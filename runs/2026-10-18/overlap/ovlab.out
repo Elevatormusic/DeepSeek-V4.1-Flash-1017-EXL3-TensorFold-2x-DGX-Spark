@@ -1,0 +1,34 @@
+== tests 18:35:39
+..............................                                           [100%]
+30 passed in 4.55s
+== engines 18:36:05
+[tfv41 18:37:02Z] serving DeepSeek-v4.1-Flash-1017-TF
+[tensorfold] rank 0: allocator ceiling 104.9 GiB (holds 102.5, host available 3.9, floor 1.5)
+[tensorfold] rank 1: allocator ceiling 104.8 GiB (holds 101.5, host available 4.7, floor 1.5)
+== long-prompt greedy check 18:37:02
+9101 200 25.9 s 40262 prompt tokens {'cached_tokens': 0} 3a71c35a49b9aa9d
+9102 200 23.2 s 40261 prompt tokens {'cached_tokens': 0} 23537b8c4e8a056b
+seed 9101 same
+seed 9102 same
+## ovl
+   pf-ovl1-8k.json 8K=2067 8K=2087
+   pf-ovl1-long.json 32K=2090 64K=2043 128K=1961
+   pf-ovl2-8k.json 8K=2076 8K=2074
+   pf-ovl2-long.json 32K=2087 64K=2004 128K=1944
+   pf-ovl3-8k.json 8K=2064 8K=2071
+   pf-ovl3-long.json 32K=2083 64K=2041 128K=1954
+   rank 0: 372 chunks, median 1.01s, slow 1 (1.33)
+     DR: 0 events, 0 ms total, max 0.0 ms; in slow chunks 0 (0 ms)
+     CP: 0 events, 0 ms total, max 0.0 ms; in slow chunks 0 (0 ms)
+     busiest thread on an A725 core: slow chunks 0%, normal chunks 0%
+   rank 1: 372 chunks, median 1.01s, slow 1 (1.33)
+     DR: 0 events, 0 ms total, max 0.0 ms; in slow chunks 0 (0 ms)
+     CP: 0 events, 0 ms total, max 0.0 ms; in slow chunks 0 (0 ms)
+     busiest thread on an A725 core: slow chunks 0%, normal chunks 0%
+== gate 18:44:32
+
+32/32 passed in 252s -> /home/elevatormusic/deploy/v41-1017-20261017/suite-results.json
+14/14 passed
+== done 18:49:01
+== production 18:49:01
+[tfv41 18:50:03Z] serving DeepSeek-v4.1-Flash-1017-TF

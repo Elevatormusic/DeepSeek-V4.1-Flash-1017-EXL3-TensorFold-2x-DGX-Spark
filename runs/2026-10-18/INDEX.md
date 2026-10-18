@@ -28,6 +28,17 @@ Release gate on this code: suite 32/32, grammar check 14/14 (`gate/suite-topk8c.
 
 Deploy of the built image `3c45bdaeab7d` (CUDA extensions compiled first, with the engine stopped): suite 32/32 in 244 s, grammar check 14/14 (`gate/suite-3c45bdaeab7d.log`, `gate/grammar-check-3c45bdaeab7d.log`). One prefill pass right after the gate (`topk/deploy3c/`): 8K 2,173 / 2,165, 32K 2,166, 64K 2,136, 128K 2,053.
 
+### Tested and not kept: gather overlap in two row halves
+
+Each prompt layer's tail ran in two row halves (attention output projection, mixes and MoE per half), with each half's all-gather on a high-priority side stream, so one half's gather ran beside the other half's compute (fork branch `v41-gather-overlap`, on top of PR #7, not pushed). Files: `overlap/`.
+
+| Run (3 passes) | 8K | 32K | 64K | 128K | Chunk median |
+|---|---:|---:|---:|---:|---:|
+| `ovl` (overlap) | 2,076 | 2,087 | 2,041 | 1,954 | 1.01 s |
+| `topk8c` (PR #7, no overlap) | 2,178 | 2,196 | 2,152 | 2,061 | 0.96 s |
+
+The overlap is 4-5% slower. It is correct: suite 32/32, grammar check 14/14 (`gate/*-ovl.log`), and the greedy replies to two fresh 40K-token prompts (`scripts/longgreedy.py`, seeds 9101 and 9102) are byte-identical to production's. A likely cause: with half the rows a launch, each expert's weights are read twice a layer (the MoE is 38% of the GPU time), and the NCCL kernel holds SMs while it waits for the other rank. Not tested apart. A gather in bf16 (half the bytes, no split) is the other way to cut this cost; it changes the rounding of the partial sums.
+
 ## Previous setup: compaction stalls removed (06:00-09:15 UTC)
 
 Image `tensorfold-dsv41:07aa02585f64` (fork PRs #1-#4 and [#6](https://github.com/Elevatormusic/TensorFold/pull/6): spill files written with `O_DIRECT`), the host settings below plus transparent huge pages off (`scripts/host_tuning.sh` item 4), `TF_DS_MEM_FLOOR_GIB=1.5`, the prefix-cache spill on (`TF_DS_SPILL_GIB=64`, as the recipe ships).
