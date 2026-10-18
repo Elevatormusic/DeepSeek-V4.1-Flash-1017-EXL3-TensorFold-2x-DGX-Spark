@@ -22,7 +22,7 @@ Each item was checked against the files in this repo. The file that supports the
 More that is not measured:
 
 - **Replies under load.** bertholomus's release gates check that a reply under `--parallel 4` equals its solo reply. No test in this repo repeats that check.
-- **Long-prompt prefill is still below bertholomus's published numbers.** With their client, the final setup gives 2,166 / 2,179 / 2,110 / 1,989 tok/s at 8K / 32K / 64K / 128K (median of 3 runs; each range is less than 2% wide); their Python engine published 2,387 / 2,421 / 2,363 / 2,242 on other nodes with the original V4.1 weights. On 17 October this recipe gave 2,190 / 1,707 / 1,457 / 1,420. The first long prompt after a start is still slower.
+- **Long-prompt prefill is still below bertholomus's published numbers.** With their client, the final setup gives 2,178 / 2,196 / 2,152 / 2,061 tok/s at 8K / 32K / 64K / 128K (median of 3 runs; each range is less than 2.5% wide); their Python engine published 2,387 / 2,421 / 2,363 / 2,242 on other nodes with the original V4.1 weights. On 17 October this recipe gave 2,190 / 1,707 / 1,457 / 1,420. The first long prompt after a start is still slower.
    - Fixed: swap, kernel compaction and Engram page-cache reclaim caused most of the 1.3-3.8 s chunk stalls. The final memory settings made 128K steady (1,851-1,986 instead of 1,202-1,988) ([runs/2026-10-18](../runs/2026-10-18/INDEX.md)).
    - Fixed: a fresh 64K prompt froze the head when memory ran out. Now earlyoom stops the engine first, and the gate's fresh 64K and 200K needles pass.
    - Fixed: some runs were 10-20% slower (one 64K run at 1,836 tok/s; 1 of 3 greedy code replies at 69-71 tok/s instead of 85). The cause was page compaction, which stalls the GPU: the spill writes and transparent huge pages. With the O_DIRECT spill and THP off, prefill ranges are less than 2% wide and 3 of 3 greedy code replies run at 84.7-85.1 tok/s. The fast/slow CPU core idea was tested and was not the cause.
@@ -49,7 +49,7 @@ More that is not measured:
 ## Costs and requirements
 
 1. **The engine is a fork, pinned at a commit.**
-   - The recipe builds [Elevatormusic/TensorFold](https://github.com/Elevatormusic/TensorFold) at `07aa02585f64`. The upstream project is `ashhart/TensorFold`.
+   - The recipe builds [Elevatormusic/TensorFold](https://github.com/Elevatormusic/TensorFold) at `3c45bdaeab7d`. The upstream project is `ashhart/TensorFold`.
    - The changes are pull requests #1 to #4 on the fork. The files in this repo do not show that upstream accepted them.
 2. **The first start is slow and large.** The first start writes the weight cache of each rank to `CACHE_DIR`. This takes about 15 minutes and about 100 GiB per node (`.env.example`; `scripts/preflight.sh` asks for 110 GiB free). Later starts take 2 to 4 minutes.
 3. **The first long prompt pays a warm-up.** The first prompt of 8K tokens or more after a start takes about 10 s longer ([OPERATIONS.md](OPERATIONS.md)). The 8K prefill row in [BENCHMARKS.md](BENCHMARKS.md) includes this cost.

@@ -14,19 +14,19 @@ Measured on 17 and 18 October 2026 on one pair of DGX Spark. Every number on thi
 |---|---:|---:|---|
 | Decode, prose (1 request) | 27 tok/s | **57 tok/s** | **2.1× faster** |
 | Decode, code (1 request) | 40 tok/s | **92 tok/s** | **2.3× faster** |
-| Prefill, 32K-token prompt | 925 tok/s | **2,179 tok/s** | **2.4× faster** |
+| Prefill, 32K-token prompt | 925 tok/s | **2,196 tok/s** | **2.4× faster** |
 | Needle-in-a-haystack, 64K-token prompt (request time) | 80 s | **36 s** | **2.2× faster** |
 | Max context length, as each setup ships | 262,144 tokens | **1,048,576 tokens** | **4× longer** |
 
 *Prefill* is the speed at which the server reads the prompt; it sets the time to first token (TTFT). *Decode* is the speed at which it writes the reply. A *token* is a piece of a word: 100 tokens are about 75 English words.
 
-Both setups ran on the same two computers, with the same model files. The prefill speed of this recipe is the median of 3 runs with cold prompts (new random prompts, no prefix-cache hit); the range is 2,174 to 2,195 tok/s. The vLLM prefill speed comes from the test suite's 32K prompt, which can include a prefix-cache hit; that would favor vLLM. In a needle test with a 1,035,020-token prompt, the model found the needle; the TTFT was 13.6 minutes.
+Both setups ran on the same two computers, with the same model files. The prefill speed of this recipe is the median of 3 runs with cold prompts (new random prompts, no prefix-cache hit); the range is 2,192 to 2,213 tok/s. The vLLM prefill speed comes from the test suite's 32K prompt, which can include a prefix-cache hit; that would favor vLLM. In a needle test with a 1,035,020-token prompt, the model found the needle; the TTFT was 13.6 minutes.
 
 Prefill with cold prompts (bertholomus's kit_bench client, median of 3 runs):
 
 | Prompt length | 8K tokens | 32K | 64K | 128K | 1,035,020 |
 |---|---:|---:|---:|---:|---:|
-| Prefill (tok/s) | 2,166 | 2,179 | 2,110 | 1,989 | 1,266 (1 run) |
+| Prefill (tok/s) | 2,178 | 2,196 | 2,152 | 2,061 | 1,266 (1 run, before PR #7) |
 
 ---
 
@@ -146,15 +146,16 @@ The fast engine for this model was written by [bertholomus](https://github.com/b
 4. **Fault isolation.** Before, one failed request stopped all requests until a manual restart. Now it ends only that request.
 5. **Faster long prefills.** The server now drops the page cache of the Engram tables after each prompt chunk. Before, the page cache filled the memory, and some chunks stalled for 1 to 4 s in reclaim and compaction.
 6. **Steady long prefills.** The server writes its spill files with O_DIRECT, so they skip the page cache, and the host setup turns transparent huge pages off. Page compaction stalls the GPU on these computers; these two changes remove the last compaction stalls, and prefill speed now changes by less than 2% from run to run.
+7. **Faster indexer selection.** The sparse-attention indexer picks the 512 best keys for each token. It now searches tiles of 8 keys, so the selection runs in one kernel launch, not in PyTorch's 8-pass top-k over every key. Long prefills are 2-4% faster (128K: 1,989 to 2,061 tok/s), with the same selection.
 
-[Read the full story](docs/WHAT-I-CHANGED.md), with the reason for each change. The engine code is in [my fork](https://github.com/Elevatormusic/TensorFold), in pull requests [#1](https://github.com/Elevatormusic/TensorFold/pull/1), [#2](https://github.com/Elevatormusic/TensorFold/pull/2), [#3](https://github.com/Elevatormusic/TensorFold/pull/3), [#4](https://github.com/Elevatormusic/TensorFold/pull/4) and [#6](https://github.com/Elevatormusic/TensorFold/pull/6).
+[Read the full story](docs/WHAT-I-CHANGED.md), with the reason for each change. The engine code is in [my fork](https://github.com/Elevatormusic/TensorFold), in pull requests [#1](https://github.com/Elevatormusic/TensorFold/pull/1), [#2](https://github.com/Elevatormusic/TensorFold/pull/2), [#3](https://github.com/Elevatormusic/TensorFold/pull/3), [#4](https://github.com/Elevatormusic/TensorFold/pull/4), [#6](https://github.com/Elevatormusic/TensorFold/pull/6) and [#7](https://github.com/Elevatormusic/TensorFold/pull/7).
 
 ---
 
 ## Good to know
 
 - **The first long prompt after a start has a higher TTFT,** about 1 to 2 s more. Later prompts do not.
-- **Prefill is a little slower than bertholomus reports.** At 32K tokens this setup prefills at 2,179 tok/s; they publish 2,421 on different computers and the original V4.1 weights. Prefill speed is now steady from run to run (64K: 2,110 to 2,115 tok/s), except for the first prompt after a start.
+- **Prefill is a little slower than bertholomus reports.** At 32K tokens this setup prefills at 2,196 tok/s; they publish 2,421 on different computers and the original V4.1 weights. Prefill speed is now steady from run to run (128K: 2,054 to 2,064 tok/s), except for the first prompt after a start.
 - **A 1M-token prompt has a TTFT of about 14 minutes** (prefill at 1,266 tok/s).
 - **vLLM was tested with 1 request at a time only.** So the concurrency numbers have no vLLM comparison.
 - **Living Weights is not available.** That TensorFold feature works only with a different model on one computer.
@@ -210,12 +211,12 @@ bertholomus's own benchmark client ([`kit_bench.py`](runs/2026-10-17/16_kit-benc
 | Decode, set b: code / prose / structured | 103.1 / 64.1 / 143.2 | 101.5 / 63.4 / 143.4 | 98.6 / 56.8 / 139.7 (\*\*\*) |
 | Aggregate decode, 2 / 4 concurrent requests | 83.1 / 118.9 | 79.8 / 113.0 | 81.5 / 116.7 |
 | Aggregate decode, 4 concurrent requests for 90 s | 142.0 | 125.3 | 120.0 |
-| Prefill, cold prompt: 8K / 32K / 64K / 128K | 2,433 / 2,495 / 2,461 / 2,354 | 2,387 / 2,421 / 2,363 / 2,242 | 2,166 / 2,179 / 2,110 / 1,989 (\*\*) |
+| Prefill, cold prompt: 8K / 32K / 64K / 128K | 2,433 / 2,495 / 2,461 / 2,354 | 2,387 / 2,421 / 2,363 / 2,242 | 2,178 / 2,196 / 2,152 / 2,061 (\*\*) |
 | Decode after a 128K prompt | 100.1 | 49.8 | 61.8 (52-73, 3 runs) |
 
 Their Zig engine does not have the agent features above (forced tool calls and structured output return an error there).
 
-(\*\*) Median of 3 runs on 18 October with the final setup (fork PRs #4 and #6, `scripts/host_tuning.sh` with transparent huge pages off); ranges 2,163-2,189 / 2,174-2,195 / 2,110-2,115 / 1,976-1,991. Before the O_DIRECT spill and THP change (median of 5): 2,179 / 2,165 / 2,037 / 1,961, with 64K from 1,836 to 2,119. On 17 October: 2,190 / 1,707 / 1,457 / 1,420. How each change was found: [runs/2026-10-18](runs/2026-10-18/INDEX.md).
+(\*\*) Median of 3 runs on 18 October with the final setup (fork PRs #4, #6 and #7, `scripts/host_tuning.sh` with transparent huge pages off); ranges 2,178-2,179 / 2,192-2,213 / 2,106-2,154 / 2,054-2,064. Before PR #7 (the indexer selection): 2,166 / 2,179 / 2,110 / 1,989. Before the O_DIRECT spill and THP change (median of 5): 2,179 / 2,165 / 2,037 / 1,961, with 64K from 1,836 to 2,119. On 17 October: 2,190 / 1,707 / 1,457 / 1,420. How each change was found: [runs/2026-10-18](runs/2026-10-18/INDEX.md).
 
 (\*\*\*) Median of 3 greedy runs on 18 October with transparent huge pages off; each set of 3 is within 0.6%. Before (THP madvise), 1 of 3 code replies ran at 69-71 tok/s instead of 85 (set a: 84.7 / 58.7 / 103.8, set b: 95.1 / 57.7 / 140.6). Files: [runs/2026-10-18/kitbench-decode](runs/2026-10-18/kitbench-decode/).
 
@@ -242,7 +243,7 @@ Method, definitions and every run: [Benchmarks](docs/BENCHMARKS.md).
 |---|---|
 | Model weights | `LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw` @ `afc7aa0a` (43 files) |
 | Engram tables | `deepseek-ai/DeepSeek-V4.1-Flash-1017` @ `1bae0e10`, files 47 and 48 |
-| Engine | [Elevatormusic/TensorFold](https://github.com/Elevatormusic/TensorFold) @ `07aa02585f64` (TensorFold 0.6.6 + bertholomus's V4.1 engine + PRs #1-#4 and #6) |
+| Engine | [Elevatormusic/TensorFold](https://github.com/Elevatormusic/TensorFold) @ `3c45bdaeab7d` (TensorFold 0.6.6 + bertholomus's V4.1 engine + PRs #1-#4, #6 and #7) |
 | Base image | `nvcr.io/nvidia/pytorch:26.07-py3` |
 | Chat template | MiaAI kit `files/chat_template.jinja` @ `6f7d1590` + [our patch](runs/2026-10-17/template-patch.diff) |
 | vLLM comparison | MiaAI kit @ `6f7d1590`, image `sha256:2f0cf3ad...` |

@@ -1,0 +1,15 @@
+## topk8c
+   pf-topk8c1-8k.json 8K=2085 8K=2179
+   pf-topk8c1-long.json 32K=2213 64K=2106 128K=2054
+   pf-topk8c2-8k.json 8K=2175 8K=2178
+   pf-topk8c2-long.json 32K=2196 64K=2154 128K=2064
+   pf-topk8c3-8k.json 8K=2174 8K=2178
+   pf-topk8c3-long.json 32K=2192 64K=2152 128K=2061
+   rank 0: 372 chunks, median 0.96s, slow 1 (2.10)
+     DR: 126 events, 27 ms total, max 1.0 ms; in slow chunks 119 (25 ms)
+     CP: 1335 events, 471 ms total, max 7.9 ms; in slow chunks 1015 (353 ms)
+     busiest thread on an A725 core: slow chunks 0%, normal chunks 0%
+   rank 1: 372 chunks, median 0.96s, slow 1 (2.10)
+     DR: 36 events, 1 ms total, max 0.2 ms; in slow chunks 0 (0 ms)
+     CP: 537 events, 179 ms total, max 4.0 ms; in slow chunks 0 (0 ms)
+     busiest thread on an A725 core: slow chunks 0%, normal chunks 0%

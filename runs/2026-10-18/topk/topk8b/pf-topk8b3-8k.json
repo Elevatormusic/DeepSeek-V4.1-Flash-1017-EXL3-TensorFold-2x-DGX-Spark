@@ -1,0 +1,22 @@
+{
+ "cmd": "prefill",
+ "base": "http://172.17.0.1:8888",
+ "model": "DeepSeek-v4.1-Flash-1017-TF",
+ "unix": 1792342684.6405282,
+ "result": [
+  {
+   "length": 8192,
+   "rep": 0,
+   "prompt_tokens": 8192,
+   "ttft_s": 3.7692396480124444,
+   "prefill_tps": 2173.382635492471
+  },
+  {
+   "length": 8192,
+   "rep": 1,
+   "prompt_tokens": 8192,
+   "ttft_s": 3.773302028886974,
+   "prefill_tps": 2171.0427464552654
+  }
+ ]
+}

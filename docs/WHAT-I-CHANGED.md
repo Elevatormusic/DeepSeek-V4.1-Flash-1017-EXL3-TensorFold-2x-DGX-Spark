@@ -8,8 +8,9 @@ All engine changes are in the public fork [Elevatormusic/TensorFold](https://git
 - [#3](https://github.com/Elevatormusic/TensorFold/pull/3): fault isolation.
 - [#4](https://github.com/Elevatormusic/TensorFold/pull/4): faster long prefills (the Engram page drop).
 - [#6](https://github.com/Elevatormusic/TensorFold/pull/6): steady prefill with the prefix-cache spill on (spill files written with `O_DIRECT`, past the page cache).
+- [#7](https://github.com/Elevatormusic/TensorFold/pull/7): faster indexer selection (8-key tiles, so the top-k runs in one launch; long prefills 2-4% faster, the same selection).
 
-The image in this repo is built from the commit at the head of #6, `07aa02585f64`, which contains all five and their review fixes. The serving results of 17 October were measured on `fd2365042f56` (the head of #3); #4 and the review fixes do not change decoding.
+The image in this repo is built from the commit at the head of #7, `3c45bdaeab7d`, which contains all six and their review fixes. The serving results of 17 October were measured on `fd2365042f56` (the head of #3); #4 and the review fixes do not change decoding.
 
 ## Test score at each step
 

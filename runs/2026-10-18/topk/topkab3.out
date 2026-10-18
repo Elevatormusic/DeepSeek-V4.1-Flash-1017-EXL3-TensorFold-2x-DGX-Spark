@@ -1,0 +1,42 @@
+== tests 17:07:35
+.......................................                                  [100%]
+39 passed in 15.29s
+n=  8192 rows= 2048 tile= 8 old   11.92 ms  new   10.05 ms  (score   6.25)  x1.19  same=True
+n= 16384 rows= 1024 tile= 8 old   11.23 ms  new    8.27 ms  (score   5.96)  x1.36  same=True
+n= 24576 rows=  682 tile= 8 old   11.27 ms  new    8.31 ms  (score   6.22)  x1.36  same=True
+n= 32768 rows=  512 tile= 8 old   11.15 ms  new    7.45 ms  (score   5.89)  x1.50  same=True
+n= 49152 rows=  341 tile= 8 old   10.05 ms  new    7.28 ms  (score   6.16)  x1.38  same=True
+candidate layers (fp32 scores, ratio 1):
+n= 16384 rows= 1024 tile= 8 old   11.63 ms  new    3.39 ms  x3.43  same=True
+n= 32768 rows=  512 tile= 8 old   11.49 ms  new    2.63 ms  x4.36  same=True
+n= 49152 rows=  341 tile= 8 old   11.44 ms  new    2.20 ms  x5.21  same=True
+n= 65536 rows=  256 tile= 8 old   11.33 ms  new    1.89 ms  x6.00  same=True
+== engines 17:08:18
+[tfv41 17:09:14Z] serving DeepSeek-v4.1-Flash-1017-TF
+[tensorfold] rank 0: allocator ceiling 104.9 GiB (holds 102.8, host available 3.7, floor 1.5)
+[tensorfold] rank 1: allocator ceiling 104.6 GiB (holds 101.9, host available 4.2, floor 1.5)
+## topk8c
+   pf-topk8c1-8k.json 8K=2085 8K=2179
+   pf-topk8c1-long.json 32K=2213 64K=2106 128K=2054
+   pf-topk8c2-8k.json 8K=2175 8K=2178
+   pf-topk8c2-long.json 32K=2196 64K=2154 128K=2064
+   pf-topk8c3-8k.json 8K=2174 8K=2178
+   pf-topk8c3-long.json 32K=2192 64K=2152 128K=2061
+   rank 0: 372 chunks, median 0.96s, slow 1 (2.10)
+     DR: 126 events, 27 ms total, max 1.0 ms; in slow chunks 119 (25 ms)
+     CP: 1335 events, 471 ms total, max 7.9 ms; in slow chunks 1015 (353 ms)
+     busiest thread on an A725 core: slow chunks 0%, normal chunks 0%
+   rank 1: 372 chunks, median 0.96s, slow 1 (2.10)
+     DR: 36 events, 1 ms total, max 0.2 ms; in slow chunks 0 (0 ms)
+     CP: 537 events, 179 ms total, max 4.0 ms; in slow chunks 0 (0 ms)
+     busiest thread on an A725 core: slow chunks 0%, normal chunks 0%
+2026-10-18T17:09:25.771233063Z 0K 2.10
+CP tensorfold 1335 471 ms
+CP kcompactd0 279 2411 ms
+== gate 17:15:38
+
+32/32 passed in 246s -> /home/elevatormusic/deploy/v41-1017-20261017/suite-results.json
+14/14 passed
+== done 17:20:02
+== production 17:20:02
+[tfv41 17:21:05Z] serving DeepSeek-v4.1-Flash-1017-TF

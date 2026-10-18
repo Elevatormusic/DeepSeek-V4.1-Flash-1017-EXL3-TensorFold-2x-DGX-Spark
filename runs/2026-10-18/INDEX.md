@@ -2,7 +2,33 @@
 
 Same pair of DGX Spark as `runs/2026-10-17/`. All prefill rows use bertholomus's `kit_bench.py prefill` (random-word prompts, so no prompt-cache hit; `cached_tokens` is 0 in the server log) through `scripts/src127.py` (it connects from 127.0.0.1). `scripts/pf.sh TAG` runs one 8K warm prompt, then 8K two times, then 32K, 64K and 128K once each. Speed is `prompt_tokens / time to first token`.
 
-## Current setup: compaction stalls removed (06:00-09:15 UTC)
+## Current setup: indexer selection with 8-key tiles (fork PR #7)
+
+Image `tensorfold-dsv41:3c45bdaeab7d` (fork PRs #1-#4, [#6](https://github.com/Elevatormusic/TensorFold/pull/6) and [#7](https://github.com/Elevatormusic/TensorFold/pull/7)), the same host settings. The model has 8 indexer layers: 2, 8 and 14 score their keys in the score kernel (the keyed path); 20, 24, 28, 32 and 36 score them in fp32 and apply the candidate pool. Before PR #7, both paths used PyTorch's top-k (8 radix passes over the int64 keys) below 32K keys a row, because the tile search with 64-key tiles needs more than k = 512 tiles. PR #7 keeps the largest key of each 8 keys, so the tile search runs from 4K keys and both of its selections fit one sort launch. The selection is the same set.
+
+Selection timing for one row block (`nsys/` kernel table: PyTorch's top-k was 6.2% of the GPU time of a 64K prompt):
+
+| Keys a row | Keyed layers, score + select (ms) | Candidate layers, select (ms) |
+|---:|---|---|
+| 16,384 | 11.2 → 8.3 | 11.6 → 3.4 |
+| 32,768 | 11.2 → 7.5 | 11.5 → 2.6 |
+| 65,536 | | 11.3 → 1.9 |
+
+Prefill, 3 passes on the PR #7 code (mounted over image `07aa02585f64`, the same bytes as `3c45bdaeab7d`):
+
+| Run | 8K (both reps) | 32K | 64K | 128K | Slow chunks (> 1.3 s) |
+|---|---|---:|---:|---:|---:|
+| topk8c, pass 1 | 2,085 / 2,179 | 2,213 | 2,106 | 2,054 | 1 (the first chunk after the start) |
+| topk8c, pass 2 | 2,175 / 2,178 | 2,196 | 2,154 | 2,064 | |
+| topk8c, pass 3 | 2,174 / 2,178 | 2,192 | 2,152 | 2,061 | |
+| **Median** | **2,178** | **2,196** | **2,152** | **2,061** | |
+| Before (odirect2, below) | 2,166 | 2,179 | 2,110 | 1,989 | 5 |
+
+Release gate on this code: suite 32/32, grammar check 14/14 (`gate/suite-topk8c.log`, `gate/grammar-check-topk8c.log`). The first try (`topk8`) failed at the first request with a CUDA out-of-memory error: the mounted files were newer than the built CUDA extensions, so the engine rebuilt them at start and had only 2.2 GiB available at warm-up. A run with only the keyed layers changed (`topk8b`) gave 2,192 / 2,124 / 2,050 at 32K / 64K / 128K.
+
+Deploy of the built image `3c45bdaeab7d` (CUDA extensions compiled first, with the engine stopped): suite 32/32 in 244 s, grammar check 14/14 (`gate/suite-3c45bdaeab7d.log`, `gate/grammar-check-3c45bdaeab7d.log`). One prefill pass right after the gate (`topk/deploy3c/`): 8K 2,173 / 2,165, 32K 2,166, 64K 2,136, 128K 2,053.
+
+## Previous setup: compaction stalls removed (06:00-09:15 UTC)
 
 Image `tensorfold-dsv41:07aa02585f64` (fork PRs #1-#4 and [#6](https://github.com/Elevatormusic/TensorFold/pull/6): spill files written with `O_DIRECT`), the host settings below plus transparent huge pages off (`scripts/host_tuning.sh` item 4), `TF_DS_MEM_FLOOR_GIB=1.5`, the prefix-cache spill on (`TF_DS_SPILL_GIB=64`, as the recipe ships).
 
@@ -69,7 +95,7 @@ The kernels fill the window (6.22 s of kernel time in 6 s, with the NCCL kernel 
 4. **fp32 SIMT matmul to TF32 or bf16 tensor cores** (1.4%, small but simple).
 5. **MoE expert kernels** (38%): the largest part, but already hand-written; ncu is the next step there.
 
-## Previous setup (image 92aa710b533d)
+## Older setup (image 92aa710b533d)
 
 Image `tensorfold-dsv41:92aa710b533d` (fork PRs #1-#4), `TF_DS_ENGRAM_DONTNEED=1`, `--oom-score-adj 1000`, and the host settings of `scripts/host_tuning.sh`: no swap for the engine, `vm.swappiness=10`, `vm.compaction_proactiveness=0`, `vm.extfrag_threshold=500`, `vm.min_free_kbytes=1048576`, `vm.watermark_scale_factor=50`, and earlyoom set to stop the engine below 1 GiB available.
 

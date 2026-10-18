@@ -1,0 +1,19 @@
+[deploy 17:45:54] prebuild extensions
+CUDA extensions ready
+CUDA extensions ready
+9:IMAGE=${IMAGE:-tensorfold-dsv41:3c45bdaeab7d}   # PRs 1-4, 6 and 7 (O_DIRECT spill, 8-key indexer tiles)
+[tfv41 17:51:43Z] serving DeepSeek-v4.1-Flash-1017-TF
+[tensorfold] rank 0: allocator ceiling 105.1 GiB (holds 102.8, host available 3.8, floor 1.5)
+tensorfold-dsv41:3c45bdaeab7d
+[tensorfold] rank 1: allocator ceiling 104.9 GiB (holds 101.9, host available 4.5, floor 1.5)
+smoke 200 200
+[deploy 17:51:48] SMOKE_OK
+32/32 passed in 244s -> /home/elevatormusic/deploy/v41-1017-20261017/suite-results.json
+14/14 passed
+[deploy 17:56:09] GATE_OK
+pf-deploy3c-8k 8192 3.77 2173
+pf-deploy3c-8k 8192 3.78 2165
+pf-deploy3c-long 32768 15.13 2166
+pf-deploy3c-long 65536 30.69 2136
+pf-deploy3c-long 131072 63.86 2053
+[deploy 17:58:12] DONE serving 3c45bdaeab7d
