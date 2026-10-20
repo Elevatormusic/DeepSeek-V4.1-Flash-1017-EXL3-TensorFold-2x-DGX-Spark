@@ -38,12 +38,16 @@ class LauncherTests(unittest.TestCase):
         self.bin = self.root / "bin"
         self.bin.mkdir()
         self.trace = self.root / "trace"
+        self.operations = self.root / "operations"
         self.env = {**os.environ, "PATH": str(self.bin) + os.pathsep + os.environ["PATH"],
-                    "TRACE": str(self.trace), "GPU_ACTIVE": "0", "WORKER_GPU_ACTIVE": "0",
+                    "TRACE": str(self.trace), "OPERATIONS": str(self.operations),
+                    "GPU_ACTIVE": "0", "WORKER_GPU_ACTIVE": "0",
                     "DOCKER_PS_FAIL": "0", "WORKER_DOCKER_PS_FAIL": "0",
-                    "DOCKER_INSPECT_FAIL": "", "WORKER_DOCKER_INSPECT_FAIL": ""}
+                    "DOCKER_INSPECT_FAIL": "", "WORKER_DOCKER_INSPECT_FAIL": "",
+                    "WORKER_INDEX_QUERY_FAIL": "0"}
         self.stub("docker", '''#!/usr/bin/env bash
 set -eu
+printf 'docker:%s\\n' "$*" >> "$OPERATIONS"
 case "$1 $2" in
   'ps -q')
     [ "$DOCKER_PS_FAIL" != 1 ] || { echo "docker ps failed" >&2; exit 7; }
@@ -63,7 +67,11 @@ esac
         self.stub("ssh", '''#!/usr/bin/env bash
 set -eu
 command=${!#}
+printf 'ssh:%s\\n' "$command" >> "$OPERATIONS"
 case "$command" in
+  'test ! -e '*)
+    [ "$WORKER_INDEX_QUERY_FAIL" != 1 ] || { echo "worker index query failed" >&2; exit 7; }
+    bash -c "${command//"$MODEL_VIEW"/"$WORKER_MODEL_VIEW"}" ;;
   sha256sum*) printf '%s  model/override-dealign-bf16.safetensors\n' "$WORKER_HASH" ;;
   *) GPU_ACTIVE=$WORKER_GPU_ACTIVE DOCKER_PS_FAIL=$WORKER_DOCKER_PS_FAIL
      export GPU_ACTIVE DOCKER_PS_FAIL
@@ -95,6 +103,9 @@ esac
         (view / "model/override-dealign-bf16.safetensors").write_bytes(payload)
         (view / "override.sha256").write_text(
             f"{digest}  model/override-dealign-bf16.safetensors\n", encoding="ascii")
+        worker_view = self.root / "worker-view"
+        (worker_view / "model").mkdir(parents=True, exist_ok=True)
+        self.env["WORKER_MODEL_VIEW"] = str(worker_view)
         (self.root / ".env").write_text(
             'BIND_HOST=127.0.0.1\nPORT=8888\nWORKER_SSH=test-worker\n', encoding="utf-8")
         (self.root / ".env.uncensored").write_text(
@@ -123,6 +134,96 @@ esac
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("worker override differs", result.stdout)
         self.assertFalse(self.trace.exists())
+
+    def test_model_index_on_head_refuses_start_before_worker_or_docker_checks(self):
+        self.prepare_settings()
+        view = self.root / "view"
+        index = view / "model/model.safetensors.index.json"
+        receipt = (view / "override-receipt.json").read_bytes()
+        for dangling in (False, True):
+            with self.subTest(dangling=dangling):
+                if dangling:
+                    index.symlink_to("missing-index.json")
+                else:
+                    index.write_bytes(b"stale index")
+                result = self.run_wrapper("start")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("must not contain model/model.safetensors.index.json", result.stderr)
+                self.assertFalse(self.trace.exists())
+                self.assertFalse(self.operations.exists())
+                self.assertEqual((view / "override-receipt.json").read_bytes(), receipt)
+                if dangling:
+                    self.assertTrue(index.is_symlink())
+                    self.assertEqual(index.readlink(), Path("missing-index.json"))
+                else:
+                    self.assertEqual(index.read_bytes(), b"stale index")
+                index.unlink()
+
+    def test_model_index_on_worker_refuses_start_before_hash_or_docker_checks(self):
+        self.prepare_settings()
+        index = Path(self.env["WORKER_MODEL_VIEW"]) / "model/model.safetensors.index.json"
+        receipt_path = self.root / "view/override-receipt.json"
+        receipt = receipt_path.read_bytes()
+        for dangling in (False, True):
+            with self.subTest(dangling=dangling):
+                if dangling:
+                    index.symlink_to("missing-index.json")
+                else:
+                    index.write_bytes(b"stale index")
+                result = self.run_wrapper("start")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("worker model index check failed", result.stdout)
+                self.assertFalse(self.trace.exists())
+                operations = self.operations.read_text(encoding="utf-8")
+                self.assertNotIn("sha256sum", operations)
+                self.assertNotIn("docker:", operations)
+                self.assertEqual(receipt_path.read_bytes(), receipt)
+                if dangling:
+                    self.assertTrue(index.is_symlink())
+                    self.assertEqual(index.readlink(), Path("missing-index.json"))
+                else:
+                    self.assertEqual(index.read_bytes(), b"stale index")
+                index.unlink()
+
+    def test_worker_index_query_failure_refuses_start_before_hash_or_docker_checks(self):
+        self.prepare_settings()
+        self.env["WORKER_INDEX_QUERY_FAIL"] = "1"
+        result = self.run_wrapper("start")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("worker model index check failed", result.stdout)
+        self.assertFalse(self.trace.exists())
+        operations = self.operations.read_text(encoding="utf-8")
+        self.assertNotIn("sha256sum", operations)
+        self.assertNotIn("docker:", operations)
+
+    def test_model_indexes_allow_recovery_commands_without_worker_or_docker_checks(self):
+        digest = self.prepare_settings()
+        (self.root / "view/model/model.safetensors.index.json").write_bytes(b"head index")
+        worker_index = Path(self.env["WORKER_MODEL_VIEW"]) / "model/model.safetensors.index.json"
+        worker_index.symlink_to("missing-index.json")
+        for action in ("stop", "status", "verify"):
+            with self.subTest(action=action):
+                result = self.run_wrapper(action)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(self.operations.exists())
+        expected_cache = self.root / "cache" / digest
+        self.assertEqual(self.trace.read_text(encoding="utf-8").splitlines(),
+                         [f"{action}:{expected_cache}" for action in ("stop", "status", "verify")])
+        self.assertEqual((self.root / "view/model/model.safetensors.index.json").read_bytes(), b"head index")
+        self.assertTrue(worker_index.is_symlink())
+
+    def test_engram_indexes_allow_start(self):
+        self.prepare_settings()
+        indexes = []
+        for view in (self.root / "view", Path(self.env["WORKER_MODEL_VIEW"])):
+            (view / "engram").mkdir()
+            index = view / "engram/model.safetensors.index.json"
+            index.write_bytes(b"engram index")
+            indexes.append(index)
+        result = self.run_wrapper("start")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        for index in indexes:
+            self.assertEqual(index.read_bytes(), b"engram index")
 
     def test_active_gpu_on_either_node_refuses_start(self):
         self.prepare_settings()

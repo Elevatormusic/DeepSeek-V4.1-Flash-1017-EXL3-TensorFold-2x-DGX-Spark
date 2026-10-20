@@ -107,7 +107,10 @@ It has no unsafe fallback.
    Its base revision is the expected revision, not a verified local revision.
    The receipt marks this with `base_verification: not_verified_by_preparation`.
    The new model folder omits the base `model.safetensors.index.json`.
-   TensorFold must read the safetensors headers to find the override tensors.
+   The pinned TensorFold engine reads the safetensors headers directly.
+   The launcher enforces the derived view's no-model-index rule on both nodes before start.
+   It also rejects a dangling index symlink. It does not delete the index.
+   Rebuild or correct the derived view before you retry.
    The Engram folder keeps its own index.
    A different safetensors header can change the complete file hash while the tensor bytes stay identical.
    Do not modify the linked base files through either view.
@@ -123,7 +126,8 @@ It has no unsafe fallback.
    BF16_VIEW=$HOME/models/deepseek-v41-1017-dealign-bf16
    test ! -e "$BF16_VIEW" && mkdir "$BF16_VIEW" && \
      cp -al "$BASE_VIEW/model" "$BASE_VIEW/engram" "$BF16_VIEW/" && {
-       if [ -e "$BF16_VIEW/model/model.safetensors.index.json" ]; then
+       if [ -e "$BF16_VIEW/model/model.safetensors.index.json" ] || \
+          [ -L "$BF16_VIEW/model/model.safetensors.index.json" ]; then
          unlink "$BF16_VIEW/model/model.safetensors.index.json"
        fi
      }
@@ -208,6 +212,6 @@ If the view receipt is missing, use `./stop.sh` to stop the standard rank contai
 
 `tests/test_prepare_uncensored.py` uses small local tensors.
 It checks payload integrity, malformed headers, failed preparation cleanup,
-new-view isolation and damage detection.
+new-view isolation, model-index refusal and damage detection.
 It does not test model quality or GPU execution.
 Run the full offline suite with `tests/run_offline.sh`.

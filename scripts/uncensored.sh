@@ -82,6 +82,10 @@ gpu_guard() {
 if [ "$action" = start ]; then
   checked=$(python3 "$ROOT/scripts/prepare_uncensored.py" --check-view "$MODEL_VIEW")
   [ "$checked" = "$UNCENSORED_CACHE_ID" ] || { log "override identity changed"; exit 1; }
+  if ! wssh "test ! -e '$MODEL_VIEW/model/model.safetensors.index.json' && test ! -L '$MODEL_VIEW/model/model.safetensors.index.json'"; then
+    log "worker model index check failed: model/model.safetensors.index.json must be absent; check SSH too"
+    exit 1
+  fi
   worker_hash=$(wssh "sha256sum '$MODEL_VIEW/model/override-dealign-bf16.safetensors'" | cut -d ' ' -f1)
   [ "$worker_hash" = "$UNCENSORED_CACHE_ID" ] || { log "worker override differs"; exit 1; }
   gpu_guard

@@ -16,7 +16,7 @@ It runs `host_tuning_test.sh` (see below) and the Python `unittest` files (`test
 A test that needs a GPU, a server or the `tensorfold` package skips itself.
 
 `test_prepare_uncensored.py` checks the [optional BF16 view](../docs/UNCENSORED.md) with small local tensor files. It checks atomic publication, index handling and receipt limits. Publication tests need Linux. No downloaded weights are needed.
-`test_uncensored_launcher.py` uses shell stubs to check help, invalid commands, worker hash mismatch, Docker query failures, active GPU refusal, engine pins and cache identity. It starts no server.
+`test_uncensored_launcher.py` uses shell stubs to check help, invalid commands, worker hash mismatch, stale model indexes on both nodes, Docker query failures, active GPU refusal, engine pins and cache identity. It starts no server.
 
 ## Script check (no server needed)
 

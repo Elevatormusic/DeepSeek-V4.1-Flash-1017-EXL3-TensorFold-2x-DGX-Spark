@@ -190,6 +190,9 @@ def build_view(source, base, view, manifest):
 
 def check_view(view, manifest):
     """Check expected pins and override bytes, but do not verify the base bytes."""
+    index = view / "model" / "model.safetensors.index.json"
+    if index.exists() or index.is_symlink():
+        raise ValueError("model view must not contain model/model.safetensors.index.json")
     receipt = json.loads((view / "override-receipt.json").read_text(encoding="utf-8"))
     for key in ("source", "base", "tensors"):
         if receipt.get(key) != manifest[key]:

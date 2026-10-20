@@ -90,6 +90,30 @@ class PrepareTests(unittest.TestCase):
         path.write_text(json.dumps(receipt), encoding="utf-8")
         self.assertEqual(PREPARE.check_view(view, self.manifest), digest)
 
+    def test_check_view_rejects_model_index_before_hash_work(self):
+        view = self.root / "view"
+        (view / "model").mkdir(parents=True)
+        index = view / "model/model.safetensors.index.json"
+        index.write_bytes(b"stale index")
+        with mock.patch.object(PREPARE, "file_sha256") as digest:
+            with self.assertRaisesRegex(ValueError, "must not contain model/model.safetensors.index.json"):
+                PREPARE.check_view(view, self.manifest)
+        digest.assert_not_called()
+        self.assertEqual(index.read_bytes(), b"stale index")
+
+    @linux
+    def test_check_view_rejects_dangling_model_index_before_hash_work(self):
+        view = self.root / "view"
+        (view / "model").mkdir(parents=True)
+        index = view / "model/model.safetensors.index.json"
+        index.symlink_to("missing-index.json")
+        with mock.patch.object(PREPARE, "file_sha256") as digest:
+            with self.assertRaisesRegex(ValueError, "must not contain model/model.safetensors.index.json"):
+                PREPARE.check_view(view, self.manifest)
+        digest.assert_not_called()
+        self.assertTrue(index.is_symlink())
+        self.assertEqual(index.readlink(), Path("missing-index.json"))
+
     @linux
     def test_destination_created_during_extraction_is_not_replaced(self):
         view = self.root / "view"

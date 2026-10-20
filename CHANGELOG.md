@@ -16,6 +16,7 @@ Each release is a git tag. To use a release, run `git checkout vX.Y.Z` before `.
 
 ### Fixed
 
+- The uncensored launcher rejects a stale model index on either node before start. Recovery commands keep working.
 - `./start.sh` stopped with "Permission denied" on a new clone: `scripts/build_extensions.sh` had no executable bit (#15).
 - Preflight now checks that RoCE has MTU 4096 on both nodes. At the default MTU 1500, the RDMA gather failed with "transport retry counter exceeded" (#15). `docs/NETWORK.md` tells you to set MTU 9000.
 
