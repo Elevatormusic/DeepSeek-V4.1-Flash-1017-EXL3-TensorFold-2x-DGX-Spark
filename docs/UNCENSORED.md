@@ -33,10 +33,10 @@ The engine needs BF16 output projections, separate shared experts, override-grou
 replacement and an in-place TP sum for large partial results.
 The default engine revision in `.env.example` does not have these changes.
 The separate engine change is [TensorFold PR #8](https://github.com/Elevatormusic/TensorFold/pull/8),
-at commit `dccc4a997b7c18fc684781ee333273f8d902c510`.
+at commit `6c53993796efddcb0a80fafc49fa2d952544eda2`.
 That pull request is open and is not merged.
 Its exact head has not completed GPU qualification.
-The example settings pin that commit and image tag `tensorfold-dsv41:dccc4a997b7c`.
+The example settings pin that commit and image tag `tensorfold-dsv41:6c53993796ef`.
 Do not treat results from an earlier local engine as GPU qualification of this head.
 
 ## Prepare the new view

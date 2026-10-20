@@ -4,7 +4,31 @@
 
 Also on Hugging Face: [Elevatormusic/DeepSeek-V4.1-Flash-1017-2x-DGX-Spark-TensorFold-2x-Faster](https://huggingface.co/Elevatormusic/DeepSeek-V4.1-Flash-1017-2x-DGX-Spark-TensorFold-2x-Faster). The engine is [my TensorFold fork](https://github.com/Elevatormusic/TensorFold) (branch `deepseek-v41-tp2`).
 
+Use the base model below, or select the [optional uncensored model (BF16)](#optional-uncensored-model-bf16).
+The base model remains the default.
+
 Measured on 17 and 18 October 2026 on one pair of DGX Spark. Every number on this page comes from a saved run in [`runs/`](runs/2026-10-17/INDEX.md) ([prefill and 1M context](runs/2026-10-18/INDEX.md)).
+The 2× speed results and completed 1M-token request apply only to the base model.
+
+---
+
+## Optional uncensored model (BF16)
+
+This recipe also supports an opt-in uncensored model view from
+[dealignai's pinned source pack](https://huggingface.co/dealignai/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw-UNCENSORED/tree/89af9bf193575b7eeeb4f1dd85463ec24ea5bb4c).
+It uses 54 original BF16 matrices (`attn.wo_b.weight` and `ffn.shared_experts.w2.weight`)
+alongside the base EXL3 weights. This is not a full BF16 model.
+
+Follow [the uncensored setup guide](docs/UNCENSORED.md) before you download these weights.
+It uses a separate model view, cache, `.env.uncensored` settings file and
+`scripts/uncensored.sh` launcher. The normal `./start.sh` setup keeps the base model.
+
+This option requires [TensorFold PR #8](https://github.com/Elevatormusic/TensorFold/pull/8),
+which is not merged. GPU qualification of its current head is pending.
+Speed and quality equivalence to the base model are not established.
+The saved checks do not prove that every request fits in memory.
+An 8 bpw override test produced a repetition loop; no decode-speed benefit was established.
+BF16 is the documented option. See the guide for the saved checks and remaining limits.
 
 ---
 
@@ -43,9 +67,6 @@ Prefill with cold prompts (bertholomus's kit_bench client, median of 3 runs):
 ---
 
 ## Before you start
-
-For the optional uncensored BF16 matrices, see [the BF16 guide](docs/UNCENSORED.md).
-It uses a separate model view, cache and settings file, and needs a newer engine.
 
 You need:
 
