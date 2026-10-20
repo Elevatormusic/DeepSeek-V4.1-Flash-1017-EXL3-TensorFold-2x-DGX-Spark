@@ -2,6 +2,8 @@
 """Build a separate BF16 override view from local source shards. Use no GPU."""
 
 import argparse
+import ctypes
+import errno
 import hashlib
 import json
 import math
@@ -9,6 +11,7 @@ import os
 from pathlib import Path
 import shutil
 import struct
+import sys
 import tempfile
 
 
@@ -135,6 +138,22 @@ def check_base(base):
             raise ValueError(f"missing base file: {path.name}")
 
 
+def publish_view(temporary, view):
+    """Publish the complete view atomically without replacing an existing path."""
+    if sys.platform != "linux":
+        raise OSError(errno.ENOTSUP, "atomic view publication requires Linux")
+    libc = ctypes.CDLL(None, use_errno=True)
+    rename = getattr(libc, "renameat2", None)
+    if rename is None:
+        raise OSError(errno.ENOTSUP, "renameat2 is required for atomic view publication")
+    rename.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint]
+    rename.restype = ctypes.c_int
+    at_fdcwd, rename_noreplace = -100, 1
+    if rename(at_fdcwd, os.fsencode(temporary), at_fdcwd, os.fsencode(view), rename_noreplace):
+        error = ctypes.get_errno()
+        raise OSError(error, os.strerror(error), str(view))
+
+
 def build_view(source, base, view, manifest):
     """Build in a new folder. Publish the folder only after all checks pass."""
     source, base, view = source.resolve(), base.resolve(), view.resolve()
@@ -144,20 +163,25 @@ def build_view(source, base, view, manifest):
     view.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix=f".{view.name}-", dir=view.parent))
     try:
+        omitted = []
         for folder in ("model", "engram"):
             (temporary / folder).mkdir()
             for path in sorted((base / folder).iterdir()):
+                if folder == "model" and path.name == "model.safetensors.index.json":
+                    omitted.append(f"{folder}/{path.name}")
+                    continue
                 if path.is_file() and path.suffix in (".json", ".jinja", ".safetensors"):
                     os.link(path.resolve(), temporary / folder / path.name)
         extract(source, temporary / "model" / OVERRIDE, manifest)
         digest = file_sha256(temporary / "model" / OVERRIDE)
         receipt = {"source": manifest["source"], "base": manifest["base"],
+                   "base_verification": "not_verified_by_preparation", "omitted_base_files": omitted,
                    "override_sha256": digest, "tensors": manifest["tensors"]}
         (temporary / "override-receipt.json").write_text(
             json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
         (temporary / "override.sha256").write_text(
             f"{digest}  model/{OVERRIDE}\n", encoding="ascii")
-        temporary.rename(view)
+        publish_view(temporary, view)
     except BaseException:
         shutil.rmtree(temporary)
         raise
@@ -165,7 +189,7 @@ def build_view(source, base, view, manifest):
 
 
 def check_view(view, manifest):
-    """Check the receipt and full override bytes before a start."""
+    """Check expected pins and override bytes, but do not verify the base bytes."""
     receipt = json.loads((view / "override-receipt.json").read_text(encoding="utf-8"))
     for key in ("source", "base", "tensors"):
         if receipt.get(key) != manifest[key]:

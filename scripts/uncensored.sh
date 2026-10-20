@@ -17,9 +17,15 @@ export TF_ENV_FILE="$ROOT/.env.uncensored"
 # shellcheck source=common.sh
 . "$ROOT/scripts/common.sh"
 
-case "$TF_COMMIT:$IMAGE" in
-  *SET_BF16_ENGINE_COMMIT*) log "set the BF16 engine commit and image first"; exit 1 ;;
-esac
+if [ "$action" = start ] || [ "$action" = build ]; then
+  [[ "$TF_COMMIT" =~ ^[0-9a-f]{40}$ ]] || {
+    log "TF_COMMIT must be a full 40-character lowercase commit SHA"; exit 2;
+  }
+  image_tag=${IMAGE##*:}
+  [[ "$IMAGE" = *:* && "$image_tag" =~ ^[0-9a-f]{12,40}$ && "$TF_COMMIT" = "$image_tag"* ]] || {
+    log "IMAGE tag must be a 12-to-40-character prefix of TF_COMMIT"; exit 2;
+  }
+fi
 
 # Existing start helpers pass these values through a remote shell.
 for value in "$MODEL_VIEW" "$CACHE_DIR" "$IMAGE"; do
@@ -56,10 +62,16 @@ export UNCENSORED_CACHE_ID
 
 gpu_guard() {
   local ids id gpu runtime
-  ids=$(docker ps -q)
+  ids=$(docker ps -q) || {
+    echo "cannot list running Docker containers" >&2; return 1;
+  }
   for id in $ids; do
-    gpu=$(docker inspect --format '{{range .HostConfig.DeviceRequests}}{{.Count}}{{end}}' "$id")
-    runtime=$(docker inspect --format '{{.HostConfig.Runtime}}' "$id")
+    gpu=$(docker inspect --format '{{range .HostConfig.DeviceRequests}}{{.Count}}{{end}}' "$id") || {
+      echo "cannot inspect GPU requests for Docker container $id" >&2; return 1;
+    }
+    runtime=$(docker inspect --format '{{.HostConfig.Runtime}}' "$id") || {
+      echo "cannot inspect runtime for Docker container $id" >&2; return 1;
+    }
     if [ -n "$gpu" ] || [ "$runtime" = nvidia ]; then
       echo "a GPU container is running; stop it with its normal stop command first" >&2
       return 1

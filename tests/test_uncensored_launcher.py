@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import tempfile
@@ -11,6 +12,18 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+TEST_COMMIT = "0123456789abcdef0123456789abcdef01234567"
+TEST_IMAGE = f"tensorfold:{TEST_COMMIT[:12]}"
+
+
+class ExamplePinTests(unittest.TestCase):
+    def test_example_image_tag_matches_commit(self):
+        text = (ROOT / ".env.uncensored.example").read_text(encoding="utf-8")
+        commit = re.search(r"^TF_COMMIT=([0-9a-f]{40})$", text, re.MULTILINE)
+        image = re.search(r"^IMAGE=[^\s:]+:([0-9a-f]{12,40})$", text, re.MULTILINE)
+        self.assertIsNotNone(commit, "the example needs a full commit SHA")
+        self.assertIsNotNone(image, "the example needs a commit prefix image tag")
+        self.assertTrue(commit.group(1).startswith(image.group(1)))
 
 
 @unittest.skipUnless(os.name == "posix" and shutil.which("bash"), "requires POSIX bash")
@@ -26,13 +39,24 @@ class LauncherTests(unittest.TestCase):
         self.bin.mkdir()
         self.trace = self.root / "trace"
         self.env = {**os.environ, "PATH": str(self.bin) + os.pathsep + os.environ["PATH"],
-                    "TRACE": str(self.trace), "GPU_ACTIVE": "0", "WORKER_GPU_ACTIVE": "0"}
+                    "TRACE": str(self.trace), "GPU_ACTIVE": "0", "WORKER_GPU_ACTIVE": "0",
+                    "DOCKER_PS_FAIL": "0", "WORKER_DOCKER_PS_FAIL": "0",
+                    "DOCKER_INSPECT_FAIL": "", "WORKER_DOCKER_INSPECT_FAIL": ""}
         self.stub("docker", '''#!/usr/bin/env bash
 set -eu
 case "$1 $2" in
-  'ps -q') if [ "$GPU_ACTIVE" = 1 ]; then echo test-gpu; fi ;;
+  'ps -q')
+    [ "$DOCKER_PS_FAIL" != 1 ] || { echo "docker ps failed" >&2; exit 7; }
+    if [ "$GPU_ACTIVE" = 1 ]; then echo test-gpu; fi ;;
   'inspect --format')
-    case "$3" in *DeviceRequests*) echo 1 ;; *) echo runc ;; esac ;;
+    case "$3" in
+      *DeviceRequests*)
+        [ "$DOCKER_INSPECT_FAIL" != gpu ] || exit 8
+        echo 1 ;;
+      *)
+        [ "$DOCKER_INSPECT_FAIL" != runtime ] || exit 8
+        echo runc ;;
+    esac ;;
   *) echo "unexpected docker command: $*" >&2; exit 9 ;;
 esac
 ''')
@@ -41,7 +65,9 @@ set -eu
 command=${!#}
 case "$command" in
   sha256sum*) printf '%s  model/override-dealign-bf16.safetensors\n' "$WORKER_HASH" ;;
-  *) GPU_ACTIVE=$WORKER_GPU_ACTIVE bash -c "$command" ;;
+  *) GPU_ACTIVE=$WORKER_GPU_ACTIVE DOCKER_PS_FAIL=$WORKER_DOCKER_PS_FAIL
+     export GPU_ACTIVE DOCKER_PS_FAIL
+     DOCKER_INSPECT_FAIL=$WORKER_DOCKER_INSPECT_FAIL bash -c "$command" ;;
 esac
 ''')
         for action in ("start", "stop", "status", "verify"):
@@ -49,14 +75,18 @@ esac
                 '#!/usr/bin/env bash\nset -eu\n. "$(dirname "$0")/scripts/common.sh"\n'
                 f'printf "{action}:%s\\n" "$CACHE_DIR" >> "$TRACE"\n', encoding="utf-8")
 
+        (self.root / "docker").mkdir()
+        (self.root / "docker/build.sh").write_text(
+            '#!/usr/bin/env bash\nprintf "build\\n" >> "$TRACE"\n', encoding="utf-8")
+
     def stub(self, name, text):
         path = self.bin / name
         path.write_text(text, encoding="utf-8")
         path.chmod(0o755)
 
-    def prepare_settings(self):
+    def prepare_settings(self, commit=TEST_COMMIT, image=TEST_IMAGE):
         view = self.root / "view"
-        (view / "model").mkdir(parents=True)
+        (view / "model").mkdir(parents=True, exist_ok=True)
         payload = b"launcher fixture: no model weights"
         digest = hashlib.sha256(payload).hexdigest()
         manifest = json.loads((ROOT / "scripts/uncensored_tensors.json").read_text(encoding="utf-8"))
@@ -68,7 +98,7 @@ esac
         (self.root / ".env").write_text(
             'BIND_HOST=127.0.0.1\nPORT=8888\nWORKER_SSH=test-worker\n', encoding="utf-8")
         (self.root / ".env.uncensored").write_text(
-            '. "$ROOT/.env"\nTF_COMMIT=test-commit\nIMAGE=tensorfold:test\n'
+            f'. "$ROOT/.env"\nTF_COMMIT={commit}\nIMAGE={image}\n'
             'MODEL_VIEW=$ROOT/view\nCACHE_DIR=$ROOT/cache/${UNCENSORED_CACHE_ID:-unverified}\n',
             encoding="utf-8")
         self.env["WORKER_HASH"] = digest
@@ -114,6 +144,73 @@ esac
         expected_cache = self.root / "cache" / digest
         self.assertEqual(self.trace.read_text(encoding="utf-8").splitlines(),
                          [f"{action}:{expected_cache}" for action in ("start", "status", "stop", "verify")])
+
+    def test_docker_ps_failure_on_either_node_refuses_start(self):
+        self.prepare_settings()
+        for variable in ("DOCKER_PS_FAIL", "WORKER_DOCKER_PS_FAIL"):
+            with self.subTest(node=variable):
+                self.env[variable] = "1"
+                result = self.run_wrapper("start")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("cannot list running Docker containers", result.stderr)
+                self.assertFalse(self.trace.exists())
+                self.env[variable] = "0"
+
+    def test_docker_inspect_failure_on_either_node_refuses_start(self):
+        self.prepare_settings()
+        for prefix in ("", "WORKER_"):
+            for field in ("gpu", "runtime"):
+                with self.subTest(node=prefix, field=field):
+                    self.env[f"{prefix}GPU_ACTIVE"] = "1"
+                    self.env[f"{prefix}DOCKER_INSPECT_FAIL"] = field
+                    result = self.run_wrapper("start")
+                    self.assertNotEqual(result.returncode, 0)
+                    message = "GPU requests" if field == "gpu" else "runtime"
+                    self.assertIn(f"cannot inspect {message}", result.stderr)
+                    self.assertFalse(self.trace.exists())
+                    self.env[f"{prefix}GPU_ACTIVE"] = "0"
+                    self.env[f"{prefix}DOCKER_INSPECT_FAIL"] = ""
+
+    def test_invalid_commit_refuses_start_and_build(self):
+        for commit in ("main", TEST_COMMIT[:12], TEST_COMMIT.upper(), TEST_COMMIT + "0"):
+            for action in ("start", "build"):
+                with self.subTest(commit=commit, action=action):
+                    self.prepare_settings(commit=commit)
+                    result = self.run_wrapper(action)
+                    self.assertEqual(result.returncode, 2, result.stderr)
+                    self.assertIn("TF_COMMIT must be a full", result.stdout)
+                    self.assertFalse(self.trace.exists())
+
+    def test_invalid_image_tag_refuses_start_and_build(self):
+        for image in ("tensorfold:latest", "tensorfold:" + "f" * 12,
+                      f"tensorfold:{TEST_COMMIT[:11]}", f"tensorfold:{TEST_COMMIT}0", "tensorfold"):
+            for action in ("start", "build"):
+                with self.subTest(image=image, action=action):
+                    self.prepare_settings(image=image)
+                    result = self.run_wrapper(action)
+                    self.assertEqual(result.returncode, 2, result.stderr)
+                    self.assertIn("IMAGE tag must be", result.stdout)
+                    self.assertFalse(self.trace.exists())
+
+    def test_build_accepts_commit_prefix_tags(self):
+        for length in (12, 24, 40):
+            with self.subTest(length=length):
+                self.prepare_settings(image=f"tensorfold:{TEST_COMMIT[:length]}")
+                result = self.run_wrapper("build")
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.trace.read_text(encoding="utf-8").splitlines(), ["build"] * 3)
+
+    def test_invalid_pins_allow_recovery_commands_without_docker_queries(self):
+        self.stub("docker", '#!/usr/bin/env bash\nprintf "docker\\n" >> "$TRACE"\nexit 9\n')
+        expected = []
+        for commit, image in (("edited", TEST_IMAGE), (TEST_COMMIT, "tensorfold:" + "f" * 12)):
+            digest = self.prepare_settings(commit=commit, image=image)
+            for action in ("stop", "status", "verify"):
+                with self.subTest(commit=commit, image=image, action=action):
+                    result = self.run_wrapper(action)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    expected.append(f"{action}:{self.root / 'cache' / digest}")
+        self.assertEqual(self.trace.read_text(encoding="utf-8").splitlines(), expected)
 
 
 if __name__ == "__main__":

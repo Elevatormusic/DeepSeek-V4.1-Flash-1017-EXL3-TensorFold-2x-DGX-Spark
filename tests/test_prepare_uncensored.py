@@ -1,19 +1,23 @@
 """Check extraction and view isolation with small local tensors."""
 
+import errno
 import hashlib
 import importlib.util
 import json
 import os
 from pathlib import Path
 import struct
+import sys
 import tempfile
 import unittest
+from unittest import mock
 
 
 SPEC = importlib.util.spec_from_file_location(
     "prepare_uncensored", Path(__file__).resolve().parents[1] / "scripts/prepare_uncensored.py")
 PREPARE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(PREPARE)
+linux = unittest.skipUnless(sys.platform == "linux", "atomic view publication requires Linux")
 
 
 class PrepareTests(unittest.TestCase):
@@ -30,6 +34,7 @@ class PrepareTests(unittest.TestCase):
             (self.base / "model" / f"model-{index:05d}-of-00043.safetensors").write_bytes(b"base")
         for name in ("config.json", "chat_template.jinja"):
             (self.base / "model" / name).write_text("base", encoding="utf-8")
+        (self.base / "model/model.safetensors.index.json").write_bytes(b"base index")
         for name in ("config.json", "model.safetensors.index.json",
                      "model-00047-of-00048.safetensors", "model-00048-of-00048.safetensors"):
             (self.base / "engram" / name).write_bytes(b"base")
@@ -47,6 +52,7 @@ class PrepareTests(unittest.TestCase):
         (self.source / "source.safetensors").write_bytes(
             struct.pack("<Q", len(header)) + header + self.payload)
 
+    @linux
     def test_extract_and_new_view_leave_base_unchanged(self):
         view = self.root / "view"
         digest = PREPARE.build_view(self.source, self.base, view, self.manifest)
@@ -55,10 +61,77 @@ class PrepareTests(unittest.TestCase):
         target = view / "model/model-00001-of-00043.safetensors"
         self.assertTrue(os.path.samefile(source, target))
         self.assertFalse((self.base / "model" / PREPARE.OVERRIDE).exists())
+        self.assertEqual((self.base / "model/model.safetensors.index.json").read_bytes(), b"base index")
+        self.assertFalse((view / "model/model.safetensors.index.json").exists())
+        self.assertTrue(os.path.samefile(self.base / "engram/model.safetensors.index.json",
+                                        view / "engram/model.safetensors.index.json"))
         with (view / "model" / PREPARE.OVERRIDE).open("rb") as stream:
             header, _ = PREPARE.read_header(stream)
             self.assertEqual(header[self.name]["dtype"], "BF16")
             self.assertEqual(stream.read(), self.payload)
+
+    @linux
+    def test_receipt_marks_base_bytes_as_unverified(self):
+        view = self.root / "view"
+        PREPARE.build_view(self.source, self.base, view, self.manifest)
+        receipt = json.loads((view / "override-receipt.json").read_text(encoding="utf-8"))
+        self.assertEqual(receipt["base"], self.manifest["base"])
+        self.assertEqual(receipt["base_verification"], "not_verified_by_preparation")
+        self.assertEqual(receipt["omitted_base_files"], ["model/model.safetensors.index.json"])
+
+    @linux
+    def test_check_view_accepts_old_receipts_without_base_status(self):
+        view = self.root / "view"
+        digest = PREPARE.build_view(self.source, self.base, view, self.manifest)
+        path = view / "override-receipt.json"
+        receipt = json.loads(path.read_text(encoding="utf-8"))
+        receipt.pop("base_verification", None)
+        receipt.pop("omitted_base_files", None)
+        path.write_text(json.dumps(receipt), encoding="utf-8")
+        self.assertEqual(PREPARE.check_view(view, self.manifest), digest)
+
+    @linux
+    def test_destination_created_during_extraction_is_not_replaced(self):
+        view = self.root / "view"
+        extract = PREPARE.extract
+        foreign = []
+
+        def extract_and_create(*args):
+            extract(*args)
+            view.mkdir()
+            foreign.append(view.stat())
+
+        with mock.patch.object(PREPARE, "extract", side_effect=extract_and_create):
+            with self.assertRaises(FileExistsError):
+                PREPARE.build_view(self.source, self.base, view, self.manifest)
+        self.assertTrue(os.path.samestat(foreign[0], view.stat()))
+        self.assertEqual(list(view.iterdir()), [])
+        self.assertEqual(list(self.root.glob(".view-*")), [])
+
+    def test_publication_fails_closed_on_unsupported_platform(self):
+        temporary = self.root / "temporary"
+        temporary.mkdir()
+        view = self.root / "view"
+        with mock.patch.object(PREPARE.sys, "platform", "unsupported"):
+            with self.assertRaisesRegex(OSError, "requires Linux"):
+                PREPARE.publish_view(temporary, view)
+        self.assertTrue(temporary.is_dir())
+        self.assertFalse(view.exists())
+
+    @linux
+    def test_publication_fails_closed_on_unsupported_kernel(self):
+        temporary = self.root / "temporary"
+        temporary.mkdir()
+        view = self.root / "view"
+        libc = mock.Mock()
+        libc.renameat2.return_value = -1
+        with (mock.patch.object(PREPARE.ctypes, "CDLL", return_value=libc),
+              mock.patch.object(PREPARE.ctypes, "get_errno", return_value=errno.ENOSYS)):
+            with self.assertRaises(OSError) as raised:
+                PREPARE.publish_view(temporary, view)
+        self.assertEqual(raised.exception.errno, errno.ENOSYS)
+        self.assertTrue(temporary.is_dir())
+        self.assertFalse(view.exists())
 
     def test_bad_payload_does_not_publish_or_leave_partial_view(self):
         self.manifest["tensors"][self.name]["sha256"] = "0" * 64
@@ -89,6 +162,7 @@ class PrepareTests(unittest.TestCase):
                 with path.open("rb") as stream, self.assertRaises(ValueError):
                     PREPARE.read_header(stream)
 
+    @linux
     def test_damaged_override_is_rejected(self):
         view = self.root / "view"
         PREPARE.build_view(self.source, self.base, view, self.manifest)

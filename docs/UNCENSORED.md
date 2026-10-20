@@ -27,6 +27,14 @@ An 8 bpw override test produced a repetition loop; no decode-speed benefit was e
 BF16 is the documented option.
 This statement does not claim a paired decode benchmark or that all BF16 answers are stable.
 
+## Expected cost (not a measured A/B)
+
+The dense BF16 matrices read more bytes than their compressed base weights.
+The engine also launches separate shared-expert operations.
+These changes can reduce prefill and decode speed.
+No paired decode A/B result is available for this option.
+The base README's 2× speed results and completed 1M-token request do not apply to these weights.
+
 ## Engine requirement
 
 The engine needs BF16 output projections, separate shared experts, override-group
@@ -38,12 +46,35 @@ That pull request is open and is not merged.
 Its exact head has not completed GPU qualification.
 The example settings pin that commit and image tag `tensorfold-dsv41:6c53993796ef`.
 Do not treat results from an earlier local engine as GPU qualification of this head.
+Keep this pin experimental until PR #8 is merged into `deepseek-v41-tp2`
+and the merged code passes live checks.
+Then pin a commit reachable from that branch and its matching `IMAGE`.
+
+## Disk space
+
+Each override SHA256 uses about 100 GiB of rank cache on each node.
+Prompt spill can use up to the configured `SPILL_GIB` on each node (64 GiB by default).
+Reserve space for both, in addition to the source shards and new override file.
+Preflight requires 110 GiB free for a new cache. This is not a check of the full spill allowance.
+A header change can give identical tensor bytes a new override hash and a new cache folder.
+Old cache folders are not removed automatically.
+When all model servers are stopped, review old cache folders on each node.
+If a folder is no longer needed, remove only that specific old cache folder.
 
 ## Prepare the new view
 
 Run each command on the head node, in the recipe folder.
 Complete the base setup first, including `scripts/download.sh` and the chat template step.
 Run `scripts/download.sh verify` to check the base files before you make hard links.
+Also check the actual base view on each node against `runs/2026-10-17/weights.sha256`.
+Run `sha256sum -c /absolute/path/to/recipe/runs/2026-10-17/weights.sha256`
+from that node's base view folder. Replace the recipe path first.
+Both checks must pass before you make the new views.
+The helper's `check_base` checks only the folder layout and required files.
+It does not verify base file hashes or the base revision.
+The helper needs Linux `renameat2` with `RENAME_NOREPLACE` on the output filesystem.
+It stops if the kernel or filesystem does not support this operation.
+It has no unsafe fallback.
 
 1. Download only the required source shards at the pinned revision.
    These shards are large. Keep the download on a disk with sufficient free space.
@@ -73,10 +104,16 @@ Run `scripts/download.sh verify` to check the base files before you make hard li
    It writes `model/override-dealign-bf16.safetensors`, `override-receipt.json`
    and `override.sha256` in the new view.
    The receipt records the SHA256 of the new complete file.
+   Its base revision is the expected revision, not a verified local revision.
+   The receipt marks this with `base_verification: not_verified_by_preparation`.
+   The new model folder omits the base `model.safetensors.index.json`.
+   TensorFold must read the safetensors headers to find the override tensors.
+   The Engram folder keeps its own index.
    A different safetensors header can change the complete file hash while the tensor bytes stay identical.
    Do not modify the linked base files through either view.
 
-3. Check the base hashes on the worker with `scripts/download.sh worker`.
+3. Run `scripts/download.sh worker` to copy and check the base files on the worker.
+   Complete the manual base-view SHA256 check above on the worker too.
    Make a new view on the worker with hard links to its own base files.
    Run this block on the worker. Change the base path if necessary.
    Both folders must be on the same disk. The output folder must not exist.
@@ -85,9 +122,14 @@ Run `scripts/download.sh verify` to check the base files before you make hard li
    BASE_VIEW=$HOME/models/deepseek-v41-1017-exl3-2.9bpw
    BF16_VIEW=$HOME/models/deepseek-v41-1017-dealign-bf16
    test ! -e "$BF16_VIEW" && mkdir "$BF16_VIEW" && \
-     cp -al "$BASE_VIEW/model" "$BASE_VIEW/engram" "$BF16_VIEW/"
+     cp -al "$BASE_VIEW/model" "$BASE_VIEW/engram" "$BF16_VIEW/" && {
+       if [ -e "$BF16_VIEW/model/model.safetensors.index.json" ]; then
+         unlink "$BF16_VIEW/model/model.safetensors.index.json"
+       fi
+     }
    ```
 
+   This removes only the new view's model index link. It keeps the Engram index.
    Then run these commands on the head. Transfer only the new override and
    its receipt, not a second copy of all base weights. Replace `<worker>` and
    the absolute destination paths with the worker settings from your `.env`.
@@ -101,10 +143,10 @@ Run `scripts/download.sh verify` to check the base files before you make hard li
      '<worker>:/absolute/path/to/deepseek-v41-1017-dealign-bf16/'
    ```
 
-   Check the base hashes in the new worker view with the recipe's
-   `runs/2026-10-17/weights.sha256` file.
    In the new view on each node, run `sha256sum -c override.sha256`.
+   Use the full base checksum file only in the base view, which retains the model index.
    The launcher also compares the full override hash on both nodes before start.
+   It does not compare or verify the worker's base file hashes.
 
 ## Settings and start
 
@@ -124,6 +166,8 @@ Disable any external service that automatically restarts it.
 Run only one model server at a time.
 The launcher refuses a start if either node has a running GPU container.
 It does not stop other containers for you.
+This guard checks containers, not GPU processes on the host.
+Stop other GPU programs on both hosts separately before start.
 Do not run `docker exec` in an active rank container.
 
 ```bash
