@@ -43,6 +43,26 @@ class RunsFolder(unittest.TestCase):
                 self.assertIn(f"runs/{day}/INDEX.md", tracked, "each run day needs an INDEX.md")
 
 
+@unittest.skipUnless(shutil.which("git") and (ROOT / ".git").exists(), "needs a git checkout")
+class ExecutableScripts(unittest.TestCase):
+    """start.sh runs scripts by their path. Git must store each script with the executable bit, or a new clone stops
+    with "Permission denied" (issue #15). runs/ is a record and stays as it ran."""
+
+    def test_scripts_are_executable(self):
+        bad = []
+        for line in git("ls-files", "-s", "--", ":!:runs/**").stdout.splitlines():
+            meta, name = line.split("\t", 1)
+            mode = meta.split()[0]
+            if mode == "120000":
+                continue                                      # a symlink: it has no mode of its own
+            with open(ROOT / name, "rb") as f:
+                shebang = f.read(2) == b"#!"
+            if (shebang or name.endswith(".sh")) and mode != "100755":
+                bad.append(f"{name} ({mode})")
+        self.assertEqual(bad, [], "scripts without the executable bit; run git update-index --chmod=+x <file>:\n"
+                         + "\n".join(bad))
+
+
 class EnvExample(unittest.TestCase):
     @unittest.skipUnless(shutil.which("bash") and os.name == "posix", "needs bash on Linux or macOS")
     def test_env_example_sources(self):

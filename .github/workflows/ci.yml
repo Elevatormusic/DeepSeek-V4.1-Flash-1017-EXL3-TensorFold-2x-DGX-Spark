@@ -115,7 +115,7 @@ jobs:
       # gitleaks scans every commit for keys and tokens. The binary is pinned by version and SHA-256.
       # tests/test_machine_values.py (job "python") checks home paths and public IP addresses.
       # The binary and its config stay in RUNNER_TEMP, outside the checkout. A pull request must not change them:
-      # a .gitleaks.toml or .gitleaksignore in the checkout could turn the default rules off.
+      # a .gitleaks.toml in the checkout could turn the default rules off.
       - name: Install gitleaks
         run: |
           cd "$RUNNER_TEMP"
@@ -125,6 +125,14 @@ jobs:
           tar -xzf "$f" gitleaks
           printf '[extend]\nuseDefault = true\n' > gitleaks.toml
           mkdir -p no-ignore
+      # gitleaks also loads <source>/.gitleaksignore whatever --gitleaks-ignore-path says, so a pull request could
+      # hide its own leak with one. The job refuses such a file.
+      - name: Refuse a .gitleaksignore in the checkout
+        run: |
+          if [ -e .gitleaksignore ]; then
+            echo "::error file=.gitleaksignore::remove .gitleaksignore: the secret scan does not accept repo ignores"
+            exit 1
+          fi
       - name: gitleaks (all commits)
         run: >-
           "$RUNNER_TEMP/gitleaks" git . --config "$RUNNER_TEMP/gitleaks.toml"

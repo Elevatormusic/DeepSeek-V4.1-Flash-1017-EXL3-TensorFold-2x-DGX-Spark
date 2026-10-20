@@ -21,6 +21,52 @@ ip -br addr
   - `RDMA_DEVICES` and `NCCL_IB_HCA` = both RoCE devices;
   - `NCCL_SOCKET_IFNAME` = the netdev that holds `HEAD_IP`.
 
+  If `ibdev2netdev` is not installed, this shows the same pairs (`<rdma device>: <netdev>`):
+
+```bash
+for d in /sys/class/infiniband/*; do echo "$(basename "$d"): $(ls "$d/device/net")"; done
+```
+
+- **MTU 9000** on each CX7 netdev, on both nodes. See [MTU](#mtu).
+
+## MTU
+
+The engine sends its RDMA gather in 4096-byte packets. RoCE uses MTU 4096 only when the netdev MTU is about 4200 or more. NVIDIA's playbook leaves the netdev at the default MTU 1500. Then RoCE uses MTU 1024, the packets drop, and both ranks stop in the warm-up prefill with `rdma gather: RDMA completion: transport retry counter exceeded`. `ping` and NCCL still work, so the fault looks like a bad cable. The measured pair used MTU 9000.
+
+`scripts/preflight.sh` checks this. To fix it:
+
+1. Set MTU 9000 on each CX7 netdev, on both nodes. Use your netdev names from `ip -br addr`:
+
+```bash
+sudo ip link set enp1s0f1np1 mtu 9000
+```
+
+2. Make it persistent. Add `mtu: 9000` to each CX7 netdev in your netplan file (for example `/etc/netplan/40-cx7.yaml`), then apply it:
+
+```yaml
+network:
+  version: 2
+  ethernets:
+    enp1s0f1np1:
+      mtu: 9000
+```
+
+```bash
+sudo netplan apply
+```
+
+3. Check that a 9000-byte frame passes with no fragmentation. Run this on the head:
+
+```bash
+ping -c 3 -M do -s 8972 10.100.80.2
+```
+
+4. Check that RoCE now uses MTU 4096:
+
+```bash
+ibv_devinfo -d rocep1s0f1 -i 1 | grep active_mtu
+```
+
 ## The GID index
 
 RoCE v2 over IPv4 uses one entry of the port's GID table. On the measured pair it was index 3 (`GID_INDEX=3`).

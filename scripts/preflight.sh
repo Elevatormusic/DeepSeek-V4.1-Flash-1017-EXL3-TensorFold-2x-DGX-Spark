@@ -24,6 +24,18 @@ for d in "$MODEL_VIEW/model" "$MODEL_VIEW/engram"; do [ -d "\$d" ] || echo "FAIL
 n=\$(ls "$MODEL_VIEW"/model/*.safetensors 2>/dev/null | wc -l); [ "\$n" -ge 43 ] || echo "FAIL \$n of 43 weight shards"
 docker image inspect "$IMAGE" --format '{{.Id}}' 2>/dev/null | sed 's/^/IMAGE /' || echo "FAIL no image $IMAGE"
 for dev in \$(echo "$RDMA_DEVICES" | tr ',' ' '); do
+  # The engine's RDMA gather sends 4096-byte packets. RoCE gets that MTU only when the netdev MTU is ~4200 or more
+  # (9000 is usual). At the default 1500, the gather fails with "transport retry counter exceeded" (issue #15).
+  nd=\$(ls /sys/class/infiniband/\$dev/device/net 2>/dev/null | head -1)
+  mtu=\$(cat /sys/class/net/\$nd/mtu 2>/dev/null || echo 0)
+  am=\$(ibv_devinfo -d \$dev -i 1 2>/dev/null | awk '/active_mtu/ {print \$2; exit}')
+  if [ -n "\$am" ] && [ "\$am" != 4096 ]; then
+    echo "FAIL \$dev RoCE MTU is \$am, not 4096: set MTU 9000 on \${nd:-its netdev} (docs/NETWORK.md)"
+  elif [ -z "\$am" ] && [ "\$mtu" -lt 4200 ]; then
+    echo "FAIL \$dev netdev \${nd:-?} has MTU \$mtu, need 9000: see docs/NETWORK.md"
+  else
+    echo "OK \$dev RoCE MTU 4096 (\$nd MTU \$mtu)"
+  fi
   if [ "$GID_INDEX" = "-1" ]; then echo "OK gid auto (\$dev)"; continue; fi
   g=\$(cat /sys/class/infiniband/\$dev/ports/1/gids/$GID_INDEX 2>/dev/null)
   t=\$(cat /sys/class/infiniband/\$dev/ports/1/gid_attrs/types/$GID_INDEX 2>/dev/null)
