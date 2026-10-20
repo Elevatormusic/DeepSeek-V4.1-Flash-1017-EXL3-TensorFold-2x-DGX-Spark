@@ -2,13 +2,15 @@
 # shellcheck shell=bash
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-if [ ! -f "$ROOT/.env" ]; then
-  echo "no $ROOT/.env: copy .env.example to .env and edit it" >&2
+TF_ENV_FILE=${TF_ENV_FILE:-$ROOT/.env}
+if [ ! -f "$TF_ENV_FILE" ]; then
+  echo "no $TF_ENV_FILE: copy the matching .env example and edit it" >&2
   exit 1
 fi
 set -a
-# shellcheck disable=SC1091
-. "$ROOT/.env"
+# The user selects this settings file at run time.
+# shellcheck disable=SC1090,SC1091
+. "$TF_ENV_FILE"
 set +a
 
 API="http://${BIND_HOST/0.0.0.0/127.0.0.1}:${PORT}/v1"

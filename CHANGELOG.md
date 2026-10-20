@@ -10,6 +10,10 @@ Each release is a git tag. To use a release, run `git checkout vX.Y.Z` before `.
 
 ## [Unreleased]
 
+### Serving
+
+- Add an optional BF16 uncensored model view, with pinned tensor checks, separate settings and weight-specific caches. The normal model and engine defaults stay the same.
+
 ### Repo
 
 - CI: a defaults guard test, a home-path and public-IP scan, workflow checks (actionlint, zizmor) and a secret scan (gitleaks).

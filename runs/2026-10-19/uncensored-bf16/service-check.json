@@ -1,0 +1,60 @@
+{
+  "kind": "sanitized service-check summary",
+  "hardware": "2x NVIDIA DGX Spark, GB10, TP2",
+  "source_checkpoint": {
+    "repo": "dealignai/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw-UNCENSORED",
+    "revision": "89af9bf193575b7eeeb4f1dd85463ec24ea5bb4c"
+  },
+  "base_checkpoint": {
+    "repo": "LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw",
+    "revision": "afc7aa0aab98ee735c0f54e0a122019af1ac08f1"
+  },
+  "tested_engine": {
+    "base_commit": "07aa02585f64cfb04c60a96de6554c0d4708ed46",
+    "source_mount": "local dense-override patch, not the later PR commit",
+    "image_id": "sha256:6d17dcf8cc273823cc183180ef7674df79c45a21374401ea54cb237bcaf67828",
+    "runtime_source_sha256": {
+      "cuda/comm.py": "7253223092f28117ca7ffc6254881b4a950ff9ee8869754cee14324bb25d6160",
+      "families/deepseek_v41/cuda/model.py": "ef49e89ce14ece931afceba935331eb93f096191674920e10b27d02810dc9700",
+      "families/deepseek_v41/cuda/weights.py": "6be622b3591f05f450bb4f41800cef8ee1c738eaf1f95ae18e26d84b0d3661b1",
+      "families/deepseek_v41/cuda/kernels.py": "db18b23cf77ff6c9ab61b563640f3d2810f16f2116b7aa141be218279113be03"
+    }
+  },
+  "settings": {
+    "override_matrices": 54,
+    "override_dtype": "BF16",
+    "context_tokens": 1048576,
+    "prefill_chunk_tokens": 1024,
+    "parallel_slots": 4,
+    "mtp_drafts": 5,
+    "minimum_host_available_gib": 1.5,
+    "prefill_salt": 1729
+  },
+  "checks": {
+    "short_correct_reply": true,
+    "prefill_8192": {"passed": true, "elapsed_seconds_rounded": 6.25, "cached_prompt_tokens": 0},
+    "prefill_65536": {"passed": true, "elapsed_seconds_rounded": 43.67, "cached_prompt_tokens": 0},
+    "concurrent_correct_replies": 4,
+    "host_memory_reserve_passed": true,
+    "minimum_available_bytes": {"head": 2047627264, "worker": 2311520256},
+    "valid_host_samples_per_node": 51
+  },
+  "kernel_audit": {
+    "allocation_warning": "NV_ERR_NO_MEMORY",
+    "nodes_with_warning": ["head", "worker"],
+    "warning_time_utc": "2026-10-19T06:27:56Z",
+    "observed_during_service_check_window": true,
+    "rank_exit_or_earlyoom_kill_observed": false,
+    "cause_established": false,
+    "all_memory_failures_fixed": false
+  },
+  "limits": {
+    "full_1m_request_tested": false,
+    "later_engine_pr_head_gpu_qualified": false,
+    "full_token_exactness_matrix_completed": false,
+    "paired_8bpw_decode_benchmark_completed": false,
+    "quality_equivalence_established": false,
+    "raw_evaluation_prompts_or_outputs_published": false
+  },
+  "eight_bpw_note": "The override test produced a repetition loop. No decode-speed benefit was established. BF16 is the documented option."
+}

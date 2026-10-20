@@ -44,6 +44,9 @@ Prefill with cold prompts (bertholomus's kit_bench client, median of 3 runs):
 
 ## Before you start
 
+For the optional uncensored BF16 matrices, see [the BF16 guide](docs/UNCENSORED.md).
+It uses a separate model view, cache and settings file, and needs a newer engine.
+
 You need:
 
 - **Two NVIDIA DGX Spark**, joined by one QSFP cable between their ConnectX-7 network ports. NVIDIA's [Connect Two Sparks](https://build.nvidia.com/spark/connect-two-sparks) guide shows how to cable them, set fixed addresses, and set up ssh.
