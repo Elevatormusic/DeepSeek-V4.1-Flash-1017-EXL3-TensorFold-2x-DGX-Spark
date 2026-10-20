@@ -1,4 +1,5 @@
 .env
+.env.uncensored
 logs/
 __pycache__/
 *.pyc

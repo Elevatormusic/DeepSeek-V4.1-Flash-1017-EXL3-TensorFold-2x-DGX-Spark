@@ -15,6 +15,9 @@ It runs `host_tuning_test.sh` (see below) and the Python `unittest` files (`test
 `test_repo_rules.py` checks the repo rules of [CONTRIBUTING.md](../CONTRIBUTING.md): git tracks `runs/`, each entry in `runs/` is a `YYYY-MM-DD` folder with an `INDEX.md`, and `.env.example` sources cleanly and holds no token.
 A test that needs a GPU, a server or the `tensorfold` package skips itself.
 
+`test_prepare_uncensored.py` checks the [optional BF16 view](../docs/UNCENSORED.md) with small local tensor files. It checks atomic publication, index handling and receipt limits. Publication tests need Linux. No downloaded weights are needed.
+`test_uncensored_launcher.py` uses shell stubs to check help, invalid commands, worker hash mismatch, stale model indexes on both nodes, Docker query failures, active GPU refusal, engine pins and cache identity. It starts no server.
+
 ## Script check (no server needed)
 
 `bash tests/host_tuning_test.sh` runs the node part of `scripts/host_tuning.sh` in a temporary folder, with stub `sysctl` and `systemctl` commands. It changes nothing on the node. It checks that the first run keeps the old sysctl values, that `--undo` puts them back, that a missing or stopped earlyoom stops the setup, that a failed setup puts the node back, and that transparent huge pages go off with a systemd unit and come back on with `--undo`.

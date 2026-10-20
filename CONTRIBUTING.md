@@ -64,7 +64,7 @@ These defaults are important. Do not change them silently:
 |---|---|---|
 | Thinking off for requests that do not ask for it (`--no-thinking`) | `start.sh` | off |
 | Bind address (`BIND_HOST`) | `.env.example` | `127.0.0.1` (this node only) |
-| Prefill chunk (`TF_DS_PREFILL_CHUNK`) | `start.sh` | `2048` |
+| Prefill chunk (`TF_DS_PREFILL_CHUNK`) | `.env` (`start.sh` fallback: `2048`) | `2048` |
 | Prompt spill to disk (`SPILL_GIB`) | `.env.example` | `64` |
 | Engine image (`TF_COMMIT`, `IMAGE`) | `.env.example` | the image in the README |
 | Context, concurrency, draft depth (`CONTEXT`, `PARALLEL`, `MTP_DRAFTS`) | `.env.example` | as in the README |
@@ -96,7 +96,7 @@ A claim such as "X makes prefill 10% faster" needs an A/B test. The A side and t
 Keep these identical on both sides, and write their values in the pull request:
 
 - the engine image id (`IMAGE`, `TF_COMMIT`)
-- `TF_DS_PREFILL_CHUNK` (in `start.sh`)
+- `TF_DS_PREFILL_CHUNK` (in `.env`; `start.sh` fallback: `2048`)
 - `SPILL_GIB`, `CONTEXT`, `PARALLEL`, `MTP_DRAFTS`, `MEM_FLOOR_GIB`
 - the host tuning state (`scripts/host_tuning.sh`)
 - the prompt lengths, the number of runs and the prefix-cache state (cold or warm)

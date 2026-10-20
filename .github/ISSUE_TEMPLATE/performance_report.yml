@@ -47,7 +47,7 @@ body:
         | Setting | A | B |
         |---|---|---|
         | Engine image id (`IMAGE`) | | |
-        | `TF_DS_PREFILL_CHUNK` (start.sh) | | |
+        | `TF_DS_PREFILL_CHUNK` (in `.env`; `start.sh` fallback: `2048`) | | |
         | `SPILL_GIB` | | |
         | `CONTEXT` / `PARALLEL` / `MTP_DRAFTS` | | |
         | `MEM_FLOOR_GIB` | | |

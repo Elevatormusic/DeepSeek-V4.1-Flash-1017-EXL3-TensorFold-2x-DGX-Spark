@@ -19,4 +19,9 @@ The OpenAI Codex review bot reviewed every engine change; its findings and our f
 
 ## This repo's licence
 
+The optional [BF16 override view](docs/UNCENSORED.md) uses matrices from
+[dealignai's pinned 1017 pack](https://huggingface.co/dealignai/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw-UNCENSORED/tree/89af9bf193575b7eeeb4f1dd85463ec24ea5bb4c).
+Those weights keep the [DeepSeek V4.1 Flash 1017 licence](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017/blob/main/LICENSE).
+The preparation script publishes no weights in this repo.
+
 Apache-2.0 (see [LICENSE](LICENSE)), the same as TensorFold. It covers the scripts, tests and documents in this repo only. The model weights, the chat template and the engine keep their own licences.

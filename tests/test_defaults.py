@@ -79,12 +79,13 @@ class ProtectedDefaults(unittest.TestCase):
             self.assertEqual(env["THINKING"], "0", f".env.example turns thinking on. {HOW}")
 
     def test_prefill_chunk(self):
-        m = re.search(r"TF_DS_PREFILL_CHUNK=(?:\$\{PREFILL_CHUNK:-)?(\d+)", start_sh())
+        m = re.search(r"TF_DS_PREFILL_CHUNK=(?:\$\{TF_DS_PREFILL_CHUNK:-)?(\d+)", start_sh())
         self.assertIsNotNone(m, "start.sh does not set TF_DS_PREFILL_CHUNK")
         self.assertEqual(m.group(1), PREFILL_CHUNK, f"start.sh prefill chunk changed. {HOW}")
         env = env_example()
-        if "PREFILL_CHUNK" in env:
-            self.assertEqual(env["PREFILL_CHUNK"], PREFILL_CHUNK, f".env.example PREFILL_CHUNK changed. {HOW}")
+        if "TF_DS_PREFILL_CHUNK" in env:
+            self.assertEqual(env["TF_DS_PREFILL_CHUNK"], PREFILL_CHUNK,
+                             f".env.example TF_DS_PREFILL_CHUNK changed. {HOW}")
 
     def test_image_matches_commit(self):
         env = env_example()

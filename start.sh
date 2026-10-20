@@ -20,7 +20,7 @@ run_args() {  # $1 = rank. Every TF_DS_* setting below is explained in docs/WHAT
 -d --name tfv41-r$r --restart ${RESTART_POLICY:-no} $( [ -n "${CGROUP_PARENT-tensorfold.slice}" ] && echo "--cgroup-parent ${CGROUP_PARENT-tensorfold.slice}" ) --gpus all --network host --ipc host --shm-size 32g --oom-score-adj 1000
 --ulimit memlock=-1 --ulimit stack=67108864 --device /dev/infiniband --cap-add IPC_LOCK --cap-add SYS_PTRACE
 -v $MODEL_VIEW/model:/model:ro -v $MODEL_VIEW/engram:/engram:ro -v $CACHE_DIR:/cache $key
--e TF_DS_REPLAY=1 -e TF_DS_REPLAY_FLOOR=1 -e TF_DS_PREFILL_CHUNK=2048
+-e TF_DS_REPLAY=1 -e TF_DS_REPLAY_FLOOR=1 -e TF_DS_PREFILL_CHUNK=${TF_DS_PREFILL_CHUNK:-2048}
 -e TF_DS_RANK_CACHE=/cache/tf-ds-rank -e TF_DS_RANK_CACHE_READERS=32
 -e TF_DS_WARM_LENGTHS=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,33,131,514,1024,2113 -e TF_DS_ENGRAM=/engram
 -e TF_DS_SPILL_GIB=${SPILL_GIB:-64} -e TF_DS_SPILL_DIR=/cache/tf-ds-spill
