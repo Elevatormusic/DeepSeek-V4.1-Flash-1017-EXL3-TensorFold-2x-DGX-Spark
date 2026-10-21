@@ -127,6 +127,8 @@ engine_lines() {
 esc() { printf '%s' "$1" | sed 's/[][\.*^$/|&(){}+?]/\\&/g'; }
 filter=(-E
   -e 's/(hf_|sk-|ghp_|gho_|ghs_|xox[bp]-|github_pat_)[A-Za-z0-9_-]{8,}/[removed]/g'
+  # Basic is a common word, so it counts only with a value of base64 text after it
+  -e 's/(^|[^a-z])basic[[:space:]]+[A-Za-z0-9+\/=]{8,}.*$/\1[removed]/Ig'
   # from the first word that names a credential to the end of the line. A value can be quoted, escaped, nested
   # in JSON or follow any Authorization scheme, so a rule for each value form always misses one. "token" counts
   # only as a whole word part (token, hf_token, token-budget), not in tokens or tokenizer.
