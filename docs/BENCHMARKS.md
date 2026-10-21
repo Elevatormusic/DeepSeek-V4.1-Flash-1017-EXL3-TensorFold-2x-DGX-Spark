@@ -139,7 +139,7 @@ Notes on the table:
 | 32,001 | 34.6 s | 925 tok/s | 14.16 - 20.04 s | 2,100 tok/s | 1,597 - 2,260 tok/s |
 
 - **The 8K row is the first long prompt after a start.** On TensorFold, its TTFT (8.4 to 18.7 s) is close to the TTFT of the 32K prompt (14.2 to 20.0 s). The one-time warm-up dominates it. On vLLM, the 8K and 32K rates are close (789 and 925 tok/s).
-- **The prompts share a start.** The 8K prompt and the 32K prompt repeat the same sentence, so the 32K prompt starts with the text of the 8K prompt. Both engines have a prefix cache. The suite does not record `cached_tokens`. So the files cannot show how much of the 32K prompt came from the cache. Check the `cached=` field in the engine log of each request.
+- **The prompts share a start.** The 8K prompt and the 32K prompt repeat the same sentence, so the 32K prompt starts with the text of the 8K prompt. Both engines have a prefix cache. The suite did not record `cached_tokens` when these files were made. So the files cannot show how much of the 32K prompt came from the cache. Check the `cached=` field in the engine log of each request. The suite of the current repo uses unique prompts and logs `cached_tokens`; see [runs/2026-10-21](../runs/2026-10-21/INDEX.md) for a measured case of a hit (6,144 tokens at 32K).
 - **The 200K needle prompt shares its first part with the 64K needle prompt**, for the same reason.
 - **Prefill rate at 64K and 200K, derived.** The needle tests give prompt tokens divided by total time. For 200,030 tokens: vLLM 922 tok/s, TensorFold 1,576 to 1,931 tok/s (median 1,823). For 64,030 tokens: vLLM 796 tok/s, TensorFold 1,601 to 1,883 tok/s (median 1,784). These rates include up to 32 generated tokens and the HTTP round trip.
 

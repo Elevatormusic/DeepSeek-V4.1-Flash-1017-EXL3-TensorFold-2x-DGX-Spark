@@ -125,7 +125,7 @@ The 32-test suite. It uses only the Python standard library. It has seven groups
 
 | Group | Tests | What it checks |
 |---|---:|---|
-| `speed` | 6 | Decode speed (prose and code, thinking off and on), prefill speed at 8K and 32K tokens. |
+| `speed` | 6 | Decode speed (prose and code, thinking off and on), prefill speed at 8K and 32K tokens. Each speed prompt has a unique first line. The prefill rows use varied text, log `cached_tokens` and fail when `cached_tokens` is more than 0. |
 | `tools` | 12 | Tool calls: single, none needed, `tool_choice` required and named, nested arguments, parallel calls, tool-result round trip, streamed deltas, a four-step agent loop. Thinking off and on where the name says so. |
 | `schema` | 6 | Structured output: strict `json_schema` (thinking off and on), `json_object`, choice, regex, and JSON from the prompt alone (no constraint). |
 | `reasoning` | 2 | The four thinking levels (off, low, high, max) and no `<think>` tag in the answer. |

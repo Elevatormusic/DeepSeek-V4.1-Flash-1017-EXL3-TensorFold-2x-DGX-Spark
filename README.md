@@ -30,6 +30,8 @@ Prefill with cold prompts (bertholomus's kit_bench client, median of 3 runs):
 |---|---:|---:|---:|---:|---:|
 | Prefill (tok/s) | 2,166 | 2,179 | 2,110 | 1,989 | 1,266 (1 run) |
 
+The kit_bench numbers use a small-vocabulary prompt (random words from a list of about 150 words). Random natural text gives 1,963 tok/s at 32K on release 1.1.0 (median of 3, cold prompt).
+
 ---
 
 ## What you get
