@@ -25,7 +25,7 @@ WORKER_NEED_GIB=109
 [ "${VISION:-1}" = 0 ] && HEAD_NEED_GIB=$((HEAD_NEED_GIB - 1))
 
 check_node() {  # $1 = label, $2 = command runner ("" for here, wssh for the worker), $3 = GiB of MemAvailable needed
-  local who=$1 run=$2 need=$3 out hint=""
+  local who=$1 run=$2 mem_need=$3 out hint=""
   [ "$who" = head ] && [ "${VISION:-1}" != 0 ] && hint=", set VISION=0 in .env if you send no images"
   out=$($run bash -s <<EOF
 set -u
@@ -72,9 +72,9 @@ for dev in \$(echo "$RDMA_DEVICES" | tr ',' ' '); do
   case "\$g" in ""|0000:0000:0000:0000:0000:0000:0000:0000) echo "FAIL \$dev GID $GID_INDEX is empty: see docs/NETWORK.md";;
     *) [ "\$t" = "RoCE v2" ] && echo "OK \$dev GID $GID_INDEX \$g (\$t)" || echo "FAIL \$dev GID $GID_INDEX is \$t, not RoCE v2";; esac
 done
-avail=\$(awk '/MemAvailable/ {print int(\$2/1048576)}' /proc/meminfo); [ "\$avail" -ge $need ] \
-  && echo "OK \$avail GiB memory available (need $need)" \
-  || echo "FAIL only \$avail GiB memory available, need $need: close browsers, desktop programs and other containers on this node$hint, and run scripts/host_tuning.sh if you did not (docs/MEMORY.md)"
+avail=\$(awk '/MemAvailable/ {print int(\$2/1048576)}' /proc/meminfo); [ "\$avail" -ge $mem_need ] \
+  && echo "OK \$avail GiB memory available (need $mem_need)" \
+  || echo "FAIL only \$avail GiB memory available, need $mem_need: close browsers, desktop programs and other containers on this node$hint, and run scripts/host_tuning.sh if you did not (docs/MEMORY.md)"
 mkdir -p "$CACHE_DIR"; free=\$(df -BG --output=avail "$CACHE_DIR" | tail -1 | tr -dc 0-9)
 [ -d "$CACHE_DIR/tf-ds-rank" ] && need=5 || need=110
 [ "\$free" -ge "\$need" ] && echo "OK \$free GiB free for the cache" || echo "FAIL \$free GiB free in $CACHE_DIR (need \$need)"
