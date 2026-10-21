@@ -38,12 +38,38 @@ The 1.1.0 step ran the image `fc9200a44463`, the head of fork PR #24. Release co
 - The 1-stream decode difference is inside the run-to-run noise. The 4-stream gain is mostly from fork PR #20 (drafts of all streams ranked in one round). The image also holds fork PRs #8 and #24, so the gain is not from #20 alone.
 - The long runs started with different head `MemAvailable` (2,113 MiB for the baseline and 3,190 MiB for 1.1.0), so the two lowest values are not strictly comparable. The head margin against the 1 GiB earlyoom limit is small in both steps. A first window on the candidate `e2b282c50724` (no admission fix yet) had one long run in which earlyoom stopped the head engine; three repeats and both steps of this window did not. The gate report gives the details. The admission fix (fork PR #24) was added after that run.
 - The prefill and decode rows are single passes. They are release-gate checks, not an A/B with a median of 3 runs.
-- **Correction (2026-10-21).** The first version of the 32K prefill row showed 2,717 tok/s (baseline, TTFT 11.78 s) and 2,751 tok/s (1.1.0, TTFT 11.63 s). Those numbers came from a prefix-cache hit of 6,144 tokens (3 chunks of 2,048): `v41_suite.py` sent an 8K prompt with a repeated sentence just before the 32K prompt with the same sentence, and it did not log `cached_tokens`. The old prefill comparison is withdrawn. Counted on the 25,857 tokens that the server prefilled, the 1.1.0 value was 2,218 tok/s. A cold 32K prompt on 1.1.0 (median of 3, `cached_tokens` 0, production settings) gives: repeated sentence 2,228 tok/s (TTFT 14.37 s); random natural text 1,963 tok/s (TTFT 16.32 s, range 1,961-1,969); random token ids 2,004 tok/s; kit_bench method (random words from a list of about 150 words, 32,768 tokens) 2,235 tok/s (TTFT 14.66 s). A small-vocabulary prompt prefills about 11-14% faster than varied text. The baseline `3c45bdaeab7d` was not measured with a cold prompt, so no 1.1.0 against baseline prefill difference is claimed. The cold side of the 24K prefix-cache row is not affected: `data/f-bench-fc9200a44463.log` and `data/b-bench-3c45bdaeab7d.log` show `cached_tokens` 0 for it. The raw files in `gate-1.1.0/` are unchanged: the suite logs, the gate report and the suite result files still show the old values, and they must be read with this correction.
+- **Correction (2026-10-21).** The first version of the 32K prefill row showed 2,717 tok/s (baseline, TTFT 11.78 s) and 2,751 tok/s (1.1.0, TTFT 11.63 s). Those numbers came from a prefix-cache hit of 6,144 tokens (3 chunks of 2,048): `v41_suite.py` sent an 8K prompt with a repeated sentence just before the 32K prompt with the same sentence, and it did not log `cached_tokens`. The old prefill comparison is withdrawn. Counted on the 25,857 tokens that the server prefilled, the 1.1.0 value was 2,218 tok/s. A cold 32K prompt on 1.1.0 (median of 3, `cached_tokens` 0, production settings) gives: repeated sentence 2,228 tok/s (TTFT 14.37 s); random natural text 1,963 tok/s (TTFT 16.32 s, range 1,961-1,969); random token ids 2,004 tok/s; kit_bench method (random words from a list of about 150 words, 32,768 tokens) 2,235 tok/s (TTFT 14.66 s). A small-vocabulary prompt prefills about 11-14% faster than varied text. The baseline `3c45bdaeab7d` was not measured with a cold prompt, so no 1.1.0 against baseline prefill difference is claimed. The data are in the section "Cold 32K prefill check of 1.1.0" below and in `prefill-32k/`. The cold side of the 24K prefix-cache row is not affected: `data/f-bench-fc9200a44463.log` and `data/b-bench-3c45bdaeab7d.log` show `cached_tokens` 0 for it. The raw files in `gate-1.1.0/` are unchanged: the suite logs, the gate report and the suite result files still show the old values, and they must be read with this correction.
+
+## Cold 32K prefill check of 1.1.0 (correction data)
+
+Same pair, image `tensorfold-dsv41:fc9200a44463`, one fresh engine start with production settings (graphs on, `SPILL_GIB=64`, `--parallel 4`, 1M context, prefill chunk 2048, thinking off). Every request: `max_tokens` 1, temperature 0, streamed, from loopback. TTFT is the time to the first streamed piece; prefill tok/s is `prompt_tokens` / TTFT. Every measured prompt starts with a unique `Run <32 hex characters>.` line, and `cached_tokens` was 0 for all 12 of them. 3 rounds, prompt types interleaved. Raw rows: `prefill-32k/results.jsonl`.
+
+| Prompt (32K) | `prompt_tokens` | TTFT median [range], s | Prefill median [range], tok/s |
+|---|---|---|---|
+| Repeated sentence (the text of the old suite, salted) | 32,023-32,025 | 14.37 [14.32-15.39] | 2,228 [2,080-2,236] |
+| Random natural text (shuffled sentences of the Python language reference and library docstrings, no repeats) | 32,029-32,030 | 16.32 [16.27-16.33] | 1,963 [1,961-1,969] |
+| Random token ids (decoded) | 32,026-32,029 | 15.99 [15.76-16.21] | 2,004 [1,975-2,033] |
+| kit_bench method (random words from a list of about 150 words, 32,768 tokens) | 32,768 | 14.66 [14.61-14.72] | 2,235 [2,227-2,243] |
+
+The cache case, on a fresh engine, in the old suite order (exact text, no salt):
+
+| Request | `prompt_tokens` | `cached_tokens` | TTFT, s | Prefill, tok/s | Without cached tokens, tok/s |
+|---|---|---|---|---|---|
+| 8K repeated prompt (first request after the start) | 8,001 | 0 | 4.68 | 1,711 | 1,711 |
+| 32K repeated prompt (right after the 8K prompt) | 32,001 | 6,144 | 11.66 | 2,745 | 2,218 |
+
+- The prefix cache keeps whole chunks of 2,048 tokens: the 32K request reused 3 chunks (19.2% of the prompt). The 2,751 tok/s of the gate is this case (within 0.2% of 2,745).
+- Small-vocabulary prompts (the repeated sentence and the 150-word list) prefill about 11-14% faster than varied text, with no cache hit in either. The cause is not tested.
+- The run stopped after the third kit_bench request because the head `MemAvailable` fell to 1,234 MiB, which is under the 1,280 MiB stop rule of that window. No earlyoom event and no crash. The 8K rounds were not run.
+- Not tested: the baseline `3c45bdaeab7d` with a cold prompt, and a cold 8K row.
 
 Files:
 
 | File | Content |
 |---|---|
+| `prefill-32k/results.jsonl` | the 16 requests of the cold 32K prefill check (one JSON row per request, with `prompt_tokens`, `cached_tokens`, `ttft_s`) |
+| `prefill-32k/measure.log` | the console output of that check, including the stop of the run by the memory rule after the third kit_bench request |
+| `prefill-32k/measure.py`, `prefill-32k/build_prompts.py` | the client and the prompt builder of that check (the builder needs the `tokenizer.json` of the model; the built prompts are not saved) |
 | `gate-1.1.0/gate-report.md` | the gate report (host names, home paths and router details removed) |
 | `gate-1.1.0/data/b-*` | baseline step: suite, grammar check, bench, long run, lowest memory, earlyoom check |
 | `gate-1.1.0/data/f-*` | 1.1.0 step: the same files |
