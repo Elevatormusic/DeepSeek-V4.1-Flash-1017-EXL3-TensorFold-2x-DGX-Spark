@@ -14,8 +14,8 @@ Each release is a git tag. To use a release, run `git checkout vX.Y.Z` before `.
 
 ### Added
 
-- `docs/MEMORY.md`: why the head runs out of memory first, how to read the earlyoom journal, that `terminate called without an active exception` on rank 0 is a SIGTERM from earlyoom, the low-memory settings (`VISION=0`, `PREFILL_CHUNK=1024`, `PARALLEL=2`), and the kernel memory reserve that `MemAvailable` leaves out ([runs/2026-10-21](runs/2026-10-21/INDEX.md#kernel-memory-reserve-of-the-pair-read-only-check)).
-- `scripts/oom_report.sh`: writes one text file with the memory facts of both nodes (meminfo, earlyoom journal, kernel memory settings, engine image, `.env` settings from a fixed list, engine log lines, driver). It prints no key or token. The bug and performance forms ask for it.
+- `docs/MEMORY.md`: why the head runs out of memory first, how to read the earlyoom journal, how to tell if `terminate called without an active exception` on rank 0 is a SIGTERM from earlyoom (a journal line at the same time) or a crash, the low-memory settings (`VISION=0`, `PREFILL_CHUNK=1024`, `PARALLEL=2`), and the kernel memory reserve that `MemAvailable` leaves out ([runs/2026-10-21](runs/2026-10-21/INDEX.md#kernel-memory-reserve-of-the-pair-read-only-check)).
+- `scripts/oom_report.sh`: writes one text file with the memory facts of both nodes (meminfo, earlyoom journal, kernel memory settings, engine image, `.env` settings from a fixed list, engine log lines, driver). It removes keys and tokens, also when they are given as a separate argument (`--api-key <value>`). The bug and performance forms ask for it.
 - After the API answers, `./start.sh` and `./status.sh` print the `MemAvailable` of the head and warn under 2.5 GiB.
 - `docs/OPERATIONS.md`: the engine switches of release 1.1.0 (decode graph sizes, capture mode, host-memory settings, draft ranking), with their defaults.
 - Add an opt-in display-backed KV launcher with a private bundle, spill disabled and offline safety tests. Full hardware validation is pending. Ordinary launch defaults do not change.

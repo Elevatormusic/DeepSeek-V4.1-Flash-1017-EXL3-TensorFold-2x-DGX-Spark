@@ -128,6 +128,7 @@ filter=(-E
   -e 's/(Bearer|Basic)[[:space:]]+[A-Za-z0-9._~+\/=-]+/\1 [removed]/Ig'
   -e 's/(hf_|sk-|ghp_|gho_|ghs_|xox[bp]-|github_pat_)[A-Za-z0-9_-]{8,}/[removed]/g'
   -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)["'"'"']?[^[:space:],;"'"'"']+/\1[removed]/Ig'
+  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)["'"'"']?[^[:space:],;"'"'"']+/\1[removed]/Ig'
   -e 's#/home/[A-Za-z0-9._-]+#/home/<user>#g'
   -e 's#/Users/[A-Za-z0-9._-]+#/Users/<user>#g')
 [ -n "${HOME:-}" ] && [ "$HOME" != / ] && filter+=(-e "s/$(esc "$HOME")/~/g")

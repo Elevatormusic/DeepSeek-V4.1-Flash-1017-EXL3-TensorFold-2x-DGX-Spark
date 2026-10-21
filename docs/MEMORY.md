@@ -91,9 +91,16 @@ Rank 1 shows `NCCL error 4` after the head stops. This is a result of the stop, 
 
 ## "terminate called without an active exception"
 
-This line in the log of rank 0 (`docker logs tfv41-r0`) is not a crash. It shows that rank 0 got SIGTERM while it processed a prompt. The signal comes from earlyoom (look for `sending SIGTERM` in the journal at the same time) or from `docker stop`. The container then exits with code 134.
+The C++ runtime prints this line in the log of rank 0 (`docker logs tfv41-r0`) when the process ends with no exception to report. The line alone does not tell you the cause. An uncaught exception, a call to `std::terminate` or a thread that is not joined can also print it.
 
-Engine fork [PR #34](https://github.com/Elevatormusic/TensorFold/pull/34) makes rank 0 end with exit code 0 and without this line. The pinned image `730d41abd8f4` does not have that change yet, so it still prints the line. The memory cause stays: earlyoom still stops the engine. Use the journal to find out why.
+Before you call it a memory stop, find a stop event within a few seconds of the line:
+
+- an earlyoom `sending SIGTERM` line in the journal (`journalctl -u earlyoom`), or
+- a `docker stop` of the container (yours, or from a script).
+
+If you find one, rank 0 got SIGTERM while it processed a prompt, and the container exits with code 134. All cases in the traces of this repo were of this type. If you find no stop event, treat it as an engine crash: open an issue with the output of `scripts/oom_report.sh` and the full log of rank 0.
+
+For a SIGTERM, engine fork [PR #34](https://github.com/Elevatormusic/TensorFold/pull/34) makes rank 0 end with exit code 0 and without this line. The pinned image `730d41abd8f4` does not have that change yet, so it still prints the line. The memory cause stays: earlyoom still stops the engine. Use the journal to find out why.
 
 ## Settings for a head with little memory
 
