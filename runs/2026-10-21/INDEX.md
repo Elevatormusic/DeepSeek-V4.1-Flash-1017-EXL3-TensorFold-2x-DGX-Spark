@@ -116,7 +116,7 @@ Each cell shows window 1 / window 2.
 - Decode and prefill differences are inside the noise (about 2%). Every prefill value is cold: `cached_tokens` was 0 for all of them.
 - **Head memory.** The lowest head `MemAvailable` of 1.1.1 is 227 MiB (window 1) and 100 MiB (window 2) below 1.1.0. The long runs started with less free memory on 1.1.1 (3,085 and 2,820 MiB, against 3,703 and 3,130 MiB), and the fall from that level is smaller. The image holds about 0.14 GiB more on the head (`reserved +644 MiB` against `+508 MiB` in the `--parallel` warm-up; probable source: the second draft graph of fork PR #25). The low point stays 0.58 GiB over the 1 GiB earlyoom limit. The 1.1.0 baseline alone spans 1,450 to 1,848 MiB across windows. The release notes list this as a known issue.
 - RDMA: with `NCCL_IB_GID_INDEX` and `TF_RDMA_GID_INDEX` unset, the 1.1.1 engine detects index 3 on both ports of both nodes and uses the RDMA gather (`data/e-gid.log`). 1.1.0 ran with the index pinned to 3.
-- SIGTERM to rank 0, 11 s into a 100K-token prefill (window 2): exit code 0 after 2.6 s, no `terminate called` in either rank log (`data/e-*`; window 1: `data/c-sigterm-*.log`).
+- SIGTERM to rank 0, 11 s into a 100K-token prefill (window 2): exit code 0 after 2.6 s, no `terminate called` in either rank log (`data/e-sigterm-*.log`; the window 1 SIGTERM run is in `data/gate111-run.log` and in the stop-time rank logs `data/r0-*` and `data/r1-*`).
 - A first try of window 2 was stopped after its candidate step, because its prompt-spill folder came from window 1 and gave prefix-cache hits. Its logs are not used and not kept.
 
 Files:

@@ -65,27 +65,27 @@ logsummary() {  # $1 = prefix
   log "$1 admission waits: r0=$(grep -ac 'admission waits' "$L/$1-r0-live.log") r1=$(grep -ac 'admission waits' "$L/$1-r1-live.log"); late captures: r0=$(grep -ac 'captured while serving' "$L/$1-r0-live.log") r1=$(grep -ac 'captured while serving' "$L/$1-r1-live.log"); WARNING: r0=$(grep -ac WARNING "$L/$1-r0-live.log") r1=$(grep -ac WARNING "$L/$1-r1-live.log"); terminate: r0=$(grep -ac 'terminate called' "$L/$1-r0-live.log") r1=$(grep -ac 'terminate called' "$L/$1-r1-live.log"); Traceback/ERROR: r0=$(grep -acE 'Traceback|ERROR' "$L/$1-r0-live.log") r1=$(grep -acE 'Traceback|ERROR' "$L/$1-r1-live.log")"
 }
 
-sigterm_test() {  # candidate: SIGTERM to rank 0 during a prefill
-  rm -f /tmp/rel111.arm
+sigterm_test() {  # $1 = step prefix; candidate: SIGTERM to rank 0 during a prefill
+  local SP=$1; rm -f /tmp/rel111.arm
   rm -f /tmp/rel111.sent; log "SIGTERM test: starting a 100K-token prefill"
-  ( cd "$V" && timeout 600 python3 -I -u prefill_req.py 100000 > "$L/c-sigterm-client.log" 2>&1 ) &
+  ( cd "$V" && timeout 600 python3 -I -u prefill_req.py 100000 > "$L/$SP-sigterm-client.log" 2>&1 ) &
   local cp=$!
   local k=0
   while [ ! -e /tmp/rel111.sent ] && [ $k -lt 120 ]; do sleep 1; k=$((k + 1)); done
   sleep 10
   if kill -0 "$cp" 2> /dev/null; then log "SIGTERM test: request sent $(( $(date +%s) - $(stat -c %Y /tmp/rel111.sent) )) s ago and not finished: rank 0 is in the prefill"; else log "SIGTERM test: client already ended before the signal (NOT a valid prefill test)"; fi
-  docker logs --tail 3 rel111-r0 2>&1 | cut -c1-200 | tee "$L/c-sigterm-before.log"
+  docker logs --tail 3 rel111-r0 2>&1 | cut -c1-200 | tee "$L/$SP-sigterm-before.log"
   local t0; t0=$(date +%s.%N)
   docker kill --signal=TERM rel111-r0 > /dev/null 2>&1
   local i=0
   while [ "$(docker inspect -f '{{.State.Running}}' rel111-r0 2>/dev/null)" = "true" ] && [ $i -lt 120 ]; do sleep 0.5; i=$((i + 1)); done
   local t1; t1=$(date +%s.%N)
   local code; code=$(docker inspect -f '{{.State.ExitCode}}' rel111-r0 2>/dev/null)
-  docker logs rel111-r0 > "$L/c-sigterm-r0.log" 2>&1
-  ssh -n $W "docker logs rel111-r1" > "$L/c-sigterm-r1.log" 2>&1
+  docker logs rel111-r0 > "$L/$SP-sigterm-r0.log" 2>&1
+  ssh -n $W "docker logs rel111-r1" > "$L/$SP-sigterm-r1.log" 2>&1
   kill "$cp" 2> /dev/null; wait "$cp" 2> /dev/null
-  log "SIGTERM test: rank 0 exit code $code after $(echo "$t1 - $t0" | bc) s; 'terminate called' r0=$(grep -ac 'terminate called' "$L/c-sigterm-r0.log") r1=$(grep -ac 'terminate called' "$L/c-sigterm-r1.log"); worker running: $(ssh -n $W "docker inspect -f '{{.State.Running}} exit={{.State.ExitCode}}' rel111-r1" 2>&1)"
-  log "SIGTERM test: last r0 lines:"; tail -n 6 "$L/c-sigterm-r0.log" | cut -c1-220
+  log "SIGTERM test: rank 0 exit code $code after $(echo "$t1 - $t0" | bc) s; 'terminate called' r0=$(grep -ac 'terminate called' "$L/$SP-sigterm-r0.log") r1=$(grep -ac 'terminate called' "$L/$SP-sigterm-r1.log"); worker running: $(ssh -n $W "docker inspect -f '{{.State.Running}} exit={{.State.ExitCode}}' rel111-r1" 2>&1)"
+  log "SIGTERM test: last r0 lines:"; tail -n 6 "$L/$SP-sigterm-r0.log" | cut -c1-220
 }
 
 step() {  # $1 = label (b or c), $2 = tag, $3 = GID mode, $4 = sigterm test (yes/no)
@@ -153,7 +153,7 @@ step() {  # $1 = label (b or c), $2 = tag, $3 = GID mode, $4 = sigterm test (yes
   curl -s -m 10 --interface 127.0.0.1 http://172.17.0.1:8888/v1/models > /dev/null && log "$P server alive after the long run" || log "$P SERVER DEAD after the long run"
   docker ps --format '{{.Names}} {{.Status}}' | grep rel111; ssh -n $W "docker ps --format '{{.Names}} {{.Status}}'" | grep rel111
   if [ "$SIG" = yes ]; then
-    if curl -s -m 10 --interface 127.0.0.1 http://172.17.0.1:8888/v1/models > /dev/null; then sigterm_test; else log "SIGTERM test skipped: engine not serving"; fi
+    if curl -s -m 10 --interface 127.0.0.1 http://172.17.0.1:8888/v1/models > /dev/null; then sigterm_test "$P"; else log "SIGTERM test skipped: engine not serving"; fi
   fi
   memstop
   cd "$R"; "$LA" stop > "$L/$P-stop.log" 2>&1
