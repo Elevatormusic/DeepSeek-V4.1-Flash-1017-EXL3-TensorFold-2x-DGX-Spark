@@ -75,3 +75,23 @@ Files:
 | `gate-1.1.0/data/f-*` | 1.1.0 step: the same files |
 | `gate-1.1.0/data/idle-b.log`, `idle-f.log` | idle `MemAvailable` before the start, after the start and before the long run |
 | `gate-1.1.0/data/mem-b-full-*`, `mem-f-full-*` | `MemAvailable` in kB each second, head and worker, over the whole step |
+
+## Watermark A/B: `vm.watermark_scale_factor` 50 against 25
+
+Same pair, image `tensorfold-dsv41:cb4ceaff2b8c` (1.1.1 candidate), production settings (graphs on, `SPILL_GIB=64`, `--parallel 4`, 1M context, prefill chunk 2048). Two windows (20:23 to 21:15 and 22:16 to 22:43 UTC, node clock). Each run set only `vm.min_free_kbytes` and `vm.watermark_scale_factor` at runtime on both nodes, started a fresh engine, ran the stall test twice (248 prefill chunks of 2,048 tokens, cold random prompts) and the long 4-stream run once (20K, 50K, 100K and 200K tokens). `MemAvailable`, `/proc/vmstat` and the CPU time of kswapd and kcompactd were sampled each second on both nodes. A watchdog stopped the test containers under 1.25 GiB of head `MemAvailable`.
+
+| Setting | `vm.min_free_kbytes` | `vm.watermark_scale_factor` | Runs | Lowest head `MemAvailable`, long run (mean) | Gain against B | Slow chunks (over 1.3 s) per 248 | Max chunk |
+|---|---|---|---|---|---|---|---|
+| B (the value before this change) | 1 GiB | 50 | 2 | 1,516 MiB | 0 | 4 and 0 | 2.04 s |
+| V1 (the new value) | 1 GiB | 25 | 2 | 1,994 MiB | +477 MiB (formula +934 MiB) | 1 and 0 | 1.31 s |
+| V2 | 512 MiB | 50 | 2 | 1,982 MiB (V2r only) | +466 MiB | 0 of 151 (stopped) and 1 | 1.72 s |
+| V3 | 512 MiB | 25 | 1 | 3,114 MiB | +1,598 MiB | 4 | 2.54 s |
+
+- V1 is not worse than B on stalls. The median chunk is 0.94 s in all runs, and B itself has 0 to 4 slow chunks. This run does not show that V1 is faster. It has 2 runs for each side, under the 3 of the A/B rule in CONTRIBUTING.md, so it makes no speed claim.
+- The gain is a lower kernel reserve, not new free memory. The engine holds the same memory in all runs.
+- V3 is not safe: on the head, 4,195 compaction stalls in the stall test (B: 2 and 0), 25,437 swap-in pages and 24,018 major faults in the long run (B: 72 and 109).
+- V2 is irregular: its first run fell to 1,192 MiB on the head and the watchdog stopped it; its repeat held 1,982 MiB.
+- 0 request errors and no earlyoom line in any run. The long-run token hashes equal those of the 1.1.0 gate.
+- `host_tuning.sh` and `preflight.sh` now use 25. A node that ran the old script fails the preflight memory check until it runs `scripts/host_tuning.sh` again.
+
+Details, per-run tables, limits and the file list: [watermark-ab/RESULT.md](watermark-ab/RESULT.md). The tables come from `watermark-ab/summarize.py` (`watermark-ab/summary-table.txt`); the raw files are in `watermark-ab/<run>/` (runs `B`, `B2`, `V1`, `V1r`, `V2`, `V2r`, `V3`). Host names and home paths are replaced in all files.

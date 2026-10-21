@@ -1,0 +1,15 @@
+Per run (MiB for MemAvailable; head compaction = compact_stall/compact_fail/allocstall)
+run | idle h/w | stall-test low h | long-run low h/w | chunks n, median, p95, max, slow | long chunk max, slow | tok/s 8K/32K/64K/128K | head compaction stall test | head compaction long | errors
+B | 3467/3469 | 1451 | 1347/2698 | 248, 0.94, 1.03, 2.04, 4 | 1.23, 0 | 2197/2268/2178/2093 | 2/1/1 | 6/0/0 | 0 errors, 258 s
+B2 | 3051/3707 | 1867 | 1686/2520 | 248, 0.94, 1.03, 1.18, 0 | 1.14, 0 | 2212/2247/2205/2110 | 0/0/1928 | 0/0/0 | 0 errors, 259 s
+V1 | 3835/4103 | 2340 | 2228/2636 | 248, 0.94, 1.04, 1.31, 1 | 1.19, 0 | 2200/2254/2182/2110 | 120/15/15 | 497/153/152 | 0 errors, 259 s
+V1r | 3702/4082 | 1926 | 1759/3044 | 248, 0.94, 1.04, 1.3, 0 | 1.39, 1 | 2196/2228/2195/2108 | 0/0/0 | 0/0/0 | 0 errors, 258 s
+V2 | 3598/4211 | 1192 | None/None | 151, 0.93, 1.04, 1.19, 0 | None, None | 2174/2257/2203/2106 | 1/1/1 | None/None/None | stopped by watchdog
+V2r | 3872/3969 | 2103 | 1982/2999 | 248, 0.94, 1.03, 1.72, 1 | 1.15, 0 | 2150/2178/2204/2113 | 46/2/2 | 4/1/1 | 0 errors, 258 s
+V3 | 4564/4709 | 3240 | 3114/3327 | 248, 0.94, 1.06, 2.54, 4 | 2.19, 3 | 2148/2032/2183/2112 | 4195/443/412 | 1927/1189/713 | 0 errors, 264 s
+
+Per setting (mean of the runs; gain against the mean of B and B2)
+B (B, B2): idle head 3259 (+0); lowest head in long run 1516 (+0); slow chunks [4, 0] of [248, 248]; max chunk 2.04 s
+V1 (V1, V1r): idle head 3768 (+510); lowest head in long run 1994 (+477); slow chunks [1, 0] of [248, 248]; max chunk 1.31 s
+V2 (V2r only for the long run): idle head 3735 (+476); lowest head in long run 1982 (+466); slow chunks [0, 1] of [151, 248]; max chunk 1.72 s
+V3: idle head 4564 (+1305); lowest head in long run 3114 (+1598); slow chunks [4] of [248]; max chunk 2.54 s

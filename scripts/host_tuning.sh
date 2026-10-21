@@ -15,10 +15,12 @@
 #        vm.compaction_proactiveness = 0  [20]   no background compaction while a prompt runs
 #        vm.extfrag_threshold = 500       [500]  the kernel compacts memory before it reclaims it
 #        vm.min_free_kbytes = 1048576     [set at boot]  keep 1 GiB free for the kernel
-#        vm.watermark_scale_factor = 50   [10]   free memory in the background before programs must wait
+#        vm.watermark_scale_factor = 25   [10]   free memory in the background before programs must wait
 #      Measured with 2 bench runs each (248 prompt chunks): background compaction on gave 46 slow chunks (over
 #      1.3 s), the first version of this script (extfrag_threshold 1000, kernel watermarks) gave 5, these values
 #      gave 2 (both at 1.31 s) and 128K prompts at 1,986 and 1,981 tokens/s (runs/2026-10-18/INDEX.md).
+#      Scale 25 in place of 50 gives the same chunk times and reads about 0.5 GiB higher in MemAvailable, because the
+#      kernel keeps less in reserve (2 runs each; runs/2026-10-21/watermark-ab/). It adds no free memory.
 #   3. earlyoom (required; the script stops if it is missing) stops the engine, not the node, when memory runs
 #      out. It sends SIGTERM to the process named "tensorfold" below 1 GiB available and SIGKILL below 0.5 GiB.
 #      It ignores swap, because the engine cannot use swap. The engine stops its own growth at 1.5 GiB available
@@ -121,7 +123,7 @@ printf '[Unit]\nDescription=TensorFold rank containers (no swap)\n\n[Slice]\nMem
 systemctl daemon-reload
 systemctl start tensorfold.slice
 printf '%s\n' "vm.swappiness = 10" "vm.compaction_proactiveness = 0" "vm.extfrag_threshold = 500" \
-  "vm.min_free_kbytes = 1048576" "vm.watermark_scale_factor = 50" > "$conf"
+  "vm.min_free_kbytes = 1048576" "vm.watermark_scale_factor = 25" > "$conf"
 sysctl -q -p "$conf"
 if [ -f "$thp/enabled" ]; then
   printf '%s\n' "[Unit]" "Description=TensorFold: transparent huge pages off (compaction stalls the GB10 GPU)" \
