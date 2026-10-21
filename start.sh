@@ -85,7 +85,7 @@ wssh "docker run $(run_args 1 | tr '\n' ' ')" >/dev/null
 
 log "waiting for $API/models (the first start writes the rank caches: slow)"
 for _ in $(seq 1 360); do
-  healthy && { log "serving $SERVED_NAME at $API"; exit 0; }
+  healthy && { log "serving $SERVED_NAME at $API"; margin_check; exit 0; }
   docker ps --format '{{.Names}}' | grep -q '^tfv41-r0$' || { log "tfv41-r0 exited"; docker logs --tail 60 tfv41-r0; exit 1; }
   wssh "docker ps --format '{{.Names}}'" | grep -q '^tfv41-r1$' || { log "tfv41-r1 exited"; wssh "docker logs --tail 60 tfv41-r1"; exit 1; }
   sleep 10

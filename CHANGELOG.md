@@ -14,6 +14,9 @@ Each release is a git tag. To use a release, run `git checkout vX.Y.Z` before `.
 
 ### Added
 
+- `docs/MEMORY.md`: why the head runs out of memory first, how to read the earlyoom journal, that `terminate called without an active exception` on rank 0 is a SIGTERM from earlyoom, the low-memory settings (`VISION=0`, `PREFILL_CHUNK=1024`, `PARALLEL=2`), and the kernel memory reserve that `MemAvailable` leaves out ([runs/2026-10-21](runs/2026-10-21/INDEX.md#kernel-memory-reserve-of-the-pair-read-only-check)).
+- `scripts/oom_report.sh`: writes one text file with the memory facts of both nodes (meminfo, earlyoom journal, kernel memory settings, engine image, `.env` settings from a fixed list, engine log lines, driver). It prints no key or token. The bug and performance forms ask for it.
+- After the API answers, `./start.sh` and `./status.sh` print the `MemAvailable` of the head and warn under 2.5 GiB.
 - `docs/OPERATIONS.md`: the engine switches of release 1.1.0 (decode graph sizes, capture mode, host-memory settings, draft ranking), with their defaults.
 - Add an opt-in display-backed KV launcher with a private bundle, spill disabled and offline safety tests. Full hardware validation is pending. Ordinary launch defaults do not change.
 - Add a separate memory/top-k image with bounded key scratch and an opt-in live allocator policy. Ordinary startup keeps its original ceiling. See [Memory and top-k](docs/MEMORY-TOPK.md).
@@ -25,6 +28,7 @@ Each release is a git tag. To use a release, run `git checkout vX.Y.Z` before `.
 
 ### Changed
 
+- Preflight needs 111 GiB `MemAvailable` on the head (110 GiB with `VISION=0`) and 109 GiB on the worker, up from 100 GiB on both. The 1.1.0 gate engine holds about 108 GiB on the head. The README said "about 100 GB"; it now gives the measured values. A head with a desktop session or a browser can fall under the new value: the message names the fix ([docs/MEMORY.md](docs/MEMORY.md)).
 - Correction of the 1.1.0 release gate: the 32K prefill row (2,751 tok/s) had a prefix-cache hit of 6,144 tokens and is withdrawn ([runs/2026-10-21](runs/2026-10-21/INDEX.md)). With no prefix-cache hit, random natural text gives 1,963 tok/s at 32K on 1.1.0. `tests/v41_suite.py` now salts each speed prompt, uses varied text for the prefill rows, logs `cached_tokens` and fails a prefill row on a cache hit. The kit_bench numbers stay, with a note that they use a small-vocabulary prompt.
 - New engine image: the recipe now builds TensorFold [release dsv41-1.1.0](https://github.com/Elevatormusic/TensorFold/releases/tag/dsv41-1.1.0) (`730d41abd8f4`; before: `07aa02585f64`). Git does not track `.env`, so `git pull` does not change your pin. In your `.env`, set `TF_COMMIT=730d41abd8f4` and `IMAGE=tensorfold-dsv41:730d41abd8f4`. Then run `docker/build.sh` and `./stop.sh && ./start.sh`. Without the new `.env` values, `docker/build.sh` builds the old engine again. It fixes graph capture while serving (#19) and lowers the host-memory peak of the head (#21, #24). In the gate run, 4-stream decode is 3.0 to 7.0% faster ([runs/2026-10-21](runs/2026-10-21/INDEX.md)). The head memory margin under 4 long streams stays small: set `PREFILL_CHUNK=1024` or `PARALLEL=2` when the head has little free memory ([docs/OPERATIONS.md](docs/OPERATIONS.md#engine-switches-of-release-110)).
 - New default: `DROP_UNOFFERED_TOOL_CALLS=1` in `.env.example` and `start.sh`. The engine drops a call to a tool that the request did not offer, also while the reply streams. Set `DROP_UNOFFERED_TOOL_CALLS=0` in `.env` to turn it off.

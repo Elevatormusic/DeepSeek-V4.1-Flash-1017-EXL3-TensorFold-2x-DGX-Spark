@@ -20,6 +20,10 @@ The opt-in display-spill image has CPU torch and composition tests in
 `TF_SPILL_SOURCE` names an explicit pinned checkout. See
 [Display spill](../docs/SPILL.md#validation-limits).
 
+## Memory checks
+
+`test_memory_checks.py` runs `scripts/preflight.sh`, `status.sh`, `margin_check` of `scripts/common.sh` and `scripts/oom_report.sh` in a temporary folder, with stub commands first on `PATH` (ssh, docker, journalctl, nvidia-smi). It checks the `MemAvailable` limits of preflight (head 111 GiB, 110 with `VISION=0`, worker 109), the warning of the post-start check under 2.5 GiB, the sections of the report, its limit of 50 log lines, and that the report holds no key, token, home path or host name. It needs bash on Linux or macOS.
+
 ## Display-only experiment checks
 
 The offline runner includes `experiments/display-kv/tests/`. These tests use temporary fixtures, not the active `.env`. They check installer rejection without partial writes, the display-only overlay list, private spill-off and prefill-512 settings, and startup guard ordering. The copied display, DRM and launcher tests use mocks. They do not prove hardware safety or correct two-node serving.

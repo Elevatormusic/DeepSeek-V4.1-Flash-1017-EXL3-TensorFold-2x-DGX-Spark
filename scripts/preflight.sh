@@ -15,8 +15,18 @@ wssh true 2>/dev/null && ok "ssh to the worker ($WORKER_SSH)" || { no "ssh to th
 ping -c 2 -W 2 "$WORKER_IP" >/dev/null 2>&1 && ok "the worker answers on the CX7 link ($WORKER_IP)" \
   || no "no answer from $WORKER_IP: check the cable and docs/NETWORK.md"
 
-check_node() {  # $1 = label, $2 = command runner ("" for here, wssh for the worker)
-  local who=$1 run=$2 out
+# MemAvailable that a node needs before the start, in GiB (docs/MEMORY.md). From the 1.1.0 gate: the head had
+# 113,838 MiB (111.2 GiB) and the worker 112,687 MiB (110.0 GiB) free before the start. The engine then held 108.3 GiB on
+# the head and 106.5 GiB on the worker, and the head idled at 2.9 GiB. The worker value is 1 GiB under its gate value
+# because the worker idles 0.7 GiB higher than the head. Rank 0 alone holds the vision tower (0.95 GiB), so the head
+# needs 1 GiB less with VISION=0. The values are for the default CONTEXT and PARALLEL.
+HEAD_NEED_GIB=111
+WORKER_NEED_GIB=109
+[ "${VISION:-1}" = 0 ] && HEAD_NEED_GIB=$((HEAD_NEED_GIB - 1))
+
+check_node() {  # $1 = label, $2 = command runner ("" for here, wssh for the worker), $3 = GiB of MemAvailable needed
+  local who=$1 run=$2 need=$3 out hint=""
+  [ "$who" = head ] && [ "${VISION:-1}" != 0 ] && hint=", set VISION=0 in .env if you send no images"
   out=$($run bash -s <<EOF
 set -u
 # The tested driver is 580.178.04 (README). Issue #24 reports node hangs on 580.173.02 (a CX7 PCIe completion
@@ -62,8 +72,9 @@ for dev in \$(echo "$RDMA_DEVICES" | tr ',' ' '); do
   case "\$g" in ""|0000:0000:0000:0000:0000:0000:0000:0000) echo "FAIL \$dev GID $GID_INDEX is empty: see docs/NETWORK.md";;
     *) [ "\$t" = "RoCE v2" ] && echo "OK \$dev GID $GID_INDEX \$g (\$t)" || echo "FAIL \$dev GID $GID_INDEX is \$t, not RoCE v2";; esac
 done
-avail=\$(awk '/MemAvailable/ {print int(\$2/1048576)}' /proc/meminfo); [ "\$avail" -ge 100 ] \
-  && echo "OK \$avail GiB memory available" || echo "FAIL only \$avail GiB memory available (need ~100): stop other GPU programs"
+avail=\$(awk '/MemAvailable/ {print int(\$2/1048576)}' /proc/meminfo); [ "\$avail" -ge $need ] \
+  && echo "OK \$avail GiB memory available (need $need)" \
+  || echo "FAIL only \$avail GiB memory available, need $need: close browsers, desktop programs and other containers on this node$hint, and run scripts/host_tuning.sh if you did not (docs/MEMORY.md)"
 mkdir -p "$CACHE_DIR"; free=\$(df -BG --output=avail "$CACHE_DIR" | tail -1 | tr -dc 0-9)
 [ -d "$CACHE_DIR/tf-ds-rank" ] && need=5 || need=110
 [ "\$free" -ge "\$need" ] && echo "OK \$free GiB free for the cache" || echo "FAIL \$free GiB free in $CACHE_DIR (need \$need)"
@@ -94,8 +105,8 @@ EOF
     esac
   done <<< "$out"
 }
-check_node head ""
-check_node worker wrun
+check_node head "" "$HEAD_NEED_GIB"
+check_node worker wrun "$WORKER_NEED_GIB"
 if [ -s /tmp/tfv41-image-head ] && cmp -s /tmp/tfv41-image-head /tmp/tfv41-image-worker; then
   ok "both nodes hold $IMAGE ($(cut -c8-19 /tmp/tfv41-image-head))"
 else
