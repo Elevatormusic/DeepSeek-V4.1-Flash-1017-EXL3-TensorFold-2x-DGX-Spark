@@ -67,7 +67,7 @@ body:
       description: |
         The output of `./status.sh` and `./verify.sh`, and the last 200 lines of `docker logs tfv41-r0` and `docker logs tfv41-r1`.
         `./stop.sh` also saves logs to `logs/`. Attach long logs as files.
-        If earlyoom stopped the engine, or the log of rank 0 shows `terminate called without an active exception`, run `scripts/oom_report.sh` on the head and attach the file it writes. It collects the memory facts of both nodes and holds no keys. See docs/MEMORY.md.
+        If earlyoom stopped the engine, or the log of rank 0 shows `terminate called without an active exception`, run `scripts/oom_report.sh` on the head and attach the file it writes. It collects the memory facts of both nodes and removes keys and tokens. See docs/MEMORY.md.
       render: text
     validations:
       required: true

@@ -234,12 +234,15 @@ DOCKER_STUB = r"""case "$1 $2" in
     echo "NCCL error 4: invalid argument in ncclAllGather"
     echo "rank 1 memory line"
     echo "memory args: --api-key @FAKE_ARG_A@ --hf-token '@FAKE_ARG_B@' --password  @FAKE_ARG_C@"
-    echo "memory args: --max-num-batched-tokens 8192 --token-budget 4096"
+    echo "memory args: --max-num-batched-tokens 8192 --port 8888 tokenizer ok"
     echo "memory quoted: --password '@FAKE_WORD_D@ @FAKE_WORD_E@ @FAKE_WORD_F@' --port 8888"
     echo 'memory quoted: --secret "@FAKE_WORD_E@ @FAKE_WORD_D@" token="@FAKE_WORD_F@ @FAKE_WORD_E@" end'
     echo "memory quoted: api_key: '@FAKE_WORD_D@ @FAKE_WORD_F@"
     echo 'memory json: {"password": "@FAKE_WORD_D@\" @FAKE_WORD_E@", "port": 8888}'
     echo 'memory odd: --token "@FAKE_WORD_F@"@FAKE_WORD_D@ @FAKE_WORD_E@'
+    echo 'memory payload={\"token\":\"@FAKE_WORD_E@\"}'
+    echo "memory header Authorization: ApiKey @FAKE_WORD_F@"
+    echo "memory header X-Custom: Token @FAKE_WORD_D@"
     ;;
   "image inspect") echo "id sha256:0123456789abcdef, created 2026-10-21T00:00:00Z" ;;
   "ps -a") echo "tfv41-r0 | tensorfold-dsv41:test | Up 3 hours" ;;
@@ -302,7 +305,7 @@ API_KEY_FILE={d}/keys
             "driver 580.178.04", "NVRM: Failed memdescAlloc", "free -m",
             "IMAGE=tensorfold-dsv41:test", "TF_COMMIT=730d41abd8f4", "id sha256:0123456789abcdef",
             "PARALLEL=4", "CONTEXT=1048576", "SPILL_GIB=64", "PREFILL_CHUNK=1024", "VISION=0",
-            "API_KEY_FILE=set (the file is not read)", "NCCL error 4",
+            "key file: set (the file is not read)", "NCCL error 4",
         ):
             with self.subTest(fact=fact):
                 self.assertIn(fact, text)
@@ -326,15 +329,16 @@ API_KEY_FILE={d}/keys
             with self.subTest(fake=fake):
                 self.assertNotIn(fake, text)
         self.assertIn("[removed]", text)
-        self.assertIn("--api-key [removed]", text)
+        # each line keeps its text up to the first word that names a credential
+        self.assertIn("memory args: --[removed]" + chr(10), text)
+        self.assertIn("memory payload={\\\"[removed]" + chr(10), text)
+        self.assertIn("memory header [removed]" + chr(10), text)
+        self.assertIn("memory header X-Custom: [removed]" + chr(10), text)
         # a flag that only contains "token" in a longer word keeps its value
-        self.assertIn("--max-num-batched-tokens 8192", text)
+        self.assertIn("--max-num-batched-tokens 8192 --port 8888 tokenizer ok", text)
         # a quoted value with spaces goes as a whole, and the text after it stays
-        self.assertIn("--password [removed] --port 8888", text)
-        self.assertIn("token=[removed] end", text)
         # an escaped quote does not end a JSON value, and a quote that a letter follows does not end a value
-        self.assertIn('"password": [removed], "port": 8888}', text)
-        self.assertIn("memory odd: --token [removed]" + chr(10), text)
+        self.assertIn("memory odd: --[removed]" + chr(10), text)
 
     def test_missing_container_falls_back_to_the_saved_log(self):
         t = Tree(self, "", ("common.sh", "oom_report.sh"))

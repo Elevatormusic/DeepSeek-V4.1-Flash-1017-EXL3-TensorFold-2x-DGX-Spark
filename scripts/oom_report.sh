@@ -2,8 +2,9 @@
 # Collects the facts that a memory report needs, on both nodes, into one text file. Attach the file to an issue.
 #   scripts/oom_report.sh [OUTPUT_FILE]       (run it on the head; default: logs/oom-report-<UTC time>.txt)
 # It only reads. It changes no setting and sends nothing. It never prints a key or a token:
-#   - It prints the settings of .env from a fixed list of names, not the whole file. API_KEY_FILE shows only "set".
-#   - A final filter removes token-like text, home paths and the host names of the two nodes from the whole file.
+#   - It prints the settings of .env from a fixed list of names, not the whole file. The key file shows only "set".
+#   - A final filter removes keys in known formats, the rest of each line from a word that names a credential (key,
+#     token, secret, password, Authorization, Bearer, cookie), home paths and the host names of the two nodes.
 # Read the file before you post it. docs/MEMORY.md explains how to read the numbers.
 set -uo pipefail
 # shellcheck source=common.sh
@@ -101,12 +102,12 @@ engine_lines() {
   echo "IMAGE=${IMAGE:-}"
   echo "TF_COMMIT=${TF_COMMIT:-}"
 
-  section ".env settings (a fixed list; no secrets)"
+  section ".env settings (a fixed list of names)"
   for k in PARALLEL CONTEXT SPILL_GIB PREFILL_CHUNK VISION MEM_FLOOR_GIB MEM_CAP MTP_DRAFTS THINKING \
       DROP_UNOFFERED_TOOL_CALLS CGROUP_PARENT RESTART_POLICY PREFLIGHT; do
     if [ -n "${!k+x}" ]; then echo "$k=${!k}"; else echo "$k=(not set)"; fi
   done
-  if [ -n "${API_KEY_FILE:-}" ]; then echo "API_KEY_FILE=set (the file is not read)"; else echo "API_KEY_FILE=not set"; fi
+  if [ -n "${API_KEY_FILE:-}" ]; then echo "key file: set (the file is not read)"; else echo "key file: not set"; fi
 
   section "head node"
   node_script | bash -s -- "${IMAGE:-}" 2>&1
@@ -125,21 +126,11 @@ engine_lines() {
 # Final filter. Fixed strings (node names, WORKER_SSH, $HOME) go through a sed pattern with escaped characters.
 esc() { printf '%s' "$1" | sed 's/[][\.*^$/|&(){}+?]/\\&/g'; }
 filter=(-E
-  -e 's/(Bearer|Basic)[[:space:]]+[A-Za-z0-9._~+\/=-]+/\1 [removed]/Ig'
   -e 's/(hf_|sk-|ghp_|gho_|ghs_|xox[bp]-|github_pat_)[A-Za-z0-9_-]{8,}/[removed]/g'
-  # a quoted value can hold spaces: remove it up to its closing quote. A double-quoted value can hold \" inside.
-  # The closing quote must end the value (a space, , ; } ) ] or the end of the line follows it). Else the quote
-  # does not close, and the rest of the line goes. The two rules for a value of one word come after these.
-  -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)"([^"\\]|\\.)*"([[:space:],;})]|]|$)/\1[removed]\5/Ig'
-  -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)'"'"'[^'"'"']*'"'"'([[:space:],;})]|]|$)/\1[removed]\4/Ig'
-  -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)".*$/\1[removed]/Ig'
-  -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)'"'"'.*$/\1[removed]/Ig'
-  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)"([^"\\]|\\.)*"([[:space:],;})]|]|$)/\1[removed]\6/Ig'
-  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)'"'"'[^'"'"']*'"'"'([[:space:],;})]|]|$)/\1[removed]\5/Ig'
-  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)".*$/\1[removed]/Ig'
-  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)'"'"'.*$/\1[removed]/Ig'
-  -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)["'"'"']?[^[:space:],;"'"'"']+/\1[removed]/Ig'
-  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)["'"'"']?[^[:space:],;"'"'"']+/\1[removed]/Ig'
+  # from the first word that names a credential to the end of the line. A value can be quoted, escaped, nested
+  # in JSON or follow any Authorization scheme, so a rule for each value form always misses one. "token" counts
+  # only as a whole word part (token, hf_token, token-budget), not in tokens or tokenizer.
+  -e 's/(api[_-]?key|secret|passw(or)?d|authori[sz]ation|bearer|cookie|credential|token([^a-z]|$)).*$/[removed]/Ig'
   -e 's#/home/[A-Za-z0-9._-]+#/home/<user>#g'
   -e 's#/Users/[A-Za-z0-9._-]+#/Users/<user>#g')
 [ -n "${HOME:-}" ] && [ "$HOME" != / ] && filter+=(-e "s/$(esc "$HOME")/~/g")
@@ -149,4 +140,4 @@ filter=(-E
 sed "${filter[@]}" "$raw" > "$out"
 
 echo "report written to $out"
-echo "Read it, then attach it to your issue. It holds no keys, but check it for anything else that is private."
+echo "Read it, then attach it to your issue. The filter removes keys and tokens, but check it for anything else that is private."
