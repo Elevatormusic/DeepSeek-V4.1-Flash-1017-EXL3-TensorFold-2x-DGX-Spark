@@ -270,6 +270,7 @@ Every checksum, file size and computer detail: [PROVENANCE](runs/2026-10-17/PROV
 | `docker/` | the engine build |
 | `tests/` | the 32 agent tests, the format check, the benchmark, the prompt tests, the Hermes test ([guide](tests/README.md)) |
 | `experiments/memory-topk/` | opt-in image with bounded top-k scratch and an opt-in allocator policy ([guide](docs/MEMORY-TOPK.md)) |
+| `experiments/display-spill/` | opt-in display KV image with SSD spill ([guide](docs/SPILL.md)) |
 | `experiments/tool-output/` | opt-in image that rejects unoffered model tool calls ([guide](docs/TOOL-OUTPUT.md)) |
 | `.github/` | CI (offline tests, ruff, shellcheck, link check), the pull request and issue templates |
 | `runs/2026-10-17/` | every log and result behind this page |

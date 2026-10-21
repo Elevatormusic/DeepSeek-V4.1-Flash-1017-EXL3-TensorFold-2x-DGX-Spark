@@ -5,3 +5,5 @@ __pycache__/
 .display-kv.lock
 .display-kv-image
 .display-kv-image.tmp
+.display-spill-image
+.display-spill-image.tmp

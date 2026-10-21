@@ -11,9 +11,14 @@ import shutil
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 IMAGE = "tensorfold-dsv41:07aa02585f64-display-kv-stage1"
+# Spill tuning values of .env that the spill bundle passes on to the rank containers, only when .env sets them.
+FORWARDED_VARIABLES = ("TF_DS_SPILL_MIN", "TF_DS_SPILL_MIN_FREE_GIB", "TF_DS_SPILL_KEEP_BUILDS",
+                       "TF_SPILL_WRITERS", "TF_SPILL_DIRECT", "TF_SPILL_FLUSH_S")
+FORWARD_SNIPPET = ('$(for v in ' + " ".join(FORWARDED_VARIABLES)
+                   + '; do [ -n "${!v:-}" ] && echo "-e $v=${!v}"; done)')
 
 
-def prepare(destination: Path, image: str = IMAGE) -> None:
+def prepare(destination: Path, image: str = IMAGE, spill: bool = False) -> None:
     destination = destination.resolve()
     if destination.exists():
         raise ValueError(f"refusing to overwrite {destination}")
@@ -49,7 +54,8 @@ fi
     config = (ROOT / ".env").read_text()
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/:@-]*", image):
         raise ValueError("invalid experimental image reference")
-    # This stage deliberately excludes the mapped-storage-safe spill port.
+    # The display-only stage excludes the mapped-storage-safe spill port.
+    # The dependent spill image opts in explicitly and keeps the user's SPILL_GIB.
     # Override only the private bundle, never the user's active .env.
     for anchor in ("TF_DS_PREFILL_CHUNK=2048", "TF_DS_PREFILL_CHUNK=${PREFILL_CHUNK:-2048}"):
         if start.count(anchor) == 1:
@@ -57,15 +63,27 @@ fi
             break
     else:
         raise ValueError("start.sh prefill anchor changed; review the experiment")
-    for key, value in (("IMAGE", image), ("SPILL_GIB", "0"), ("PREFILL_CHUNK", "512")):
+    # MEM_CAP=1 needs the memory-topk image label, which these images do not have: the bundle starts with it off.
+    overrides = [("IMAGE", image), ("PREFILL_CHUNK", "512"), ("MEM_CAP", "0")]
+    if not spill:
+        overrides.append(("SPILL_GIB", "0"))
+    for key, value in overrides:
         config, count = re.subn(rf"(?m)^{key}=.*$", f"{key}={value}", config)
-        if count == 0 and key in ("PREFILL_CHUNK", "SPILL_GIB"):
+        if count == 0 and key in ("PREFILL_CHUNK", "SPILL_GIB", "MEM_CAP"):
             config = config.rstrip() + f"\n{key}={value}\n"
             count = 1
         if count != 1:
             raise ValueError(f"expected exactly one {key} in .env")
+    if spill:
+        # Forward the spill tuning values of .env to both ranks.
+        anchor = "-e TF_DS_SPILL_GIB=${SPILL_GIB:-64} -e TF_DS_SPILL_DIR=/cache/tf-ds-spill"
+        if start.count(anchor) != 1:
+            raise ValueError("start.sh spill anchor changed; review the experiment")
+        start = start.replace(anchor, anchor + "\n" + FORWARD_SNIPPET)
     # Validate the installer syntax without importing Torch or touching devices.
     ast.parse((HERE / "apply.py").read_text())
+    if spill:
+        ast.parse((ROOT / "experiments/display-spill/compose.py").read_text())
     destination.mkdir(mode=0o700)
     try:
         shutil.copytree(ROOT / "scripts", destination / "scripts")
@@ -86,5 +104,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("destination", type=Path, help="new directory with an existing parent")
     parser.add_argument("--image", default=IMAGE, help="experimental image to use in this snapshot")
+    parser.add_argument("--spill", action="store_true", help="keep SPILL_GIB for the display-spill image")
     args = parser.parse_args()
-    prepare(args.destination, args.image)
+    prepare(args.destination, args.image, args.spill)
