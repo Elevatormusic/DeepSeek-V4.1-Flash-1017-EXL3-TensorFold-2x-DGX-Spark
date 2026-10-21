@@ -20,11 +20,11 @@ GIB_KB = 1048576
 
 # Fake secrets for the report test. They are built here, so that no secret-like text is in the source, and they
 # have low entropy, so that a secret scanner does not flag them.
-HF_TOKEN = "hf" + "_" + "Qx" * 18
-SK_KEY = "sk" + "-" + "Zm" * 14
-BEARER = "Tk" * 8
-API_KEY = "Pw" * 6
-OTHER_SECRET = "Lm" * 8
+FAKE_HUB = "hf" + "_" + "Qx" * 18
+FAKE_SK = "sk" + "-" + "Zm" * 14
+FAKE_AUTH = "Tk" * 8
+FAKE_QS = "Pw" * 6
+FAKE_OTHER = "Lm" * 8
 
 needs_bash = unittest.skipUnless(shutil.which("bash") and os.name == "posix", "needs bash on Linux or macOS")
 
@@ -45,8 +45,8 @@ exec sh -c "$*"
 
 def fill(text: str) -> str:
     """Puts the fake secrets into a fixture text."""
-    for name, value in (("HF_TOKEN", HF_TOKEN), ("BEARER", BEARER), ("API_KEY", API_KEY),
-                        ("OTHER_SECRET", OTHER_SECRET)):
+    for name, value in (("FAKE_HUB", FAKE_HUB), ("FAKE_AUTH", FAKE_AUTH), ("FAKE_QS", FAKE_QS),
+                        ("FAKE_OTHER", FAKE_OTHER)):
         text = text.replace(f"@{name}@", value)
     return text
 
@@ -217,9 +217,9 @@ DOCKER_STUB = r"""case "$1 $2" in
     i=0
     while [ $i -lt 80 ]; do echo "[tensorfold] line $i host memory is low"; i=$((i + 1)); done
     echo "terminate called without an active exception"
-    echo "memory Authorization: Bearer @BEARER@"
-    echo "memory api_key=@API_KEY@"
-    echo "memory loaded /home/ubuntu/models/x with @HF_TOKEN@"
+    echo "memory Authorization: Bearer @FAKE_AUTH@"
+    echo "memory api_key=@FAKE_QS@"
+    echo "memory loaded /home/ubuntu/models/x with @FAKE_HUB@"
     echo "an unrelated line about decode speed"
     ;;
   "logs tfv41-r1") echo "NCCL error 4: invalid argument in ncclAllGather"; echo "rank 1 memory line" ;;
@@ -243,15 +243,15 @@ PREFILL_CHUNK=1024
 VISION=0
 MEM_FLOOR_GIB=1.5
 TF_COMMIT=730d41abd8f4
-HF_TOKEN=@HF_TOKEN@
-SOME_SECRET=@OTHER_SECRET@
+HF_TOKEN=@FAKE_HUB@
+SOME_SECRET=@FAKE_OTHER@
 API_KEY_FILE={d}/keys
 """
 
     def report(self, output_arg: bool = False) -> str:
         t = Tree(self, "", ("common.sh", "oom_report.sh"))
         (t.dir / ".env").write_text(fill(self.ENV.format(d=t.dir)), encoding="utf-8")
-        (t.dir / "keys").write_text(f"main: {SK_KEY}" + chr(10), encoding="utf-8")
+        (t.dir / "keys").write_text(f"main: {FAKE_SK}" + chr(10), encoding="utf-8")
         t.stub("docker", fill(DOCKER_STUB))
         t.stub("journalctl", JOURNAL_STUB)
         t.stub("nvidia-smi", "echo 580.178.04\n")
@@ -302,10 +302,10 @@ API_KEY_FILE={d}/keys
 
     def test_no_secret_in_the_report(self):
         text = self.report()
-        for secret in (HF_TOKEN, SK_KEY, BEARER, API_KEY, OTHER_SECRET, "SOME_SECRET", "HF_TOKEN",
-                       "/home/ubuntu", "spark-test1"):
-            with self.subTest(secret=secret):
-                self.assertNotIn(secret, text)
+        for fake in (FAKE_HUB, FAKE_SK, FAKE_AUTH, FAKE_QS, FAKE_OTHER, "SOME_SECRET", "HF_TOKEN",
+                     "/home/ubuntu", "spark-test1"):
+            with self.subTest(fake=fake):
+                self.assertNotIn(fake, text)
         self.assertIn("[removed]", text)
 
     def test_missing_container_falls_back_to_the_saved_log(self):

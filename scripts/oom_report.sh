@@ -56,31 +56,40 @@ else
   echo "journalctl failed: $(printf '%s\n' "$j" | head -3)"
 fi
 sub "kernel log, NVRM lines (last 20)"
-if d=$(dmesg 2>&1); then
-  printf '%s\n' "$d" | grep -a NVRM | tail -n 20 || true
-  printf '%s\n' "$d" | grep -a -q NVRM || echo "(no NVRM lines)"
-else
-  echo "dmesg not readable: $(printf '%s\n' "$d" | head -1)"
-fi
+nv=$(dmesg 2>&1 | grep -a -E 'NVRM|^dmesg:' | tail -n 20)
+case "$nv" in
+  "") echo "(no NVRM lines)" ;;
+  dmesg:*) echo "dmesg not readable: $nv" ;;
+  *) printf '%s\n' "$nv" ;;
+esac
 sub "engine image on this node"
 docker image inspect "$image" --format 'id {{.Id}}, created {{.Created}}' 2>&1 | head -3
 docker ps -a --filter name=tfv41 --format '{{.Names}} | {{.Image}} | {{.Status}}' 2>&1 | head -5
 NODE
 }
 
-# The last 50 lines of the engine log of one rank that mention memory, earlyoom or terminate. $1 = rank (0 or 1).
-# Without the container (./stop.sh removes it), it reads the newest log that ./stop.sh saved in logs/.
+# The last 50 lines of an engine log that mention memory, earlyoom or terminate. It reads the log as a stream: a
+# long-lived rank can have a log of hundreds of MiB, and this script runs while memory is short.
+log_filter() { grep -a -i -E 'memory|earlyoom|terminate|mem avail|NCCL error' | tail -n 50; }
+
+# One rank. $1 = rank (0 or 1). Without the container (./stop.sh removes it), it reads the newest log that ./stop.sh
+# saved in logs/.
 engine_lines() {
-  local rank=$1 txt src="docker logs tfv41-r$1" f
-  if [ "$rank" = 0 ]; then txt=$(docker logs tfv41-r0 2>&1); else txt=$(wssh "docker logs tfv41-r1" 2>&1); fi
-  # shellcheck disable=SC2181  # the exit code of the substitution above
-  if [ $? -ne 0 ]; then
+  local rank=$1 src="docker logs tfv41-r$1" f rc tmp
+  tmp=$(mktemp)
+  if [ "$rank" = 0 ]; then
+    docker logs tfv41-r0 2>&1 | log_filter > "$tmp"; rc=${PIPESTATUS[0]}
+  else
+    wssh "docker logs tfv41-r1" 2>&1 | log_filter > "$tmp"; rc=${PIPESTATUS[0]}
+  fi
+  if [ "$rc" -ne 0 ]; then
     f=$(ls -t "$LOGS"/r"$rank"-*.log 2>/dev/null | head -1)
-    if [ -n "$f" ]; then txt=$(cat "$f"); src="saved log ${f##*/}"; else txt=""; src="no container and no saved log"; fi
+    if [ -n "$f" ]; then log_filter < "$f" > "$tmp"; src="saved log ${f##*/}"; else : > "$tmp"; src="no container and no saved log"; fi
   fi
   echo
   echo "--- rank $rank engine log ($src): last 50 lines with memory, earlyoom or terminate"
-  printf '%s\n' "$txt" | grep -a -i -E 'memory|earlyoom|terminate|mem avail|NCCL error' | tail -n 50 || true
+  cat "$tmp"
+  rm -f "$tmp"
 }
 
 {
