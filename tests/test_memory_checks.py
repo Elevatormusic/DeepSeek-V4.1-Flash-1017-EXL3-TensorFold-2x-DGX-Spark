@@ -238,6 +238,8 @@ DOCKER_STUB = r"""case "$1 $2" in
     echo "memory quoted: --password '@FAKE_WORD_D@ @FAKE_WORD_E@ @FAKE_WORD_F@' --port 8888"
     echo 'memory quoted: --secret "@FAKE_WORD_E@ @FAKE_WORD_D@" token="@FAKE_WORD_F@ @FAKE_WORD_E@" end'
     echo "memory quoted: api_key: '@FAKE_WORD_D@ @FAKE_WORD_F@"
+    echo 'memory json: {"password": "@FAKE_WORD_D@\" @FAKE_WORD_E@", "port": 8888}'
+    echo 'memory odd: --token "@FAKE_WORD_F@"@FAKE_WORD_D@ @FAKE_WORD_E@'
     ;;
   "image inspect") echo "id sha256:0123456789abcdef, created 2026-10-21T00:00:00Z" ;;
   "ps -a") echo "tfv41-r0 | tensorfold-dsv41:test | Up 3 hours" ;;
@@ -330,6 +332,9 @@ API_KEY_FILE={d}/keys
         # a quoted value with spaces goes as a whole, and the text after it stays
         self.assertIn("--password [removed] --port 8888", text)
         self.assertIn("token=[removed] end", text)
+        # an escaped quote does not end a JSON value, and a quote that a letter follows does not end a value
+        self.assertIn('"password": [removed], "port": 8888}', text)
+        self.assertIn("memory odd: --token [removed]" + chr(10), text)
 
     def test_missing_container_falls_back_to_the_saved_log(self):
         t = Tree(self, "", ("common.sh", "oom_report.sh"))

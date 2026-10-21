@@ -127,16 +127,17 @@ esc() { printf '%s' "$1" | sed 's/[][\.*^$/|&(){}+?]/\\&/g'; }
 filter=(-E
   -e 's/(Bearer|Basic)[[:space:]]+[A-Za-z0-9._~+\/=-]+/\1 [removed]/Ig'
   -e 's/(hf_|sk-|ghp_|gho_|ghs_|xox[bp]-|github_pat_)[A-Za-z0-9_-]{8,}/[removed]/g'
-  # a quoted value can hold spaces: remove it up to its closing quote, or to the end of the line if the quote
-  # does not close. The two rules for a value of one word come after these.
-  -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)"[^"]*"/\1[removed]/Ig'
-  -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)'"'"'[^'"'"']*'"'"'/\1[removed]/Ig'
-  -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)"[^"]*$/\1[removed]/Ig'
-  -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)'"'"'[^'"'"']*$/\1[removed]/Ig'
-  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)"[^"]*"/\1[removed]/Ig'
-  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)'"'"'[^'"'"']*'"'"'/\1[removed]/Ig'
-  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)"[^"]*$/\1[removed]/Ig'
-  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)'"'"'[^'"'"']*$/\1[removed]/Ig'
+  # a quoted value can hold spaces: remove it up to its closing quote. A double-quoted value can hold \" inside.
+  # The closing quote must end the value (a space, , ; } ) ] or the end of the line follows it). Else the quote
+  # does not close, and the rest of the line goes. The two rules for a value of one word come after these.
+  -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)"([^"\\]|\\.)*"([[:space:],;})]|]|$)/\1[removed]\5/Ig'
+  -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)'"'"'[^'"'"']*'"'"'([[:space:],;})]|]|$)/\1[removed]\4/Ig'
+  -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)".*$/\1[removed]/Ig'
+  -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)'"'"'.*$/\1[removed]/Ig'
+  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)"([^"\\]|\\.)*"([[:space:],;})]|]|$)/\1[removed]\6/Ig'
+  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)'"'"'[^'"'"']*'"'"'([[:space:],;})]|]|$)/\1[removed]\5/Ig'
+  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)".*$/\1[removed]/Ig'
+  -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)'"'"'.*$/\1[removed]/Ig'
   -e 's/((api[_-]?key|secret|token|passw(or)?d|authorization)["'"'"']?[[:space:]]*[=:][[:space:]]*)["'"'"']?[^[:space:],;"'"'"']+/\1[removed]/Ig'
   -e 's/(-{1,2}([A-Za-z0-9_]+[_-])?(api[_-]?key|secret|token|passw(or)?d)[[:space:]]+)["'"'"']?[^[:space:],;"'"'"']+/\1[removed]/Ig'
   -e 's#/home/[A-Za-z0-9._-]+#/home/<user>#g'
