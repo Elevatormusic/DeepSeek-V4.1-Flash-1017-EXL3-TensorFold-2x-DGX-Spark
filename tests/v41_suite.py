@@ -8,10 +8,12 @@ Writes suite-results.json next to this script and prints a summary.
 import http.client
 import json
 import os
+import random
 import re
 import sys
 import time
 import urllib.request
+import uuid
 
 # Environment overrides. The defaults are the values of the original 2x DGX Spark setup.
 #   V41_BASE_URL        raw engine API (only 127.0.0.1 may connect)
@@ -175,7 +177,7 @@ def speed_decode(kind, prompts, mode):
         rates, ttfts = [], []
         for p in prompts:
             extra = off() if mode == "off" else think()
-            c, r, _, u, ttft, total = chat_stream({"messages": [{"role": "user", "content": p}],
+            c, r, _, u, ttft, total = chat_stream({"messages": [{"role": "user", "content": salted(p)}],
                                                    "max_tokens": 700, "temperature": 1.0, "top_p": 1.0, **extra})
             n = u["completion_tokens"]
             rates.append((n - 1) / max(total - ttft, 1e-6))
@@ -186,17 +188,71 @@ def speed_decode(kind, prompts, mode):
     return fn
 
 
+def salted(text):
+    """Put a unique first line before a prompt, so that no prompt shares a prefix with an earlier prompt.
+    The prefix cache then cannot give a hit, and a speed row counts only work that the server did."""
+    return f"Run {uuid.uuid4().hex}.\n{text}"
+
+
+def varied_prompt(target_tokens, rng=None):
+    """Return unique, varied English text of about target_tokens tokens (stdlib only).
+    The text is shuffled sentences of the Python language reference, with no repeated sentence, behind a unique
+    first line. A repeated sentence is not a fair prefill test: the 8K prompt then shares a prefix with the
+    32K prompt (a prefix-cache hit), and repeated text prefills faster than varied text."""
+    import pydoc_data.topics
+    rng = rng or random.Random()
+    sents = set()
+    for text in pydoc_data.topics.topics.values():
+        for para in re.split(r"\n\s*\n", text):
+            if re.search(r"(^|\n) {4,}\S|>>>|::|[{}=#]", para):  # skip code blocks and markup
+                continue
+            sents.update(s for s in re.split(r"(?<=[.!?])\s+(?=[A-Z])", " ".join(para.split()))
+                         if 7 <= len(s.split()) <= 55 and s.endswith("."))
+    sents = sorted(sents)
+    rng.shuffle(sents)
+    want = target_tokens * 4.7  # about 4.7 characters per token for this text
+    out, chars = [], 0
+    for s in sents:
+        if chars >= want:
+            break
+        out.append(s)
+        chars += len(s) + 1
+    if chars < want:
+        raise RuntimeError("not enough varied text for this prompt size")
+    return salted(" ".join(out))
+
+
+def cached_tokens(usage):
+    """Return cached_tokens from a usage dict, or None when the server does not report it."""
+    details = (usage or {}).get("prompt_tokens_details")
+    if not isinstance(details, dict) or details.get("cached_tokens") is None:
+        return None
+    return int(details["cached_tokens"])
+
+
+def prefill_row(usage, ttft):
+    """Return (ok, info) for a prefill row. The row fails when the server reports a prefix-cache hit.
+    prefill_tok_s counts only tokens that the server did not take from the prefix cache."""
+    pt = int(usage["prompt_tokens"])
+    cached = cached_tokens(usage)
+    if not ttft:
+        return False, {"prompt_tokens": pt, "cached_tokens": cached, "detail": "no first token was streamed"}
+    info = {"prompt_tokens": pt, "cached_tokens": cached, "ttft_s": round(ttft, 2),
+            "prefill_tok_s": round((pt - (cached or 0)) / ttft, 0)}
+    if cached is None:
+        info["note"] = "server does not report cached_tokens: a prefix-cache hit cannot be ruled out"
+    elif cached > 0:
+        info["detail"] = f"prefix-cache hit of {cached} tokens: this row is not a cold prefill"
+    return not cached, info
+
+
 def speed_prefill(target_tokens):
     def fn():
-        filler = ("The quick brown fox jumps over the lazy dog while the archivist catalogues another "
-                  "ledger of tide tables and harbor fees. ")
-        # ~24 tokens per sentence; build to the target size.
-        text = filler * max(1, target_tokens // 24)
+        text = varied_prompt(target_tokens)
         c, r, _, u, ttft, total = chat_stream({"messages": [{"role": "user", "content": text + "\nReply with OK."}],
                                                "max_tokens": 8, "temperature": 0, **off()})
-        pt = u["prompt_tokens"]
-        record("speed", f"prefill_{target_tokens // 1000}k", ttft is not None, prompt_tokens=pt,
-               ttft_s=round(ttft, 2), prefill_tok_s=round(pt / ttft, 0))
+        ok, info = prefill_row(u, ttft)
+        record("speed", f"prefill_{target_tokens // 1000}k", ok, **info)
     return fn
 
 
