@@ -5,7 +5,8 @@
   lowmem reserve of zone DMA against Normal: 0.47 GiB
   totalreserve (subtracted from MemFree):    2.69 GiB
   page cache cut (min(cache/2, sum of low)): 1.61 GiB when the page cache is over 3.22 GiB
-  hidden in all:                             4.30 GiB
+  reclaimable slab cut (min(slab/2, low)):   0.25 GiB
+  hidden in all:                             4.55 GiB
   MemAvailable by the formula 93592356 kB, in /proc/meminfo 93592356 kB, difference 0 kB
   watermark boost in the Normal zone (approx.): 0.00 GiB
   kernel defaults, by the formula (estimate): totalreserve 0.79 GiB, low sum 0.19 GiB
@@ -16,7 +17,8 @@
   lowmem reserve of zone DMA against Normal: 0.47 GiB
   totalreserve (subtracted from MemFree):    2.69 GiB
   page cache cut (min(cache/2, sum of low)): 1.61 GiB when the page cache is over 3.22 GiB
-  hidden in all:                             4.30 GiB
+  reclaimable slab cut (min(slab/2, low)):   0.42 GiB
+  hidden in all:                             4.71 GiB
   MemAvailable by the formula 92019280 kB, in /proc/meminfo 92019280 kB, difference 0 kB
   watermark boost in the Normal zone (approx.): 0.00 GiB
   kernel defaults, by the formula (estimate): totalreserve 0.79 GiB, low sum 0.19 GiB

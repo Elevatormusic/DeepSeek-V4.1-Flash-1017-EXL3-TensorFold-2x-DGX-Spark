@@ -48,6 +48,7 @@ def compute(d: dict) -> dict:
     free = mi["MemFree"] // page
     avail = free - reserve + (cache - min(cache // 2, low)) + (slab - min(slab // 2, low))
     return {"reserve": reserve * page, "low": low * page, "high": high * page, "calc": max(avail, 0) * page,
+            "cache_cut": min(cache // 2, low) * page, "slab_cut": min(slab // 2, low) * page,
             "real": mi["MemAvailable"], "lowmem": max(zones["DMA"]["protection"]) * page}
 
 
@@ -88,7 +89,8 @@ def main() -> int:
         print(f"  lowmem reserve of zone DMA against Normal: {r['lowmem'] / GIB:.2f} GiB")
         print(f"  totalreserve (subtracted from MemFree):    {r['reserve'] / GIB:.2f} GiB")
         print(f"  page cache cut (min(cache/2, sum of low)): {r['low'] / GIB:.2f} GiB when the page cache is over {2 * r['low'] / GIB:.2f} GiB")
-        print(f"  hidden in all:                             {(r['reserve'] + r['low']) / GIB:.2f} GiB")
+        print(f"  reclaimable slab cut (min(slab/2, low)):   {r['slab_cut'] / GIB:.2f} GiB")
+        print(f"  hidden in all:                             {(r['reserve'] + r['cache_cut'] + r['slab_cut']) / GIB:.2f} GiB")
         print(f"  MemAvailable by the formula {r['calc'] // 1024} kB, in /proc/meminfo {r['real'] // 1024} kB, "
               f"difference {(r['calc'] - r['real']) // 1024} kB")
         print(f"  watermark boost in the Normal zone (approx.): {boost * d['page'] / GIB:.2f} GiB")

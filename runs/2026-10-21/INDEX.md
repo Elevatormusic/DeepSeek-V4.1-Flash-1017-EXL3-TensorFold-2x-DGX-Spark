@@ -89,7 +89,8 @@ What `MemAvailable` leaves out, by the kernel formula of `si_mem_available()`. `
 | Lowmem reserve of zone DMA against Normal (kernel default ratio) | 0.47 GiB | 0.47 GiB |
 | `totalreserve`, subtracted from `MemFree` (high watermarks plus lowmem reserve) | 2.69 GiB | 2.69 GiB |
 | Cut from the page cache, `min(page cache / 2, sum of the low watermarks)`, when the page cache is over 3.22 GiB | 1.61 GiB | 1.61 GiB |
-| Hidden in all | 4.30 GiB | 4.30 GiB |
+| Cut from the reclaimable slab, `min(SReclaimable / 2, sum of the low watermarks)` | 0.25 GiB | 0.42 GiB |
+| Hidden in all | 4.55 GiB | 4.71 GiB |
 | Same `totalreserve` at the kernel defaults (`vm.min_free_kbytes` 67,584, `vm.watermark_scale_factor` 10), by the formula, not measured | 0.79 GiB | 0.79 GiB |
 
 The tuned values raise `totalreserve` by 1.90 GiB (2.69 against 0.79 GiB) and the page cache cut by about 1.4 GiB (1.61 against 0.19 GiB, by the formula). The watermark boost was 0 on both nodes at this read.

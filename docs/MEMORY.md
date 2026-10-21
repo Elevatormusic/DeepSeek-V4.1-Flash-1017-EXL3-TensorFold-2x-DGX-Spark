@@ -54,7 +54,8 @@ On our pair, with the tuning applied, the kernel formula gives the same value as
 |---|---|
 | Reserve that is subtracted from `MemFree` (high watermarks 2.22 GiB plus the lowmem reserve 0.47 GiB) | 2.69 GiB |
 | Cut from the page cache (the sum of the low watermarks), when the page cache is over 3.22 GiB | 1.61 GiB |
-| Hidden in all | 4.30 GiB |
+| Cut from the reclaimable slab (half of it, at most the sum of the low watermarks) | 0.25 GiB (head), 0.42 GiB (worker) |
+| Hidden in all | 4.55 GiB (head), 4.71 GiB (worker) |
 
 With the kernel defaults, the same formula gives 0.79 GiB for the first part. The tuning adds 1.90 GiB to it. The values stay unchanged: they prevent the stalls of [runs/2026-10-18](../runs/2026-10-18/INDEX.md). Do not change them without the stall test.
 
