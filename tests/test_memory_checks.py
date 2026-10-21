@@ -28,6 +28,9 @@ FAKE_OTHER = "Lm" * 8
 FAKE_ARG_A = "Ak" * 8
 FAKE_ARG_B = "Gt" * 8
 FAKE_ARG_C = "Ps" * 6
+FAKE_WORD_D = "Wd" * 5
+FAKE_WORD_E = "Xe" * 5
+FAKE_WORD_F = "Yf" * 5
 
 needs_bash = unittest.skipUnless(shutil.which("bash") and os.name == "posix", "needs bash on Linux or macOS")
 
@@ -50,7 +53,8 @@ def fill(text: str) -> str:
     """Puts the fake secrets into a fixture text."""
     for name, value in (("FAKE_HUB", FAKE_HUB), ("FAKE_AUTH", FAKE_AUTH), ("FAKE_QS", FAKE_QS),
                         ("FAKE_OTHER", FAKE_OTHER), ("FAKE_ARG_A", FAKE_ARG_A),
-                        ("FAKE_ARG_B", FAKE_ARG_B), ("FAKE_ARG_C", FAKE_ARG_C)):
+                        ("FAKE_ARG_B", FAKE_ARG_B), ("FAKE_ARG_C", FAKE_ARG_C), ("FAKE_WORD_D", FAKE_WORD_D),
+                        ("FAKE_WORD_E", FAKE_WORD_E), ("FAKE_WORD_F", FAKE_WORD_F)):
         text = text.replace(f"@{name}@", value)
     return text
 
@@ -231,6 +235,9 @@ DOCKER_STUB = r"""case "$1 $2" in
     echo "rank 1 memory line"
     echo "memory args: --api-key @FAKE_ARG_A@ --hf-token '@FAKE_ARG_B@' --password  @FAKE_ARG_C@"
     echo "memory args: --max-num-batched-tokens 8192 --token-budget 4096"
+    echo "memory quoted: --password '@FAKE_WORD_D@ @FAKE_WORD_E@ @FAKE_WORD_F@' --port 8888"
+    echo 'memory quoted: --secret "@FAKE_WORD_E@ @FAKE_WORD_D@" token="@FAKE_WORD_F@ @FAKE_WORD_E@" end'
+    echo "memory quoted: api_key: '@FAKE_WORD_D@ @FAKE_WORD_F@"
     ;;
   "image inspect") echo "id sha256:0123456789abcdef, created 2026-10-21T00:00:00Z" ;;
   "ps -a") echo "tfv41-r0 | tensorfold-dsv41:test | Up 3 hours" ;;
@@ -312,7 +319,7 @@ API_KEY_FILE={d}/keys
     def test_no_secret_in_the_report(self):
         text = self.report()
         for fake in (FAKE_HUB, FAKE_SK, FAKE_AUTH, FAKE_QS, FAKE_OTHER, FAKE_ARG_A, FAKE_ARG_B,
-                     FAKE_ARG_C, "SOME_SECRET", "HF_TOKEN",
+                     FAKE_ARG_C, FAKE_WORD_D, FAKE_WORD_E, FAKE_WORD_F, "SOME_SECRET", "HF_TOKEN",
                      "/home/ubuntu", "spark-test1"):
             with self.subTest(fake=fake):
                 self.assertNotIn(fake, text)
@@ -320,6 +327,9 @@ API_KEY_FILE={d}/keys
         self.assertIn("--api-key [removed]", text)
         # a flag that only contains "token" in a longer word keeps its value
         self.assertIn("--max-num-batched-tokens 8192", text)
+        # a quoted value with spaces goes as a whole, and the text after it stays
+        self.assertIn("--password [removed] --port 8888", text)
+        self.assertIn("token=[removed] end", text)
 
     def test_missing_container_falls_back_to_the_saved_log(self):
         t = Tree(self, "", ("common.sh", "oom_report.sh"))
