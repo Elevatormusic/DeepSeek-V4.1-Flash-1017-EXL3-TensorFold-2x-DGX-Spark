@@ -1,0 +1,93 @@
+[gate111 21:42:30Z] GATE START. images: head bbf4f4485278 / a760ff885c96; worker bbf4f4485278 / a760ff885c96
+[gate111 21:42:31Z] STEP e (cb4ceaff2b8c, GID mode auto): idle memory before the start: head: 115639 MiB | worker: 115055 MiB
+[gate111 21:42:35Z] prebuild cb4ceaff2b8c: head rc=0 worker rc=0; extensions ready in 2 s / extensions ready in 2 s
+[tfv41 21:43:31Z] serving DeepSeek-v4.1-Flash-1017-TF
+START_EXIT=0
+head:
+[tensorfold] rank 0: NCCL settings by default: NCCL_CUMEM_ENABLE=0 NCCL_CUMEM_HOST_ENABLE=0 NCCL_IB_GID_INDEX=3
+[tensorfold] rank 0: RDMA GID index of rocep1s0f1 port 1: 3 (detected)
+[tensorfold] rank 0: RDMA GID index of roceP2p1s0f1 port 1: 3 (detected)
+[tensorfold] decode gathers over RDMA writes
+worker:
+[tensorfold] rank 1: NCCL settings by default: NCCL_CUMEM_ENABLE=0 NCCL_CUMEM_HOST_ENABLE=0 NCCL_IB_GID_INDEX=3
+[tensorfold] rank 1: RDMA GID index of rocep1s0f1 port 1: 3 (detected)
+[tensorfold] rank 1: RDMA GID index of roceP2p1s0f1 port 1: 3 (detected)
+[gate111 21:43:31Z] e idle memory after the start: head: 3471 MiB | worker: 3667 MiB
+[gate111 21:43:39Z] e smoke: SMOKE_EXIT=0
+[gate111 21:47:36Z] e suite: 32 pass, 0 fail:  32/32 passed in 237s -> $HOME/rel111/v41/suite-results.json SUITE_EXIT=0 
+[gate111 21:47:52Z] e grammar: 14/14 passed CHECK_EXIT=0 
+[gate111 21:49:56Z] e bench done: BENCH_EXIT=0
+[gate111 21:52:22Z] e cold prefill:  32000 B           n=3 pt=[32026, 32027, 32028] cached=[0, 0, 0] TTFT 16.35 [16.33-16.47] s  tok/s 1959 [1945-1961]  32768 D-kitbench  n=3 pt=[32768] cached=[0, 0, 0] TTFT 14.67 [14.59-14.88] s  tok/s 2234 [2201-2246] 
+[gate111 21:52:45Z] e live checks: LIVE_CHECKS 22/22 passed
+[gate111 21:52:45Z] e idle memory before the long run: head: 2820 MiB | worker: 3676 MiB
+[gate111 21:52:45Z] e long run start 21:52:45
+prompts: [('L20000', 20023), ('L50000', 50192), ('L100000', 100621), ('L200000', 200082)]
+  long L20000 seed=7 tokens=1500 sha=d58f653b2ce8 ttft=9.2 tps=20.5 
+  long L50000 seed=8 tokens=1500 sha=f42ae2e092ab ttft=53.9 tps=31.3 
+  long L100000 seed=9 tokens=1500 sha=0ed6e9e70041 ttft=125.3 tps=42.1 
+  long L200000 seed=10 tokens=1500 sha=0d2a3aa664b6 ttft=244.1 tps=115.6 
+elapsed 258s errors=0
+LONG_EXIT=0
+[gate111 21:57:03Z] e long run window 21:52:45 - 21:57:03; lowest MemAvailable in the long run:
+  head: lowest 1584 MiB at 21:55:47
+  worker: lowest 2371 MiB at 21:55:56
+[gate111 21:57:03Z] e lowest MemAvailable in the whole step so far:
+  head: lowest 1572 MiB at 21:51:33
+  worker: lowest 2345 MiB at 21:50:00
+earlyoom head:
+earlyoom worker:
+[gate111 21:57:04Z] e admission waits: r0=0 r1=0; late captures: r0=0 r1=0; WARNING: r0=0 r1=0; terminate: r0=0 r1=0; Traceback/ERROR: r0=0 r1=0
+[gate111 21:57:05Z] e server alive after the long run
+rel111-r0 Up 14 minutes
+rel111-r1 Up 14 minutes
+[gate111 21:57:05Z] SIGTERM test: starting a 100K-token prefill
+[gate111 21:57:16Z] SIGTERM test: request sent 11 s ago and not finished: rank 0 is in the prefill
+[tensorfold] 127.0.0.1 "GET /v1/models HTTP/1.1" 200 -
+[tensorfold] 127.0.0.1 "GET /v1/models HTTP/1.1" 200 -
+[tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+[gate111 21:57:19Z] SIGTERM test: rank 0 exit code 0 after 2.614434062 s; 'terminate called' r0=0 r1=0; worker running: false exit=1
+[gate111 21:57:19Z] SIGTERM test: last r0 lines:
+[tensorfold] done req-421f6a2dcae6 prompt=100621 cached=0 thinking=False tokens=1500 sha=0ed6e9e70041 finish=length tok/s=41.7 ttft=125.18s prefill=46.01s rounds=490 accepted=1009/1252
+[tensorfold] spilled kept prompt 8ebff37d-000017: 198656 positions, wrote rows 0..198656 and 210.1 MiB in 0.61s
+[tensorfold] done req-4b8ec46a222d prompt=200082 cached=0 thinking=False tokens=1500 sha=0d2a3aa664b6 finish=length tok/s=110.4 ttft=243.86s prefill=97.39s rounds=352 accepted=1147/1239
+[tensorfold] 127.0.0.1 "GET /v1/models HTTP/1.1" 200 -
+[tensorfold] 127.0.0.1 "GET /v1/models HTTP/1.1" 200 -
+[tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+[gate111 21:57:23Z] step e finished
+[gate111 21:57:24Z] STEP d (fc9200a44463, GID mode pinned): idle memory before the start: head: 117035 MiB | worker: 116381 MiB
+[gate111 21:57:28Z] prebuild fc9200a44463: head rc=0 worker rc=0; extensions ready in 2 s / extensions ready in 2 s
+[tfv41 22:02:43Z] serving DeepSeek-v4.1-Flash-1017-TF
+START_EXIT=0
+head:
+[tensorfold] decode gathers over RDMA writes
+worker:
+[gate111 22:02:43Z] d idle memory after the start: head: 3152 MiB | worker: 3624 MiB
+[gate111 22:02:50Z] d smoke: SMOKE_EXIT=0
+[gate111 22:06:51Z] d suite: 32 pass, 0 fail:  32/32 passed in 241s -> $HOME/rel111/v41/suite-results.json SUITE_EXIT=0 
+[gate111 22:07:07Z] d grammar: 14/14 passed CHECK_EXIT=0 
+[gate111 22:09:12Z] d bench done: BENCH_EXIT=0
+[gate111 22:11:39Z] d cold prefill:  32000 B           n=3 pt=[32026, 32030] cached=[0, 0, 0] TTFT 16.42 [16.38-16.43] s  tok/s 1950 [1949-1956]  32768 D-kitbench  n=3 pt=[32768] cached=[0, 0, 0] TTFT 14.71 [14.66-14.71] s  tok/s 2228 [2228-2235] 
+[gate111 22:12:02Z] d live checks: LIVE_CHECKS 5/22 passed
+[gate111 22:12:02Z] d idle memory before the long run: head: 3130 MiB | worker: 3706 MiB
+[gate111 22:12:02Z] d long run start 22:12:02
+prompts: [('L20000', 20023), ('L50000', 50192), ('L100000', 100621), ('L200000', 200082)]
+  long L20000 seed=7 tokens=1500 sha=d58f653b2ce8 ttft=9.1 tps=19.5 
+  long L50000 seed=8 tokens=1500 sha=f42ae2e092ab ttft=53.8 tps=30.3 
+  long L100000 seed=9 tokens=1500 sha=0ed6e9e70041 ttft=126.0 tps=41.6 
+  long L200000 seed=10 tokens=1500 sha=0d2a3aa664b6 ttft=244.8 tps=115.8 
+elapsed 259s errors=0
+LONG_EXIT=0
+[gate111 22:16:22Z] d long run window 22:12:02 - 22:16:22; lowest MemAvailable in the long run:
+  head: lowest 1684 MiB at 22:15:14
+  worker: lowest 2391 MiB at 22:15:42
+[gate111 22:16:22Z] d lowest MemAvailable in the whole step so far:
+  head: lowest 1548 MiB at 22:10:25
+  worker: lowest 2376 MiB at 22:04:02
+earlyoom head:
+earlyoom worker:
+[gate111 22:16:23Z] d admission waits: r0=0 r1=0; late captures: r0=0 r1=0; WARNING: r0=0 r1=0; terminate: r0=0 r1=0; Traceback/ERROR: r0=0 r1=0
+[gate111 22:16:23Z] d server alive after the long run
+rel111-r0 Up 18 minutes
+rel111-r1 Up 18 minutes
+[gate111 22:16:31Z] step d finished
+[gate111 22:16:31Z] GATE111_DONE

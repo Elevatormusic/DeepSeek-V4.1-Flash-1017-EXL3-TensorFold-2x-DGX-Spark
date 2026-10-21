@@ -1,0 +1,9 @@
+head:
+[tensorfold] rank 0: NCCL settings by default: NCCL_CUMEM_ENABLE=0 NCCL_CUMEM_HOST_ENABLE=0 NCCL_IB_GID_INDEX=3
+[tensorfold] rank 0: RDMA GID index of rocep1s0f1 port 1: 3 (detected)
+[tensorfold] rank 0: RDMA GID index of roceP2p1s0f1 port 1: 3 (detected)
+[tensorfold] decode gathers over RDMA writes
+worker:
+[tensorfold] rank 1: NCCL settings by default: NCCL_CUMEM_ENABLE=0 NCCL_CUMEM_HOST_ENABLE=0 NCCL_IB_GID_INDEX=3
+[tensorfold] rank 1: RDMA GID index of rocep1s0f1 port 1: 3 (detected)
+[tensorfold] rank 1: RDMA GID index of roceP2p1s0f1 port 1: 3 (detected)

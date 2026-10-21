@@ -1,0 +1,24 @@
+[FAIL] special_token_text/thinking_off/think_end {"extra_think_end_ids": 1, "extra_user_ids": 0, "plain_run_found": false, "n_ids": 5}
+[FAIL] special_token_text/thinking_off/user_tag {"extra_think_end_ids": 0, "extra_user_ids": 1, "plain_run_found": false, "n_ids": 5}
+[FAIL] special_token_text/thinking_off/both_in_prose {"extra_think_end_ids": 1, "extra_user_ids": 1, "plain_run_found": null, "n_ids": 15}
+[FAIL] special_token_text/thinking_on/think_end {"extra_think_end_ids": 1, "extra_user_ids": 0, "plain_run_found": false, "n_ids": 31}
+[FAIL] special_token_text/thinking_on/user_tag {"extra_think_end_ids": 0, "extra_user_ids": 1, "plain_run_found": false, "n_ids": 31}
+[FAIL] special_token_text/thinking_on/both_in_prose {"extra_think_end_ids": 1, "extra_user_ids": 1, "plain_run_found": null, "n_ids": 41}
+[PASS] special_token_text/chat_request_200 {"status": 200}
+[FAIL] dsml_cut/required/4 {"no_raw_dsml": false, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["<\uff5cDSML\uff5c calls>", "<\uff5cDSML\uff5c calls>"]}
+[FAIL] dsml_cut/required/8 {"no_raw_dsml": false, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name", "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name"]}
+[FAIL] dsml_cut/required/16 {"no_raw_dsml": false, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter", "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter"]}
+[FAIL] dsml_cut/required/24 {"no_raw_dsml": false, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter name=\"city\" ", "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter name=\"city\" "]}
+[FAIL] dsml_cut/required/40 {"no_raw_dsml": false, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter name=\"city\" ", "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter name=\"city\" "]}
+[FAIL] dsml_cut/required/64 {"no_raw_dsml": false, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter name=\"city\" ", "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter name=\"city\" "]}
+[PASS] dsml_cut/auto/4 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["I'll check the", "I'll check the"]}
+[PASS] dsml_cut/auto/8 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["I'll check the weather in both cities", "I'll check the weather in both cities"]}
+[FAIL] dsml_cut/auto/16 {"no_raw_dsml": false, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<", "I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<"]}
+[FAIL] dsml_cut/auto/24 {"no_raw_dsml": false, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke na", "I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke na"]}
+[FAIL] dsml_cut/auto/40 {"no_raw_dsml": false, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke na", "I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke na"]}
+[FAIL] dsml_cut/auto/64 {"no_raw_dsml": false, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke na", "I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke na"]}
+[PASS] dsml_cut/control_full_call {"status": 200, "finish": "tool_calls"}
+[PASS] json_schema/three_requests_valid {}
+[FAIL] json_schema/prompt_shows_schema_only {"schema_names_in_prompt": true, "openai_wrapper_in_prompt": true}
+LIVE_CHECKS 5/22 passed
+LIVE_EXIT=1

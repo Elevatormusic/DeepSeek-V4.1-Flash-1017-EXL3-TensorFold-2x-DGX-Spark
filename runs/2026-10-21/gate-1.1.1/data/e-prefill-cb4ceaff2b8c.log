@@ -1,0 +1,14 @@
+start head MemAvailable MiB: 2891
+{"step": "warm32-32000-0", "epoch": 1, "kind": "warm32", "size": 32000, "rep": 0, "prompt_tokens": 32028, "cached_tokens": 0, "ttft_s": 16.403, "total_s": 16.704, "prefill_tps": 1952.6, "net_tps": 1952.6, "head_min_mib": 1680, "head_idle_mib": 2797, "unix": 1792619412.859034}
+{"step": "B-32000-0", "epoch": 1, "kind": "B", "size": 32000, "rep": 0, "prompt_tokens": 32028, "cached_tokens": 0, "ttft_s": 16.349, "total_s": 16.404, "prefill_tps": 1959.0, "net_tps": 1959.0, "head_min_mib": 1795, "head_idle_mib": 2961, "unix": 1792619434.263964}
+{"step": "D-kitbench-32768-0", "epoch": 1, "kind": "D-kitbench", "size": 32768, "rep": 0, "prompt_tokens": 32768, "cached_tokens": 0, "ttft_s": 14.667, "total_s": 14.992, "prefill_tps": 2234.2, "net_tps": 2234.2, "head_min_mib": 1531, "head_idle_mib": 3106, "unix": 1792619454.3486795}
+{"step": "B-32000-1", "epoch": 1, "kind": "B", "size": 32000, "rep": 1, "prompt_tokens": 32026, "cached_tokens": 0, "ttft_s": 16.329, "total_s": 16.417, "prefill_tps": 1961.3, "net_tps": 1961.3, "head_min_mib": 1590, "head_idle_mib": 2703, "unix": 1792619475.7663856}
+{"step": "D-kitbench-32768-1", "epoch": 1, "kind": "D-kitbench", "size": 32768, "rep": 1, "prompt_tokens": 32768, "cached_tokens": 0, "ttft_s": 14.592, "total_s": 14.931, "prefill_tps": 2245.7, "net_tps": 2245.7, "head_min_mib": 1572, "head_idle_mib": 2645, "unix": 1792619495.7790844}
+{"step": "B-32000-2", "epoch": 1, "kind": "B", "size": 32000, "rep": 2, "prompt_tokens": 32027, "cached_tokens": 0, "ttft_s": 16.468, "total_s": 16.549, "prefill_tps": 1944.8, "net_tps": 1944.8, "head_min_mib": 1630, "head_idle_mib": 2740, "unix": 1792619517.3292243}
+{"step": "D-kitbench-32768-2", "epoch": 1, "kind": "D-kitbench", "size": 32768, "rep": 2, "prompt_tokens": 32768, "cached_tokens": 0, "ttft_s": 14.885, "total_s": 15.254, "prefill_tps": 2201.4, "net_tps": 2201.4, "head_min_mib": 1633, "head_idle_mib": 2743, "unix": 1792619537.6641073}
+
+SUMMARY (median [min-max])
+ 32000 B           n=3 pt=[32026, 32027, 32028] cached=[0, 0, 0] TTFT 16.35 [16.33-16.47] s  tok/s 1959 [1945-1961]
+ 32768 D-kitbench  n=3 pt=[32768] cached=[0, 0, 0] TTFT 14.67 [14.59-14.88] s  tok/s 2234 [2201-2246]
+head MemAvailable lowest MiB over the run: 1531
+MEASURE_EXIT=0

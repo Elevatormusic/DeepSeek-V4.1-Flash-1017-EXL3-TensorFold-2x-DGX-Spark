@@ -1,0 +1,16 @@
+[PASS] round 1 json_schema off 2.2s: '{"name": "Mira Tallow", "age": 34, "tags": ["cartographer", "tea enthusiast", "night owl"]}'
+[PASS] round 1 json_schema think 3.5s: '{"name": "Marisol Vance", "age": 34, "tags": ["botanist", "amateur cellist", "lighthouse keeper"]}'
+[PASS] round 1 json_object 4.7s: '{"type":"json_object","name":"Whiskers","species":"Felis catus","breed":"Domestic Shorthair","age_years":3,"co'
+[PASS] round 1 regex date 1.1s: '2024-01-01'
+[PASS] round 1 choice 0.2s: 'yes'
+[PASS] round 1 plain prose 1.9s: 'The sea stretched endlessly to the horizon, its waves rolling in a steady, rhythmic pulse. Sunlight danced acr'
+[PASS] round 1 plain code 5.6s: '# Reversing a String in Python\n\nHere are several clean ways to reverse a string in Python:\n\n## 1. Using Slicin'
+[PASS] round 2 json_schema off 2.2s: '{"name": "Mira Tallow", "age": 34, "tags": ["cartographer", "tea enthusiast", "night owl"]}'
+[PASS] round 2 json_schema think 3.5s: '{"name": "Marisol Vance", "age": 34, "tags": ["botanist", "amateur cellist", "lighthouse keeper"]}'
+[PASS] round 2 json_object 4.7s: '{"type":"json_object","name":"Whiskers","species":"Felis catus","breed":"Domestic Shorthair","age_years":3,"co'
+[PASS] round 2 regex date 1.0s: '2024-01-01'
+[PASS] round 2 choice 0.2s: 'yes'
+[PASS] round 2 plain prose 1.9s: 'The sea stretched endlessly to the horizon, its waves rolling in a steady, rhythmic pulse. Sunlight danced acr'
+[PASS] round 2 plain code 5.6s: '# Reversing a String in Python\n\nHere are several clean ways to reverse a string in Python:\n\n## 1. Using Slicin'
+14/14 passed
+CHECK_EXIT=0

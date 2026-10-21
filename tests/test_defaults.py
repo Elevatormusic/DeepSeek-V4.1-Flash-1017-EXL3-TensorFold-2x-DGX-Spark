@@ -24,8 +24,8 @@ PROTECTED = {
     # On since engine 1.1.0: a call to a tool that the request did not offer is dropped.
     "DROP_UNOFFERED_TOOL_CALLS": "1",
     # The engine build. A change here must come with new gate results (see CONTRIBUTING.md).
-    "TF_COMMIT": "730d41abd8f4",
-    "IMAGE": "tensorfold-dsv41:730d41abd8f4",
+    "TF_COMMIT": "cb4ceaff2b8c",
+    "IMAGE": "tensorfold-dsv41:cb4ceaff2b8c",
 }
 PREFILL_CHUNK = "2048"
 # Where start.sh gives each protected value to the server. Every use of the option must take the variable, so a

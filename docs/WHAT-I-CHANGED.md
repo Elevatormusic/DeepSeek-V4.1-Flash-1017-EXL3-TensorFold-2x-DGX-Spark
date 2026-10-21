@@ -11,7 +11,7 @@ All engine changes are in the public fork [Elevatormusic/TensorFold](https://git
 
 Release 1.0.0 of the engine was built from the commit at the head of #6, `07aa02585f64`, which contains all five and their review fixes. The serving results of 17 October were measured on `fd2365042f56` (the head of #3); #4 and the review fixes do not change decoding.
 
-The image in this repo is now built from the commit of [release dsv41-1.1.0](https://github.com/Elevatormusic/TensorFold/releases/tag/dsv41-1.1.0), `730d41abd8f4`. It adds more fork pull requests ([section 7](#7-engine-release-110)).
+The image in this repo is now built from the commit of [release dsv41-1.1.1](https://github.com/Elevatormusic/TensorFold/releases/tag/dsv41-1.1.1), `cb4ceaff2b8c`. It adds more fork pull requests ([section 7](#7-engine-release-110) and [section 8](#8-engine-release-111)).
 
 ## Test score at each step
 
@@ -125,3 +125,15 @@ The engine is now [release dsv41-1.1.0](https://github.com/Elevatormusic/TensorF
 - Not used by the recipe: dense BF16 overrides (PR #8).
 
 The settings of the new engine switches are in [OPERATIONS.md](OPERATIONS.md#engine-switches-of-release-110).
+
+## 8. Engine release 1.1.1
+
+The engine is now [release dsv41-1.1.1](https://github.com/Elevatormusic/TensorFold/releases/tag/dsv41-1.1.1) (`cb4ceaff2b8c`). The release notes give every change, the results and the known issues. This list gives only what changes for a user of this recipe:
+
+- **Host setup of NCCL and RDMA** (fork PR #22). NCCL cuMem is off by default. This is a probable cause of the `NV_ERR_NO_MEMORY` reports. The RDMA GID index is read from sysfs when `GID_INDEX` is `-1`. The page cache of the weight files is released after the weight load. `.env.example` still sets `GID_INDEX=3`, the tested value.
+- **Tool calls are contained** (fork PRs #23 and #35). A DSML call counts only when its block is complete. A reply that stops inside a DSML block (`max_tokens`) no longer shows the raw block in `content`, and the stream agrees with the whole reply.
+- **Special-token text stays text** (fork PR #28, security). `</think>`, `<｜User｜>` and the other special-token spellings in message text are plain text. A client cannot end the thinking or forge a turn with them.
+- **Clean stop after SIGTERM** (fork PR #34). Rank 0 exits with code 0 and without `terminate called` when earlyoom or `docker stop` ends it during a prefill.
+- **`json_schema` prompt** (fork PR #27, by hyungraekim-bagelcode). The prompt shows the schema, not the OpenAI wrapper.
+- **Coupled drafts** (fork PR #25) and **L2 prefetch at once** (fork PR #26). Output tokens do not change. In the gate runs, decode and cold prefill are equal to 1.1.0 within the noise ([runs/2026-10-21](../runs/2026-10-21/INDEX.md#release-gate-of-engine-111)).
+- Known issue: the new image holds about 0.14 GiB more on the head, and the lowest head `MemAvailable` in the long run was 1.58 to 1.62 GiB (1.1.0: 1.68 to 1.85 GiB). See [OPERATIONS.md](OPERATIONS.md#engine-switches-of-release-111).

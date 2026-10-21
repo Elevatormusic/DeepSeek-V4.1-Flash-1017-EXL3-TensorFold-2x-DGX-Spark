@@ -1,0 +1,287 @@
+[
+ {
+  "name": "special_token_text/thinking_off/think_end",
+  "pass": false,
+  "extra_think_end_ids": 1,
+  "extra_user_ids": 0,
+  "plain_run_found": false,
+  "n_ids": 5
+ },
+ {
+  "name": "special_token_text/thinking_off/user_tag",
+  "pass": false,
+  "extra_think_end_ids": 0,
+  "extra_user_ids": 1,
+  "plain_run_found": false,
+  "n_ids": 5
+ },
+ {
+  "name": "special_token_text/thinking_off/both_in_prose",
+  "pass": false,
+  "extra_think_end_ids": 1,
+  "extra_user_ids": 1,
+  "plain_run_found": null,
+  "n_ids": 15
+ },
+ {
+  "name": "special_token_text/thinking_on/think_end",
+  "pass": false,
+  "extra_think_end_ids": 1,
+  "extra_user_ids": 0,
+  "plain_run_found": false,
+  "n_ids": 31
+ },
+ {
+  "name": "special_token_text/thinking_on/user_tag",
+  "pass": false,
+  "extra_think_end_ids": 0,
+  "extra_user_ids": 1,
+  "plain_run_found": false,
+  "n_ids": 31
+ },
+ {
+  "name": "special_token_text/thinking_on/both_in_prose",
+  "pass": false,
+  "extra_think_end_ids": 1,
+  "extra_user_ids": 1,
+  "plain_run_found": null,
+  "n_ids": 41
+ },
+ {
+  "name": "special_token_text/chat_request_200",
+  "pass": true,
+  "status": 200
+ },
+ {
+  "name": "dsml_cut/required/4",
+  "pass": false,
+  "no_raw_dsml": false,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "<\uff5cDSML\uff5c calls>",
+   "<\uff5cDSML\uff5c calls>"
+  ]
+ },
+ {
+  "name": "dsml_cut/required/8",
+  "pass": false,
+  "no_raw_dsml": false,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name",
+   "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name"
+  ]
+ },
+ {
+  "name": "dsml_cut/required/16",
+  "pass": false,
+  "no_raw_dsml": false,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter",
+   "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter"
+  ]
+ },
+ {
+  "name": "dsml_cut/required/24",
+  "pass": false,
+  "no_raw_dsml": false,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter name=\"city\" ",
+   "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter name=\"city\" "
+  ]
+ },
+ {
+  "name": "dsml_cut/required/40",
+  "pass": false,
+  "no_raw_dsml": false,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter name=\"city\" ",
+   "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter name=\"city\" "
+  ]
+ },
+ {
+  "name": "dsml_cut/required/64",
+  "pass": false,
+  "no_raw_dsml": false,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter name=\"city\" ",
+   "<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke name=\"get_weather\">\n<\uff5cDSML\uff5c parameter name=\"city\" "
+  ]
+ },
+ {
+  "name": "dsml_cut/auto/4",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "I'll check the",
+   "I'll check the"
+  ]
+ },
+ {
+  "name": "dsml_cut/auto/8",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "I'll check the weather in both cities",
+   "I'll check the weather in both cities"
+  ]
+ },
+ {
+  "name": "dsml_cut/auto/16",
+  "pass": false,
+  "no_raw_dsml": false,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<",
+   "I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<"
+  ]
+ },
+ {
+  "name": "dsml_cut/auto/24",
+  "pass": false,
+  "no_raw_dsml": false,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke na",
+   "I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke na"
+  ]
+ },
+ {
+  "name": "dsml_cut/auto/40",
+  "pass": false,
+  "no_raw_dsml": false,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke na",
+   "I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke na"
+  ]
+ },
+ {
+  "name": "dsml_cut/auto/64",
+  "pass": false,
+  "no_raw_dsml": false,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke na",
+   "I'll check the weather in both cities for you.\n\n<\uff5cDSML\uff5c calls>\n<\uff5cDSML\uff5c invoke na"
+  ]
+ },
+ {
+  "name": "dsml_cut/control_full_call",
+  "pass": true,
+  "status": 200,
+  "finish": "tool_calls"
+ },
+ {
+  "name": "json_schema/three_requests_valid",
+  "pass": true
+ },
+ {
+  "name": "json_schema/prompt_shows_schema_only",
+  "pass": false,
+  "schema_names_in_prompt": true,
+  "openai_wrapper_in_prompt": true
+ }
+]

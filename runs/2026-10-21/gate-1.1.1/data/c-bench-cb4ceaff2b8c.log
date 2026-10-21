@@ -1,0 +1,13 @@
+[bench] prose x1: per-stream 54.8 tok/s (min 54.8), aggregate 54.4 tok/s, TTFT 0.09 s
+[bench] prose x2: per-stream 39.7 tok/s (min 39.1), aggregate 77.3 tok/s, TTFT 0.13 s
+[bench] prose x3: per-stream 33.6 tok/s (min 30.9), aggregate 92.5 tok/s, TTFT 0.18 s
+[bench] prose x4: per-stream 27.2 tok/s (min 25.5), aggregate 101.8 tok/s, TTFT 0.22 s
+[bench] code  x1: per-stream 99.9 tok/s (min 99.9), aggregate 98.1 tok/s, TTFT 0.11 s
+[bench] code  x2: per-stream 64.4 tok/s (min 62.8), aggregate 122.8 tok/s, TTFT 0.15 s
+[bench] code  x3: per-stream 49.7 tok/s (min 48.5), aggregate 141.4 tok/s, TTFT 0.23 s
+[bench] code  x4: per-stream 40.2 tok/s (min 37.4), aggregate 148.9 tok/s, TTFT 0.27 s
+[prefix] cold: document A, question 1: prompt 24209 tok, cached 0, TTFT 11.14 s
+[prefix] warm: document A, question 2: prompt 24210 tok, cached 22528, TTFT 1.07 s
+[prefix] cold: document B (same size): prompt 24374 tok, cached 0, TTFT 11.23 s
+[bench] done -> bench-results.json
+BENCH_EXIT=0
