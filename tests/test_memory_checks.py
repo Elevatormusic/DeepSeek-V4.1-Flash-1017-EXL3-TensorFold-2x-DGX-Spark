@@ -277,7 +277,7 @@ SOME_SECRET=@FAKE_OTHER@
 API_KEY_FILE={d}/keys
 """
 
-    def report(self, output_arg: bool = False) -> str:
+    def prepared(self) -> "Tree":
         t = Tree(self, "", ("common.sh", "oom_report.sh"))
         (t.dir / ".env").write_text(fill(self.ENV.format(d=t.dir)), encoding="utf-8")
         (t.dir / "keys").write_text(f"main: {FAKE_SK}" + chr(10), encoding="utf-8")
@@ -289,6 +289,10 @@ API_KEY_FILE={d}/keys
         t.stub("swapon", "exit 0\n")
         t.stub("free", "echo 'Mem: 124546 100 100'\n")
         t.stub("systemctl", "echo active\n")
+        return t
+
+    def report(self, output_arg: bool = False) -> str:
+        t = self.prepared()
         args = ["bash", "scripts/oom_report.sh"] + ([str(t.dir / "out" / "r.txt")] if output_arg else [])
         r = t.run(args, {"HOME": "/home/ubuntu"})
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
@@ -301,6 +305,24 @@ API_KEY_FILE={d}/keys
 
     def test_output_path_argument(self):
         self.assertIn("OOM report", self.report(output_arg=True))
+
+    def test_unwritable_output_fails(self):
+        t = self.prepared()
+        for target, message in ((t.dir / "out" / "folder", "is a folder"),
+                                (t.dir / "ro" / "r.txt", "cannot write the report")):
+            with self.subTest(target=target.name):
+                if target.name == "folder":
+                    target.mkdir(parents=True)
+                else:
+                    target.parent.mkdir()
+                    target.parent.chmod(0o500)
+                    self.addCleanup(target.parent.chmod, 0o700)
+                    if os.access(target.parent, os.W_OK):      # (root can write anyway)
+                        continue
+                r = t.run(["bash", "scripts/oom_report.sh", str(target)], {"HOME": "/home/ubuntu"})
+                self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
+                self.assertIn(message, r.stderr)
+                self.assertNotIn("report written", r.stdout)
 
     def test_report_holds_the_facts_of_both_nodes(self):
         text = self.report()

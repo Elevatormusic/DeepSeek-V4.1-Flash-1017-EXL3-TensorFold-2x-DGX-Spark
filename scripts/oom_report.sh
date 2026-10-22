@@ -11,8 +11,11 @@ set -uo pipefail
 . "$(dirname "$0")/common.sh"
 
 out=${1:-$LOGS/oom-report-$(date -u +%Y%m%dT%H%M%SZ).txt}
-mkdir -p "$LOGS" "$(dirname "$out")"
-raw=$(mktemp)
+# the script has no set -e: each write that the report needs stops it with an error when it fails
+fail() { echo "error: $*" >&2; exit 1; }
+[ -d "$out" ] && fail "$out is a folder; give a file name"
+mkdir -p "$LOGS" "$(dirname "$out")" || fail "cannot make the folder for $out"
+raw=$(mktemp) || fail "cannot make a temporary file"
 trap 'rm -f "$raw"' EXIT
 head_name=$(hostname 2>/dev/null || true)
 worker_name=$(wssh hostname 2>/dev/null || true)
@@ -144,7 +147,10 @@ filter=(-E
 [ -n "${WORKER_SSH:-}" ] && filter+=(-e "s/$(esc "$WORKER_SSH")/<worker>/g")
 [ "${#worker_name}" -ge 3 ] && filter+=(-e "s/$(esc "$worker_name")/worker/g")
 [ "${#head_name}" -ge 3 ] && filter+=(-e "s/$(esc "$head_name")/head/g")
-sed "${filter[@]}" "$raw" > "$out"
+if ! sed "${filter[@]}" "$raw" > "$out"; then
+  rm -f "$out"                     # a part of the report (for example on a full disk) is not a report
+  fail "cannot write the report to $out"
+fi
 
 echo "report written to $out"
 echo "Read it, then attach it to your issue. The filter removes keys and tokens, but check it for anything else that is private."
