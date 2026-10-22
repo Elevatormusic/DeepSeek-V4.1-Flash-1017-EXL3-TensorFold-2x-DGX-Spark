@@ -50,7 +50,7 @@ More that is not measured:
 ## Costs and requirements
 
 1. **The engine is a fork, pinned at a commit.**
-   - The recipe builds [Elevatormusic/TensorFold](https://github.com/Elevatormusic/TensorFold) at `730d41abd8f4` (release dsv41-1.1.0). The upstream project is `ashhart/TensorFold`.
+   - The recipe builds [Elevatormusic/TensorFold](https://github.com/Elevatormusic/TensorFold) at `cb4ceaff2b8c` (release dsv41-1.1.1). The upstream project is `ashhart/TensorFold`.
    - The changes are pull requests on the fork ([What I changed](WHAT-I-CHANGED.md)). The files in this repo do not show that upstream accepted them.
 2. **The first start is slow and large.** The first start writes the weight cache of each rank to `CACHE_DIR`. This takes about 15 minutes and about 100 GiB per node (`.env.example`; `scripts/preflight.sh` asks for 110 GiB free). Later starts take 2 to 4 minutes.
 3. **The first long prompt pays a warm-up.** The first prompt of 8K tokens or more after a start takes about 10 s longer ([OPERATIONS.md](OPERATIONS.md)). The 8K prefill row in [BENCHMARKS.md](BENCHMARKS.md) includes this cost.

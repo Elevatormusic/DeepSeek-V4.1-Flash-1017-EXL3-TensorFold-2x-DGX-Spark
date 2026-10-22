@@ -105,7 +105,7 @@ All token counts come from the `usage` field of the server reply. The suite neve
 | 04 | TensorFold | `90c2d59c8179` | 28/32 | 278 s |
 | 05 | TensorFold | `7f80c3d267da` | 32/32 | 285 s |
 | 09 | TensorFold | `d5c9d3cdf4fa` | 32/32 | 324 s |
-| 11 | TensorFold | `fd2365042f56` (the image of 17 October; release 1.0.0 was `07aa02585f64`, the recipe now builds `730d41abd8f4`) | 32/32 | 295 s |
+| 11 | TensorFold | `fd2365042f56` (the image of 17 October; release 1.0.0 was `07aa02585f64`, the recipe now builds `cb4ceaff2b8c`) | 32/32 | 295 s |
 
 - The failed tests in runs 02, 03 and 04 are tool-choice and structured-output tests, not speed tests. Their speed rows are valid.
 - Runs 02, 03 and 04 used engine builds from before the structured-output work. See [`INDEX.md`](../runs/2026-10-17/INDEX.md) for the failed test names.
@@ -147,7 +147,7 @@ Notes on the table:
 
 The run used `v41_bench.py`: thinking off, 512 tokens per stream. Per-stream speed and TTFT are means over the streams.
 
-Image `fd2365042f56` of 17 October (run 13). Release 1.0.0 (`07aa02585f64`) has its runs in [runs/2026-10-18](../runs/2026-10-18/INDEX.md). The recipe now builds `730d41abd8f4`; its gate run is in [runs/2026-10-21](../runs/2026-10-21/INDEX.md).:
+Image `fd2365042f56` of 17 October (run 13). Release 1.0.0 (`07aa02585f64`) has its runs in [runs/2026-10-18](../runs/2026-10-18/INDEX.md). The recipe now builds `cb4ceaff2b8c` (release 1.1.1); the gate runs of 1.1.0 and 1.1.1 are in [runs/2026-10-21](../runs/2026-10-21/INDEX.md).:
 
 | Streams | Prose per stream | Prose aggregate | Prose TTFT | Code per stream | Code aggregate | Code TTFT |
 |---:|---:|---:|---:|---:|---:|---:|
@@ -213,7 +213,7 @@ All values are from [`PROVENANCE.md`](../runs/2026-10-17/PROVENANCE.md).
 | Engram tables | `deepseek-ai/DeepSeek-V4.1-Flash-1017` at `1bae0e1088993b9b82de08f59de5be5a34e42170`, shards 47 and 48 |
 | vLLM baseline | MiaAI-Lab kit at `6f7d1590ad49a2b8995188e45d7b9db31e677452`, image `sha256:2f0cf3adc0f989c1d446be274df864eb799630175f604c3b22b71b7205971dce` |
 | vLLM settings | TP=2, `MAX_MODEL_LEN=262144`, `MAX_NUM_SEQS=1`, `MAX_NUM_BATCHED_TOKENS=1536`, `GPU_MEM_UTIL=0.88`, `KV_BLOCK_SIZE=64`, `KV_CACHE_MEMORY_BYTES=2684354560`, `SPEC_METHOD=dspark`, `DSPARK_TOKENS=3`, `PREFIX_CACHE_RETENTION_INTERVAL=4096` |
-| TensorFold | Fork [Elevatormusic/TensorFold](https://github.com/Elevatormusic/TensorFold) at `fd2365042f56` (the image measured on 17 October; the recipe now builds `730d41abd8f4`), 0.6.6 base, xgrammar 0.2.8 |
+| TensorFold | Fork [Elevatormusic/TensorFold](https://github.com/Elevatormusic/TensorFold) at `fd2365042f56` (the image measured on 17 October; the recipe now builds `cb4ceaff2b8c`), 0.6.6 base, xgrammar 0.2.8 |
 | TensorFold settings | `--tp 2 --context 1048576 --vision --parallel 4 --mtp-drafts 5 --temperature 1.0 --top-p 1.0`, `TF_DS_REPLAY=1`, `TF_DS_REPLAY_FLOOR=1`, `TF_DS_PREFILL_CHUNK=2048` |
 | Base image, torch | `nvcr.io/nvidia/pytorch:26.07-py3`, torch `2.13.0a0+9186a08b2c.nv26.7.59513937`, Python 3.12 |
 

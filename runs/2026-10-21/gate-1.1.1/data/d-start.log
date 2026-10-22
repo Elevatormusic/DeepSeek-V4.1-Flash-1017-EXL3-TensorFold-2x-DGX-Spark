@@ -1,0 +1,5 @@
+[tfv41 21:57:28Z] starting rank 0 (head), image tensorfold-dsv41:fc9200a44463, GID mode pinned
+[tfv41 21:57:31Z] starting rank 1 (worker)
+[tfv41 21:57:31Z] waiting for http://172.17.0.1:8888/v1/models
+[tfv41 22:02:43Z] serving DeepSeek-v4.1-Flash-1017-TF
+START_EXIT=0

@@ -1,0 +1,3 @@
+smoke schema 200 {"id": "chatcmpl-96b6b511dee74e9db8244728", "object": "chat.completion", "created": 1792620167, "model": "DeepSeek-v4.1-Flash-1017-TF", "choices": [{"index": 0, "message": {"role": "assistant", "conte
+smoke plain 200 {"id": "chatcmpl-2b918e22f4a84bf5a3779f45", "object": "chat.completion", "created": 1792620170, "model": "DeepSeek-v4.1-Flash-1017-TF", "choices": [{"index": 0,
+SMOKE_EXIT=0

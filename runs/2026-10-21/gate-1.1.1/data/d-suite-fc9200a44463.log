@@ -1,0 +1,36 @@
+[PASS] speed/decode_prose_off tok_s=56.4 per_prompt=[53.0, 59.9] ttft_s=[0.19, 0.17]
+[PASS] speed/decode_code_off tok_s=90.1 per_prompt=[87.4, 92.7] ttft_s=[0.18, 0.23]
+[PASS] speed/decode_prose_think tok_s=56.8 per_prompt=[56.8] ttft_s=[0.27]
+[PASS] speed/decode_code_think tok_s=71.1 per_prompt=[71.1] ttft_s=[0.27]
+[PASS] speed/prefill_8k prompt_tokens=8123 cached_tokens=0 ttft_s=6.0 prefill_tok_s=1353.0
+[PASS] speed/prefill_32k prompt_tokens=32200 cached_tokens=0 ttft_s=16.84 prefill_tok_s=1913.0
+[PASS] tools/single_call_off s=1.1 finish=tool_calls
+[PASS] tools/single_call_think s=1.1 finish=tool_calls
+[PASS] tools/no_call_when_not_needed s=0.5
+[PASS] tools/tool_choice_required s=1.7
+[PASS] tools/tool_choice_named s=1.3
+[PASS] tools/nested_arguments s=1.8
+[PASS] tools/parallel_calls_one_turn s=1.5 n_calls=2
+[PASS] tools/tool_result_round_trip_off s=1.6
+[PASS] tools/tool_result_round_trip_think s=1.6
+[PASS] tools/streaming_tool_call_deltas s=0.9
+[PASS] tools/agent_loop_off steps=4 s=4.2
+[PASS] tools/agent_loop_think steps=4 s=3.9
+[PASS] schema/json_schema_strict_off valid=5/5
+[PASS] schema/json_schema_strict_think valid=3/3
+[PASS] schema/json_object_mode 
+[PASS] schema/choice_constraint got=negative
+[PASS] schema/regex_constraint got=(555) 123-4567
+[PASS] schema/json_from_prompt_only valid=5/5
+[PASS] reasoning/thinking_modes 
+       {"off": {"reasoning_chars": 0, "answer_ok": true, "tokens": 2, "s": 0.2}, "low": {"reasoning_chars": 181, "answer_ok": true, "tokens": 81, "s": 1.1}, "high": {"reasoning_chars": 137, "answer_ok": true, "tokens": 49, "s": 0.9}, "max": {"reasoning_chars": 217, "answer_ok": true, "tokens": 93, "s": 1.5}}
+[PASS] reasoning/no_think_tag_leak 
+[PASS] format/stop_sequence got=1 2 3 4 5 6
+[PASS] format/multilingual_utf8 
+[PASS] long_context/needle_64k prompt_tokens=64030 s=29.6 got=ORCHID-7731
+[PASS] long_context/needle_200k prompt_tokens=200030 s=85.5 got=ORCHID-7731
+[PASS] router/chat_tools_stream s=1.3
+[PASS] router/default_request_hermes_shape s=0.1 reasoning_chars=0
+
+32/32 passed in 241s -> $HOME/rel111/v41/suite-results.json
+SUITE_EXIT=0

@@ -1,0 +1,24 @@
+[PASS] special_token_text/thinking_off/think_end {"extra_think_end_ids": 0, "extra_user_ids": 0, "plain_run_found": true, "n_ids": 7}
+[PASS] special_token_text/thinking_off/user_tag {"extra_think_end_ids": 0, "extra_user_ids": 0, "plain_run_found": true, "n_ids": 9}
+[PASS] special_token_text/thinking_off/both_in_prose {"extra_think_end_ids": 0, "extra_user_ids": 0, "plain_run_found": null, "n_ids": 19}
+[PASS] special_token_text/thinking_on/think_end {"extra_think_end_ids": 0, "extra_user_ids": 0, "plain_run_found": true, "n_ids": 33}
+[PASS] special_token_text/thinking_on/user_tag {"extra_think_end_ids": 0, "extra_user_ids": 0, "plain_run_found": true, "n_ids": 35}
+[PASS] special_token_text/thinking_on/both_in_prose {"extra_think_end_ids": 0, "extra_user_ids": 0, "plain_run_found": null, "n_ids": 45}
+[PASS] special_token_text/chat_request_200 {"status": 200}
+[PASS] dsml_cut/required/4 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["", ""]}
+[PASS] dsml_cut/required/8 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["", ""]}
+[PASS] dsml_cut/required/16 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["", ""]}
+[PASS] dsml_cut/required/24 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["", ""]}
+[PASS] dsml_cut/required/40 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["", ""]}
+[PASS] dsml_cut/required/64 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["", ""]}
+[PASS] dsml_cut/auto/4 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["I'll check the", "I'll check the"]}
+[PASS] dsml_cut/auto/8 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["I'll check the weather in both cities", "I'll check the weather in both cities"]}
+[PASS] dsml_cut/auto/16 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["I'll check the weather in both cities for you.", "I'll check the weather in both cities for you."]}
+[PASS] dsml_cut/auto/24 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["I'll check the weather in both cities for you.", "I'll check the weather in both cities for you."]}
+[PASS] dsml_cut/auto/40 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["I'll check the weather in both cities for you.", "I'll check the weather in both cities for you."]}
+[PASS] dsml_cut/auto/64 {"no_raw_dsml": true, "stream_equals_nonstream": true, "finish": ["length", "length"], "calls": [0, 0], "content_head": ["I'll check the weather in both cities for you.", "I'll check the weather in both cities for you."]}
+[PASS] dsml_cut/control_full_call {"status": 200, "finish": "tool_calls"}
+[PASS] json_schema/three_requests_valid {}
+[PASS] json_schema/prompt_shows_schema_only {"schema_names_in_prompt": true, "openai_wrapper_in_prompt": false}
+LIVE_CHECKS 22/22 passed
+LIVE_EXIT=0
