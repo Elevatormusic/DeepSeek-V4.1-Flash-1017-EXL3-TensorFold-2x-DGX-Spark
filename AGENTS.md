@@ -25,7 +25,7 @@ Then give the user the three client settings from [docs/CONNECT.md](docs/CONNECT
 - **Never stop the display manager** (`systemctl stop gdm`) on a Spark. On the tested pair it powered the node off.
 - **Run one model server at a time.** Each one needs port 8888 and ~108 GiB of memory on each node ([docs/MEMORY.md](docs/MEMORY.md)). The Zig engine and the Python engine use the same container names, so they also cannot run together.
 - **Keep `BIND_HOST=127.0.0.1`** unless the user asks for network access. Then set `API_KEY_FILE` too ([docs/CONNECT.md](docs/CONNECT.md)).
-- **If a rank stops with exit code 75**, its peer failed or the lane broke. Run `./stop.sh && ./start.sh`, or run `scripts/zig_supervise.sh`, which does this at most 3 times in a row. Exit code 137 (killed) and every other code are not restarted: read the logs first ([docs/ZIG.md](docs/ZIG.md#exit-codes)).
+- **If a rank stops with exit code 75**, its peer failed or the lane broke. Run `./stop.sh && ./start.sh`. Do not start `scripts/zig_supervise.sh` unless the user asks for it: it is optional and not tested on hardware. Exit code 137 (killed) and every other code are not restarted: read the logs first ([docs/ZIG.md](docs/ZIG.md#exit-codes)).
 - **If NCCL hangs at start after a cable or reboot event** (`ENGINE=python`), the RoCE GID index moved. Set `GID_INDEX=-1` in `.env` and restart ([docs/NETWORK.md](docs/NETWORK.md)). The Zig engine reads the index at each start (`ZIG_RDMA_GID_INDEX=auto`).
 - **Never run a file from the kernel kit.** `scripts/zig_inputs.sh` checks the kit with `scripts/verify_kit.sh` of this repo. Do not run `tools/verify_kit.sh` of the kit, on any node.
 

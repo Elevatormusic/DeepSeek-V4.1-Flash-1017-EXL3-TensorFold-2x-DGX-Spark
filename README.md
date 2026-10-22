@@ -60,7 +60,7 @@ Optional: [cache accounting for health and Prometheus](experiments/cache-metrics
 - **Ready for AI agents.** Forced tool calls (`tool_choice` set to `required` or to one tool) and structured output (a JSON schema, a regex or a list of choices). In the release tests, 505 agent requests with parallel tool calls gave 0 lost and 0 malformed calls.
 - **4 concurrent requests.** Up to 4 requests share the two computers.
 - **Prefix cache.** A second question about the same long document has a TTFT of about 1 s instead of 14 s (a 32K prompt). The Python engine also keeps cached prompts on disk: after a restart the TTFT is about 3 s (`ENGINE=python`, `SPILL_GIB`).
-- **Fault isolation.** One failed request ends only that request, not the whole server. If a rank dies, the other rank ends with exit code 75 in 2 to 8 s, and `scripts/zig_supervise.sh` restarts the pair.
+- **Fault isolation.** One failed request ends only that request, not the whole server. If a rank dies, the other rank ends with exit code 75 in 2 to 8 s, and you restart the pair with `./stop.sh && ./start.sh`. The optional script `scripts/zig_supervise.sh` can do this for you (not tested on hardware).
 - **1M-token context.** The full 1,048,576-token context window. Needle tests with prompts of up to 1,038,664 tokens passed.
 
 ---
@@ -159,7 +159,7 @@ Thinking is off by default. Turn it on per request with `"reasoning_effort": "hi
 | See if the server is running | `./status.sh` |
 | Stop the server | `./stop.sh` |
 | Run all the tests | `tests/run_all.sh` |
-| Restart the pair on its own after a peer fault (exit code 75) | `scripts/zig_supervise.sh` |
+| Restart the pair on its own after a peer fault (exit code 75); optional, not tested on hardware | `scripts/zig_supervise.sh` |
 | Install a new Python engine version safely (`ENGINE=python`) | `scripts/deploy_gate.sh <new> <old>` |
 
 If something goes wrong, read [the Zig engine guide](docs/ZIG.md#exit-codes) (exit codes, restarts) and [Operations](docs/OPERATIONS.md) (logs, and what to avoid on DGX Spark). If earlyoom stops the engine, read [Memory](docs/MEMORY.md). To go back to the Python engine, read [Rollback](docs/ROLLBACK.md).
@@ -312,7 +312,7 @@ Every checksum, file size and computer detail: [PROVENANCE](runs/2026-10-17/PROV
 | Path | What |
 |---|---|
 | `start.sh`, `stop.sh`, `status.sh`, `verify.sh` | run the server (`ENGINE` in `.env` picks the engine) |
-| `scripts/` | download, template fix, setup checks, the Zig engine (`zig_*.sh`: image, inputs, start, supervisor), safe engine install for the Python engine (`_raw_*`: the scripts as they ran on the tested pair) |
+| `scripts/` | download, template fix, setup checks, the Zig engine (`zig_*.sh`: image, inputs, start, and an optional supervisor), safe engine install for the Python engine (`_raw_*`: the scripts as they ran on the tested pair) |
 | `docker/` | the engine builds (`Dockerfile.zig` for the Zig engine, `Dockerfile` for the Python engine) |
 | `tests/` | the 32 agent tests, the format check, the benchmark, the prompt tests, the Hermes test ([guide](tests/README.md)) |
 | `experiments/memory-topk/` | opt-in image with bounded top-k scratch and an opt-in allocator policy ([guide](docs/MEMORY-TOPK.md)) |

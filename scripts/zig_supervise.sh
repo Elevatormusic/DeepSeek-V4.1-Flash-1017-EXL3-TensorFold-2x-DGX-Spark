@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Optional supervisor for ENGINE=zig. It watches both rank containers and follows the exit codes of the engine
+# OPTIONAL supervisor for ENGINE=zig. Not tested on hardware (offline tests only). The default is the manual start and stop
+# (./start.sh, ./stop.sh; docs/ZIG.md). It watches both rank containers and follows the exit codes of the engine
 # (docs/ZIG.md, "Exit codes"). Run it on the head, after ./start.sh, for example in tmux or in a systemd service.
 #   scripts/zig_supervise.sh
 # Rules, from the exit codes of the two ranks:

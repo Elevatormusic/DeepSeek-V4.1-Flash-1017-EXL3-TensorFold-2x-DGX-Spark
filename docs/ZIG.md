@@ -177,9 +177,11 @@ Either rank can exit 75. The other rank then exits 75 too, because it sees the l
 
 `TF_DS_EXIT_ON_FAULT=1` must stay on for both ranks.
 
-### The supervisor
+### The supervisor (optional, not tested on hardware)
 
-`scripts/zig_supervise.sh` follows the table. Run it on the head after `./start.sh`, for example in `tmux`:
+The default way to run the engine is the manual start and stop: [The launch](#the-launch) and [Stop and restart](#stop-and-restart) (`./start.sh`, `./stop.sh`). After an exit code 75, you run `./stop.sh && ./start.sh` yourself.
+
+`scripts/zig_supervise.sh` is an optional helper that does this for you. It has offline tests only: nobody has run it on a pair. It follows the table above. Run it on the head after `./start.sh`, for example in `tmux`:
 
 ```bash
 scripts/zig_supervise.sh
@@ -268,6 +270,6 @@ These are things that a public user cannot do, or that no test covers, at this t
 3. **The kernel kit comes from a third party.** `scripts/zig_inputs.sh kit` downloads the folder `kit/` of `bertholomus/DeepSeek-V4.1-Flash-TensorFold-TP2-2xGB10` (mixed licences: see `KIT-LICENSES.md` in the kit). The kit README names this place. The script fixes the download to one commit of that repo (`4996441a82d9`; the `MANIFEST` of that commit has the sha256 `8c6dcb71`, the file that the tests used, read over HTTPS on 22 October 2026). The script then checks, before anything from the kit runs: (1) the sha256 of `MANIFEST`; (2) every file of the kit against `MANIFEST`, and that the folder holds no file that `MANIFEST` does not list, with `scripts/verify_kit.sh` of this repo. It never runs `tools/verify_kit.sh` of the kit. It sends `scripts/verify_kit.sh` to the worker on stdin, so the worker also runs only the checker of this repo. This recipe has not downloaded the other kit files from that commit yet; the offline tests use a small kit of their own.
 4. **The token map** is made by `make_token_map.py` of the fork. The file it made from our tokenizer has the same sha256 as the file of the tests (`de40bcdd71f2`). A different `tokenizers` version can give another file. The script warns in that case.
 5. **Host tests of `d58d25cc`** (`zig build test-cuda-host`) are not finished.
-6. **earlyoom and rank 1.** `scripts/host_tuning.sh` sets `--prefer ^tensorfold`. Rank 0 is `tensorfold-native`, which matches. Rank 1 is `tf-dsv41-lanes`, which does not match. Both containers have `--oom-score-adj 1000`. The tests saw no earlyoom stop of rank 1 and did not test this choice.
+6. **earlyoom and rank 1.** `scripts/host_tuning.sh` sets `--prefer ^(tensorfold|tf-dsv41)`. It matches rank 0 (`tensorfold-native`) and rank 1 (`tf-dsv41-lanes`); the containers also run with `--oom-score-adj 1000`. A node that ran an older `scripts/host_tuning.sh` has `--prefer ^tensorfold` and must run the script again (`scripts/preflight.sh` checks this). The tests saw no earlyoom stop of rank 1 and did not test this choice on hardware.
 7. **Not measured on the Zig engine:** MTP acceptance by depth; a prompt cache that survives a restart; image answers (3 image requests were compared for prompt tokens only); `PARALLEL` below 4; `CONTEXT` other than 1,048,576; a KL measurement against the native release.
 8. **One pair.** All results come from one pair of DGX Spark.

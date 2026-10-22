@@ -95,7 +95,7 @@ docker run $(run_args 0 "$head_gid") >/dev/null
 # A rank that exits tells why with its exit code. The meaning of each code is in docs/ZIG.md.
 explain_exit() {  # $1 = side, $2 = container exit code
   case "$2" in
-    75) log "$1 rank exited with 75: a peer fault. Run ./stop.sh, then ./start.sh (or use scripts/zig_supervise.sh)." ;;
+    75) log "$1 rank exited with 75: a peer fault. Run ./stop.sh, then ./start.sh (the optional scripts/zig_supervise.sh does this)." ;;
     137) log "$1 rank exited with 137: it was killed (OOM kill, earlyoom or an operator). Check memory (docs/MEMORY.md)." ;;
     *) log "$1 rank exited with $2: read the log above. Do not restart in a loop." ;;
   esac

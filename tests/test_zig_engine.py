@@ -923,6 +923,20 @@ class Files(unittest.TestCase):
         self.assertIn('test "$(git rev-parse HEAD)" = "${TF_REF}"', text)
         self.assertIn('sha256sum -c -', text)                        # the Zig archive
 
+    def test_earlyoom_prefers_both_engine_processes_and_not_the_system(self):
+        text = (ROOT / "scripts" / "host_tuning.sh").read_text(encoding="utf-8")
+        m = re.search(r"--prefer (\S+) --avoid ([^\s\"]+)", text)
+        self.assertIsNotNone(m)
+        prefer, avoid = re.compile(m.group(1)), re.compile(m.group(2))
+        for name in ("tensorfold-native", "tf-dsv41-lanes", "tensorfold"):
+            self.assertTrue(prefer.match(name), name)
+        for name in ("sshd", "dockerd", "systemd"):
+            self.assertFalse(prefer.match(name), name)
+            self.assertTrue(avoid.match(name), name)
+        for name in ("tensorfold-native", "tf-dsv41-lanes"):
+            self.assertFalse(avoid.match(name), name)
+        self.assertIn(f"--prefer {m.group(1)} ", (ROOT / "scripts" / "preflight.sh").read_text(encoding="utf-8"))
+
     def test_zig_scripts_are_listed_with_the_rollback_note(self):
         for name in ("scripts/zig_start.sh", "scripts/zig_supervise.sh", "scripts/zig_inputs.sh",
                      "scripts/zig_build_image.sh", "scripts/zig_gid.sh"):

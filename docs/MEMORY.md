@@ -72,11 +72,11 @@ Keep `vm.min_free_kbytes` at 1 GiB. With 512 MiB the head showed compaction stal
 `scripts/host_tuning.sh` starts earlyoom with these arguments (in `/etc/default/earlyoom`):
 
 ```text
--r 3600 -p -M 1048576,524288 -s 100,100 --prefer ^tensorfold --avoid ^(systemd|sshd|dockerd|containerd|dbus-daemon|NetworkManager|gdm|Xorg|nvidia)
+-r 3600 -p -M 1048576,524288 -s 100,100 --prefer ^(tensorfold|tf-dsv41) --avoid ^(systemd|sshd|dockerd|containerd|dbus-daemon|NetworkManager|gdm|Xorg|nvidia)
 ```
 
 - `-M 1048576,524288`: earlyoom sends SIGTERM when `MemAvailable` is under 1 GiB, and SIGKILL when it is under 512 MiB. The values are in KiB.
-- `--prefer ^tensorfold`: earlyoom stops the engine process first.
+- `--prefer ^(tensorfold|tf-dsv41)`: earlyoom stops the engine process first. The pattern matches rank 0 of the Zig engine (`tensorfold-native`) and of the Python engine, and rank 1 of the Zig engine (`tf-dsv41-lanes`). The containers also run with `--oom-score-adj 1000`, so the kernel OOM killer also picks them first.
 - `--avoid ...`: earlyoom does not stop ssh, Docker, the network manager or the desktop. The node stays reachable.
 - `-s 100,100`: the swap does not change this. The engine runs in `tensorfold.slice`, which has no swap.
 - `-r 3600`: earlyoom prints a status line each hour.
