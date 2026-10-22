@@ -3,29 +3,47 @@
 #   scripts/download.sh [phase ...]
 # With no argument, it runs all phases in this order. Each phase is safe to run again:
 # it resumes a download, or it skips work that is done.
-#   download  EXL3 2.9 bpw weights (196 GiB, 43 shards) at a pinned revision, with the hf command
+#   download  the EXL3 weights at a pinned revision, with the hf command. ENGINE=zig (the default in .env.example):
+#             the 2.8 bpw pack, 47 files, 190 GiB. ENGINE=python (the rollback): the 2.9 bpw pack, 43 shards, 196 GiB.
 #   engram    Engram shards 47 and 48 (189 GiB in total) and two small files, with resumable curl
-#   verify    sha256 check of 53 files against runs/2026-10-17/weights.sha256 (reads ~385 GiB)
+#   verify    sha256 check of the files against runs/2026-10-22/zig-28/weights-2.8bpw.sha256 (ENGINE=zig, 51 files)
+#             or runs/2026-10-17/weights.sha256 (ENGINE=python, 53 files). It reads about 380 GiB.
 #   view      hard-link view in $MODEL_VIEW (model/ and engram/); the chat template comes next
 #   worker    copy the view to the worker with rsync, then check the hashes there
 # The files go to $DOWNLOAD_DIR first (default: $MODEL_VIEW.src). Keep it on the same disk as
-# $MODEL_VIEW, because the view uses hard links. The two repos are public. HF_TOKEN is optional.
+# $MODEL_VIEW, because the view uses hard links. The repos are public. HF_TOKEN is optional.
 set -euo pipefail
 
 PHASES=(download engram verify view worker)
 
-usage() { sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; }
 
 case "${1:-}" in -h | --help) usage; exit 0 ;; esac
 
 # shellcheck source=common.sh
 . "$(dirname "$0")/common.sh"
 
-# --- Pinned inputs. The sizes come from runs/2026-10-17/PROVENANCE.md, section 2. ---
-EXL3_REPO=LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw
-EXL3_REV=afc7aa0aab98ee735c0f54e0a122019af1ac08f1
-EXL3_SHARDS=43
-EXL3_BYTES=210818691539   # model/ in the view, without the two template files
+# --- Pinned inputs. The sizes of the 2.9 bpw pack come from runs/2026-10-17/PROVENANCE.md, section 2. ---
+# The pack follows the engine: ENGINE=zig (the default) gets the 2.8 bpw pack, ENGINE=python (the rollback) the 2.9 bpw pack.
+case "${ENGINE:-zig}" in
+  zig)
+    PACK=2.8
+    EXL3_REPO=jayleaton/DeepSeek-V4.1-Flash-1017-EXL3-2.8bpw     # MIT licence
+    EXL3_REV=859396591c340195526aaf61f94b4ad5323a5e18
+    EXL3_SHARDS=42            # *.safetensors in model/: 40 layer files, native and head-mtp
+    EXL3_BYTES=203793355048   # model/ in the view: 47 files (46 files of the pack and its LICENSE)
+    SUMS="$ROOT/runs/2026-10-22/zig-28/weights-2.8bpw.sha256"
+    ;;
+  python)
+    PACK=2.9
+    EXL3_REPO=LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw
+    EXL3_REV=afc7aa0aab98ee735c0f54e0a122019af1ac08f1
+    EXL3_SHARDS=43
+    EXL3_BYTES=210818691539   # model/ in the view, without the two template files
+    SUMS="$ROOT/runs/2026-10-17/weights.sha256"
+    ;;
+  *) echo "ENGINE must be zig or python" >&2; exit 1 ;;
+esac
 BASE_REPO=deepseek-ai/DeepSeek-V4.1-Flash-1017
 BASE_REV=1bae0e1088993b9b82de08f59de5be5a34e42170
 ENGRAM_FILES=(            # "name size in bytes": the four files of the base repo that the view needs
@@ -34,7 +52,6 @@ ENGRAM_FILES=(            # "name size in bytes": the four files of the base rep
   "model.safetensors.index.json 7470294"
   "config.json 3311"
 )
-SUMS="$ROOT/runs/2026-10-17/weights.sha256"
 SPARE_BYTES=$((10 * 1024 * 1024 * 1024))   # keep 10 GiB free after the work
 
 ENGRAM_BYTES=0
@@ -151,12 +168,21 @@ check_head_setup() {  # Run once, before a download. Fail now, not after 200 GiB
 }
 
 phase_download() {
-  local hf attempt
+  local hf attempt files filter
   hf=$(find_hf) || fail "download: the hf command is missing. Install it with: pipx install 'huggingface_hub[cli]'"
   mkdir -p "$DL_DIR/model"
   log "download: $EXL3_REPO at ${EXL3_REV:0:8}, about $(gib_up "$EXL3_BYTES") GiB, into $DL_DIR/model"
+  # The 2.9 bpw pack: the whole repo. The 2.8 bpw pack: only the files of the hash list. The repo also holds a chat
+  # template and a README, which the view does not use (the template comes from scripts/patch_template.py).
+  files=()
+  filter=(--exclude 'assets/*')
+  if [ "$PACK" = 2.8 ]; then
+    [ -f "$SUMS" ] || fail "download: $SUMS is missing"
+    filter=()                 # the hf command takes file names or filters, not both
+    mapfile -t files < <(awk '$2 ~ /^model\// { sub(/^model\//, "", $2); print $2 }' "$SUMS")
+  fi
   for attempt in 1 2 3 4 5; do
-    if "$hf" download "$EXL3_REPO" --revision "$EXL3_REV" --exclude 'assets/*' --local-dir "$DL_DIR/model" > /dev/null; then
+    if "$hf" download "$EXL3_REPO" "${files[@]}" --revision "$EXL3_REV" "${filter[@]}" --local-dir "$DL_DIR/model" > /dev/null; then
       log "download: done"
       return 0
     fi
@@ -194,7 +220,7 @@ phase_verify() {
     fail "verify: no files in $DL_DIR or $MODEL_VIEW. Run the download and engram phases first."
   fi
   log "verify: check $(wc -l < "$SUMS") files in $root against $(basename "$SUMS")"
-  log "verify: this reads about 385 GiB with one thread and takes a while. One line shows for each finished file."
+  log "verify: this reads about $(gib_up $((EXL3_BYTES + ENGRAM_BYTES))) GiB with one thread and takes a while. One line shows for each finished file."
   (cd "$root" && sha256sum -c "$SUMS") ||
     fail "verify: a file is missing or damaged (see FAILED above). Delete it, then run the download and engram phases again."
   log "verify: all files match"
@@ -209,7 +235,7 @@ phase_view() {
     fail "view: no weights in $DL_DIR/model. Run the download phase first."
   mkdir -p "$MODEL_VIEW/model" "$MODEL_VIEW/engram"
   log "view: link the files into $MODEL_VIEW (hard links, no copy)"
-  for f in "$DL_DIR"/model/*.json "$DL_DIR"/model/*.safetensors; do
+  for f in "$DL_DIR"/model/*.json "$DL_DIR"/model/*.safetensors "$DL_DIR"/model/LICENSE; do
     [ -e "$f" ] || continue
     link_file "$f" "$MODEL_VIEW/model/$(basename "$f")"
   done
@@ -217,8 +243,9 @@ phase_view() {
     name=${e%% *}
     link_file "$DL_DIR/engram/$name" "$MODEL_VIEW/engram/$name"
   done
-  n=$(find "$MODEL_VIEW/model" -maxdepth 1 -name 'model-*-of-*.safetensors' | wc -l)
-  [ "$n" -eq "$EXL3_SHARDS" ] || fail "view: $n weight shards in $MODEL_VIEW/model, expected $EXL3_SHARDS"
+  if [ "$PACK" = 2.8 ]; then pattern='*.safetensors'; else pattern='model-*-of-*.safetensors'; fi
+  n=$(find "$MODEL_VIEW/model" -maxdepth 1 -name "$pattern" | wc -l)
+  [ "$n" -eq "$EXL3_SHARDS" ] || fail "view: $n weight files in $MODEL_VIEW/model, expected $EXL3_SHARDS"
   log "view: done. $(find "$MODEL_VIEW" -type f | wc -l) files, $n weight shards."
   log "view: $DL_DIR and the view share the data. Deleting $DL_DIR frees no disk space."
   if [ ! -f "$MODEL_VIEW/model/chat_template.jinja" ]; then
@@ -244,7 +271,7 @@ phase_worker() {
   log "worker: copy $MODEL_VIEW to $WORKER_SSH"
   rsync -a --partial-dir=.rsync-partial --info=progress2,stats1 \
     -e "ssh -o BatchMode=yes -o ConnectTimeout=10" "$MODEL_VIEW/" "$WORKER_SSH:$MODEL_VIEW/"
-  log "worker: sha256 check on the worker. It reads about 385 GiB there and takes a while."
+  log "worker: sha256 check on the worker. It reads about $(gib_up $((EXL3_BYTES + ENGRAM_BYTES))) GiB there and takes a while."
   wrun "cd $q && sha256sum -c -" < "$SUMS" ||
     fail "worker: a file is missing or damaged on the worker (see FAILED above). Delete it on the worker, then run the worker phase again."
   log "worker: view OK on $WORKER_SSH"

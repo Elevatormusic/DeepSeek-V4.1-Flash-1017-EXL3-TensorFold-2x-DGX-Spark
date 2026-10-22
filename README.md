@@ -4,15 +4,32 @@ Optional: [display-backed KV experiment](docs/DISPLAY-KV.md). Spill is disabled 
 
 **Run DeepSeek's V4.1 Flash model on two NVIDIA DGX Spark computers with about 2× the decode and prefill speed of the standard vLLM setup, ready for AI agents.**
 
-Also on Hugging Face: [Elevatormusic/DeepSeek-V4.1-Flash-1017-2x-DGX-Spark-TensorFold-2x-Faster](https://huggingface.co/Elevatormusic/DeepSeek-V4.1-Flash-1017-2x-DGX-Spark-TensorFold-2x-Faster). The engine is [my TensorFold fork](https://github.com/Elevatormusic/TensorFold) (branch `deepseek-v41-tp2`).
+**The default is the Zig engine with the 2.8 bpw pack** (since 22 October 2026). The Python engine 1.1.1 with the 2.9 bpw pack is the documented rollback: set `ENGINE=python` in `.env` ([Rollback](docs/ROLLBACK.md)). The Zig engine decodes about as fast as the Python engine and prefills 8 to 10% faster, and the 2.8 bpw pack leaves about 3 GiB more free memory on each node ([Zig engine](docs/ZIG.md)). The setup of the Zig engine has offline tests only: [Test status](docs/ZIG.md#test-status-read-this-first) and [Gaps](docs/ZIG.md#gaps) say what is not tested yet.
 
-Measured on 17 and 18 October 2026 on one pair of DGX Spark. Every number on this page comes from a saved run in [`runs/`](runs/2026-10-17/INDEX.md) ([prefill and 1M context](runs/2026-10-18/INDEX.md)).
+Also on Hugging Face: [Elevatormusic/DeepSeek-V4.1-Flash-1017-2x-DGX-Spark-TensorFold-2x-Faster](https://huggingface.co/Elevatormusic/DeepSeek-V4.1-Flash-1017-2x-DGX-Spark-TensorFold-2x-Faster). The engine is [my TensorFold fork](https://github.com/Elevatormusic/TensorFold): branch `dsv41-zig-dev` (Zig engine) and branch `deepseek-v41-tp2` (Python engine, the rollback).
+
+Measured on 17 and 18 October 2026 (Python engine against vLLM) and on 22 October 2026 (Zig engine against the Python engine) on one pair of DGX Spark. Every number on this page comes from a saved run in [`runs/`](runs/2026-10-17/INDEX.md) ([prefill and 1M context](runs/2026-10-18/INDEX.md), [Zig engine and 2.8 bpw pack](runs/2026-10-22/INDEX.md#zig-engine-and-the-28-bpw-pack)).
 
 ---
 
 ## At a glance
 
-| | Standard setup (vLLM) | This recipe | |
+**Zig engine against the Python engine 1.1.1** (same pack, same pair, median of 3; [details](docs/ZIG.md#measured-numbers)):
+
+| | Python engine 1.1.1 | Zig engine | |
+|---|---:|---:|---|
+| Decode, code (1 request) | 87.1 tok/s | **85.3 tok/s** | 97.9% |
+| Decode, 4 requests together | 123.3 tok/s | **123.0 tok/s** | 99.8% |
+| Prefill, 32K-token prompt, cold | 2,004 to 2,268 tok/s | **2,161 to 2,487 tok/s** | **+7.8 to +9.7%** |
+| Free memory at idle, head | 6.47 GiB | **6.43 GiB** | |
+| Lost or malformed tool calls (505 requests) | 0.40% | **0.00%** | |
+| Longest needle test | | **1,038,664 tokens** | found |
+
+The 2.8 bpw pack against the 2.9 bpw pack, both on the Python engine: **3.3 GiB more free memory at idle, 3.0 GiB more at the lowest point**, equal speed and equal results in our tests ([pack report](runs/2026-10-22/zig-28/pack-2.8bpw-test.md)).
+
+**Python engine (the rollback) against the standard vLLM setup** (measured on 17 and 18 October; the Zig engine is as fast or faster):
+
+| | Standard setup (vLLM) | Python engine | |
 |---|---:|---:|---|
 | Decode, prose (1 request) | 27 tok/s | **57 tok/s** | **2.1× faster** |
 | Decode, code (1 request) | 40 tok/s | **92 tok/s** | **2.3× faster** |
@@ -22,9 +39,9 @@ Measured on 17 and 18 October 2026 on one pair of DGX Spark. Every number on thi
 
 *Prefill* is the speed at which the server reads the prompt; it sets the time to first token (TTFT). *Decode* is the speed at which it writes the reply. A *token* is a piece of a word: 100 tokens are about 75 English words.
 
-Both setups ran on the same two computers, with the same model files. The prefill speed of this recipe is the median of 3 runs with cold prompts (new random prompts, no prefix-cache hit); the range is 2,174 to 2,195 tok/s. The vLLM prefill speed comes from the test suite's 32K prompt, which can include a prefix-cache hit; that would favor vLLM. In a needle test with a 1,035,020-token prompt, the model found the needle; the TTFT was 13.6 minutes.
+Both setups ran on the same two computers, with the same model files. The prefill speed of the Python engine is the median of 3 runs with cold prompts (new random prompts, no prefix-cache hit); the range is 2,174 to 2,195 tok/s. The vLLM prefill speed comes from the test suite's 32K prompt, which can include a prefix-cache hit; that would favor vLLM. In a needle test with a 1,035,020-token prompt, the model found the needle; the TTFT was 13.6 minutes.
 
-Prefill with cold prompts (bertholomus's kit_bench client, median of 3 runs):
+Prefill with cold prompts (bertholomus's kit_bench client, median of 3 runs, Python engine):
 
 | Prompt length | 8K tokens | 32K | 64K | 128K | 1,035,020 |
 |---|---:|---:|---:|---:|---:|
@@ -36,15 +53,15 @@ The kit_bench numbers use a small-vocabulary prompt (random words from a list of
 
 ## What you get
 
-Optional: [cache accounting for health and Prometheus](experiments/cache-metrics/README.md). This experiment does not change the ordinary image.
+Optional: [cache accounting for health and Prometheus](experiments/cache-metrics/README.md). This experiment needs the Python engine (`ENGINE=python`). It does not change the ordinary image.
 
-- **About 2× the decode speed** of the standard vLLM setup: 57 vs 27 tok/s on prose, 92 vs 40 tok/s on code.
-- **Fast prefill.** About 2,000 to 2,200 tok/s for prompts up to 64K tokens.
-- **Ready for AI agents.** Forced tool calls (`tool_choice` set to `required` or to one tool) and structured output (a JSON schema, a regex or a list of choices).
-- **4 concurrent requests.** Up to 4 requests share the two computers. Aggregate throughput reaches 140 tok/s on code.
-- **Prefix cache.** A second question about the same long document has a TTFT of about 1 s instead of 13 s. Cached prompts also go to disk, so after a restart the TTFT is about 3 s.
-- **Fault isolation.** One failed request ends only that request, not the whole server.
-- **1M-token context.** The full 1,048,576-token context window. A needle test with a 1,035,020-token prompt passed.
+- **About 2× the decode speed** of the standard vLLM setup. The Zig engine decodes at 97.9 to 99.8% of the Python engine's speed (85.3 tok/s on code, 123.0 tok/s for 4 requests together), and the Python engine decodes 57 vs 27 tok/s on prose and 92 vs 40 tok/s on code against vLLM.
+- **Fast prefill.** About 2,100 to 2,500 tok/s for a cold 32K-token prompt on the Zig engine.
+- **Ready for AI agents.** Forced tool calls (`tool_choice` set to `required` or to one tool) and structured output (a JSON schema, a regex or a list of choices). In the release tests, 505 agent requests with parallel tool calls gave 0 lost and 0 malformed calls.
+- **4 concurrent requests.** Up to 4 requests share the two computers.
+- **Prefix cache.** A second question about the same long document has a TTFT of about 1 s instead of 14 s (a 32K prompt). The Python engine also keeps cached prompts on disk: after a restart the TTFT is about 3 s (`ENGINE=python`, `SPILL_GIB`).
+- **Fault isolation.** One failed request ends only that request, not the whole server. If a rank dies, the other rank ends with exit code 75 in 2 to 8 s, and you restart the pair with `./stop.sh && ./start.sh`. The optional script `scripts/zig_supervise.sh` can do this for you (not tested on hardware).
+- **1M-token context.** The full 1,048,576-token context window. Needle tests with prompts of up to 1,038,664 tokens passed.
 
 ---
 
@@ -53,11 +70,11 @@ Optional: [cache accounting for health and Prometheus](experiments/cache-metrics
 You need:
 
 - **Two NVIDIA DGX Spark**, joined by one QSFP cable between their ConnectX-7 network ports. NVIDIA's [Connect Two Sparks](https://build.nvidia.com/spark/connect-two-sparks) guide shows how to cable them, set fixed addresses, and set up ssh.
-- **About 650 GB of free disk on each computer.** The model files use 414 GB (385 GiB). The first start needs 110 GiB more for the cache (preflight checks this). With the default `SPILL_GIB=64`, cached prompts can use up to 64 GiB more. With `SPILL_GIB=0`, about 550 GB is enough.
-- **About 111 GiB of free memory on the head and 109 GiB on the worker** (`MemAvailable` before the start; `scripts/preflight.sh` checks this). The engine holds about 108 GiB on the head. The head is the first computer to run out of memory, so close other AI programs, browsers and desktop programs on it first. See [Memory](docs/MEMORY.md).
+- **About 500 GB of free disk on each computer.** The 2.8 bpw pack uses 190 GiB and the Engram tables 189 GiB. The first start needs 96 GiB more for the weight file of each rank. (The rollback needs about 650 GB: see [Rollback](docs/ROLLBACK.md).)
+- **110 GiB of free memory on each node** (`MemAvailable` before the start; `scripts/preflight.sh` checks this). The head is the first computer to run out of memory, so close other AI programs, browsers and desktop programs on it first. See [Memory](docs/MEMORY.md).
 - **A network setup** with fixed addresses on the cable link and ssh from the first computer to the second. Do NVIDIA's guide first, then read [our network notes](docs/NETWORK.md).
 - **Software on the head:** Docker with GPU support (DGX OS has it), Python 3, `curl`, `rsync`, and the [Hugging Face CLI](https://huggingface.co/docs/huggingface_hub/guides/cli) (`hf`). The worker needs Docker and `rsync`.
-- **Time.** Most of the first setup is the 400 GB download. It takes a few hours on a fast internet link.
+- **Time.** Most of the first setup is the 380 GiB download and the image build.
 
 In this guide, the *head* is the computer where you type the commands. The *worker* is the second computer.
 
@@ -65,15 +82,15 @@ In this guide, the *head* is the computer where you type the commands. The *work
 
 ## Set up
 
-Run each command on the head, in this folder.
+Run each command on the head, in this folder. [The Zig engine guide](docs/ZIG.md) explains each step and lists the gaps.
 
-**1. Make your settings file.** Then open `.env` and type your addresses and folder paths.
+**1. Make your settings file.** Then open `.env` and type your addresses and folder paths. `ENGINE=zig` is already there.
 
 ```bash
 cp .env.example .env
 ```
 
-**2. Download the model.** This step gets 400 GB, checks every file, and copies it to the worker.
+**2. Download the pack.** This step gets 380 GiB (the 2.8 bpw pack and the Engram tables), checks every file, and copies it to the worker.
 
 ```bash
 scripts/download.sh
@@ -85,10 +102,10 @@ scripts/download.sh
 scripts/patch_template.py --worker
 ```
 
-**4. Build the engine.** This step builds the server software from [my TensorFold fork](https://github.com/Elevatormusic/TensorFold) and copies it to the worker. The fork is bertholomus's engine plus the changes in [What I changed](#what-i-changed-to-make-it-work).
+**4. Build the engine.** This step builds the Zig engine image from [my TensorFold fork](https://github.com/Elevatormusic/TensorFold) (it builds the base image first when it is missing) and copies it to the worker. The fork is bertholomus's Zig engine plus the changes in [What I changed](#what-i-changed-to-make-it-work).
 
 ```bash
-docker/build.sh
+scripts/zig_build_image.sh
 ```
 
 **5. Tune the memory settings (once).** This keeps the model out of swap, turns transparent huge pages off and stops memory stalls during long prefills, on both computers. If memory runs out, it stops the model, not the computer (this needs the earlyoom package, which DGX OS has). It asks for your password on each computer. `scripts/host_tuning.sh --undo` removes it.
@@ -97,13 +114,19 @@ docker/build.sh
 scripts/host_tuning.sh
 ```
 
-**6. Start the server.** It checks your setup first. The first start takes about 15 minutes. Later starts take 2 to 4 minutes.
+**6. Make the inputs of the engine.** This step gets the kernel kit, makes the token map, and makes the weight file of each rank (96 GiB on each node).
+
+```bash
+scripts/zig_inputs.sh
+```
+
+**7. Start the server.** It checks your setup first, then sends one real request. A start takes 26 to 34 s when the weight files exist.
 
 ```bash
 ./start.sh
 ```
 
-**7. Check that it works.** This sends five real requests and shows the result of each.
+**8. Check that it works.** This sends five real requests and shows the result of each.
 
 ```bash
 ./verify.sh
@@ -136,9 +159,10 @@ Thinking is off by default. Turn it on per request with `"reasoning_effort": "hi
 | See if the server is running | `./status.sh` |
 | Stop the server | `./stop.sh` |
 | Run all the tests | `tests/run_all.sh` |
-| Install a new engine version safely | `scripts/deploy_gate.sh <new> <old>` |
+| Restart the pair on its own after a peer fault (exit code 75); optional, not tested on hardware | `scripts/zig_supervise.sh` |
+| Install a new Python engine version safely (`ENGINE=python`) | `scripts/deploy_gate.sh <new> <old>` |
 
-If something goes wrong, read [Operations](docs/OPERATIONS.md). It covers restarts, logs, and what to avoid on DGX Spark. If earlyoom stops the engine, read [Memory](docs/MEMORY.md).
+If something goes wrong, read [the Zig engine guide](docs/ZIG.md#exit-codes) (exit codes, restarts) and [Operations](docs/OPERATIONS.md) (logs, and what to avoid on DGX Spark). If earlyoom stops the engine, read [Memory](docs/MEMORY.md). To go back to the Python engine, read [Rollback](docs/ROLLBACK.md).
 
 ---
 
@@ -152,16 +176,20 @@ The fast engine for this model was written by [bertholomus](https://github.com/b
 4. **Fault isolation.** Before, one failed request stopped all requests until a manual restart. Now it ends only that request.
 5. **Faster long prefills.** The server now drops the page cache of the Engram tables after each prompt chunk. Before, the page cache filled the memory, and some chunks stalled for 1 to 4 s in reclaim and compaction.
 6. **Steady long prefills.** The server writes its spill files with O_DIRECT, so they skip the page cache, and the host setup turns transparent huge pages off. Page compaction stalls the GPU on these computers; these two changes remove the last compaction stalls, and prefill speed now changes by less than 2% from run to run.
+7. **The Zig engine as the default (22 October 2026).** The fork ports the agent features to bertholomus's Zig engine: `top_k` 0 ([#29](https://github.com/Elevatormusic/TensorFold/pull/29)), the RDMA GID setting ([#30](https://github.com/Elevatormusic/TensorFold/pull/30)), structured output ([#31](https://github.com/Elevatormusic/TensorFold/pull/31)), forced DSML tool calls ([#32](https://github.com/Elevatormusic/TensorFold/pull/32)), fault isolation with exit code 75 ([#33](https://github.com/Elevatormusic/TensorFold/pull/33)), the loader for the 2.8 bpw pack ([#38](https://github.com/Elevatormusic/TensorFold/pull/38)), special-token text as plain text ([#39](https://github.com/Elevatormusic/TensorFold/pull/39)) and a peer watch that ends a rank whose peer died ([#40](https://github.com/Elevatormusic/TensorFold/pull/40)). A release fault campaign found two faults that block a release (F1 and F3) and both are fixed ([results](docs/ZIG.md#measured-numbers)).
 
-[Read the full story](docs/WHAT-I-CHANGED.md), with the reason for each change. The engine code is in [my fork](https://github.com/Elevatormusic/TensorFold), in pull requests [#1](https://github.com/Elevatormusic/TensorFold/pull/1), [#2](https://github.com/Elevatormusic/TensorFold/pull/2), [#3](https://github.com/Elevatormusic/TensorFold/pull/3), [#4](https://github.com/Elevatormusic/TensorFold/pull/4) and [#6](https://github.com/Elevatormusic/TensorFold/pull/6), and in [release dsv41-1.1.0](https://github.com/Elevatormusic/TensorFold/releases/tag/dsv41-1.1.0) (more pull requests; see [What I changed](docs/WHAT-I-CHANGED.md#7-engine-release-110)).
+[Read the full story](docs/WHAT-I-CHANGED.md), with the reason for each change. The Python engine code is in [my fork](https://github.com/Elevatormusic/TensorFold), in pull requests [#1](https://github.com/Elevatormusic/TensorFold/pull/1), [#2](https://github.com/Elevatormusic/TensorFold/pull/2), [#3](https://github.com/Elevatormusic/TensorFold/pull/3), [#4](https://github.com/Elevatormusic/TensorFold/pull/4) and [#6](https://github.com/Elevatormusic/TensorFold/pull/6), and in [release dsv41-1.1.0](https://github.com/Elevatormusic/TensorFold/releases/tag/dsv41-1.1.0) (more pull requests; see [What I changed](docs/WHAT-I-CHANGED.md#7-engine-release-110)).
 
 ---
 
 ## Good to know
 
-- **The first long prompt after a start has a higher TTFT,** about 1 to 2 s more. Later prompts do not.
-- **Prefill is a little slower than bertholomus reports.** At 32K tokens this setup prefills at 2,179 tok/s; they publish 2,421 on different computers and the original V4.1 weights. Prefill speed is now steady from run to run (64K: 2,110 to 2,115 tok/s), except for the first prompt after a start.
-- **A 1M-token prompt has a TTFT of about 14 minutes** (prefill at 1,266 tok/s).
+- **Check the gaps before you rely on the Zig setup.** The scripts for the Zig engine have offline tests only, and the image is not built from this recipe yet ([Gaps](docs/ZIG.md#gaps)).
+- **The pack is a third-party quant.** The 2.8 bpw pack is [`jayleaton/DeepSeek-V4.1-Flash-1017-EXL3-2.8bpw`](https://huggingface.co/jayleaton/DeepSeek-V4.1-Flash-1017-EXL3-2.8bpw) (MIT). In our tests it matches the 2.9 bpw pack in speed and in tool-call form (0 failures in 530 requests). Nobody has measured the quality of the content against the native release (a KL measurement is still open).
+- **MTP acceptance.** On the Python engine, the 2.8 bpw pack accepts 2 to 3 points fewer drafts at depth 1 (71.7% against 74.5%). Nobody has measured it on the Zig engine yet.
+- **The first long prompt after a start has a higher TTFT** on the Python engine, about 1 to 2 s more. The Zig engine was not measured for this.
+- **Prefill is a little slower than bertholomus reports.** At 32K tokens the Zig engine prefills at 2,161 to 2,487 tok/s, depending on the prompt; bertholomus publishes 2,421 on different computers and the original V4.1 weights.
+- **A 1M-token prompt has a TTFT of about 14 minutes** (Python engine, prefill at 1,266 tok/s). The Zig engine passed a needle test of 1,038,664 tokens; its TTFT was not recorded.
 - **vLLM was tested with 1 request at a time only.** So the concurrency numbers have no vLLM comparison.
 - **Living Weights is not available.** That TensorFold feature works only with a different model on one computer.
 
@@ -169,7 +197,11 @@ The fast engine for this model was written by [bertholomus](https://github.com/b
 
 ---
 
-## Go back to the standard setup
+## Go back
+
+**To the Python engine 1.1.1 and the 2.9 bpw pack** (the rollback of this recipe): set `ENGINE=python` and `MODEL_VIEW=$HOME/models/deepseek-v41-1017-exl3-2.9bpw` in `.env`, then run `./stop.sh && ./start.sh`. [Rollback](docs/ROLLBACK.md) has every step.
+
+**To the standard vLLM setup:**
 
 1. Stop this server:
 
@@ -177,18 +209,25 @@ The fast engine for this model was written by [bertholomus](https://github.com/b
 ./stop.sh
 ```
 
-2. Start the [MiaAI-Lab vLLM kit](https://github.com/MiaAI-Lab/DeepSeek-v4.1-Flash-EXL3-2x-DGX-Sparks) as its guide tells you. It uses the same model files. Run only one server at a time.
+2. Start the [MiaAI-Lab vLLM kit](https://github.com/MiaAI-Lab/DeepSeek-v4.1-Flash-EXL3-2x-DGX-Sparks) as its guide tells you. It uses the 2.9 bpw model files. Run only one server at a time.
 
 ---
 
 ## For experts
 
 <details>
-<summary><b>Full speed results</b></summary>
+<summary><b>Full speed results of the Zig engine</b></summary>
+
+All values are in [docs/ZIG.md](docs/ZIG.md#measured-numbers). The runs behind them: [`runs/2026-10-22/zig-28/zig-release-faults.md`](runs/2026-10-22/zig-28/zig-release-faults.md) (Zig engine against Python 1.1.1, same pack) and [`runs/2026-10-22/zig-28/pack-2.8bpw-test.md`](runs/2026-10-22/zig-28/pack-2.8bpw-test.md) (2.8 bpw pack against 2.9 bpw pack, both on the Python engine).
+
+</details>
+
+<details>
+<summary><b>Full speed results of the Python engine (the rollback), against vLLM</b></summary>
 
 #### This recipe vs the vLLM kit (same computers, same day, same prompts)
 
-vLLM: 1 run. This recipe: 6 runs (6 engine builds of the same day, the last is the released one). The table shows the median and the range.
+vLLM: 1 run. The Python engine: 6 runs (6 engine builds of the same day, the last is the released one). The table shows the median and the range.
 
 | 1 request | vLLM kit | This recipe (median, range) | Faster by |
 |---|---:|---:|---:|
@@ -252,9 +291,12 @@ Method, definitions and every run: [Benchmarks](docs/BENCHMARKS.md).
 
 | What | Version |
 |---|---|
-| Model weights | `LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw` @ `afc7aa0a` (43 files) |
+| Model weights, Zig engine (default) | `jayleaton/DeepSeek-V4.1-Flash-1017-EXL3-2.8bpw` @ `85939659` (47 files, MIT) |
+| Engine, Zig (default) | [Elevatormusic/TensorFold](https://github.com/Elevatormusic/TensorFold) branch `dsv41-zig-dev` @ `d58d25ccd6dbd624814cc2ccc848f8e5ba84580c`, image `tensorfold-dsv41-zig:d58d25cc` ([ZIG.md](docs/ZIG.md#the-image)) |
+| Kernel kit, Zig | the kit of bertholomus's TensorFold 1.0 (Zig) engine for DeepSeek-V4.1-Flash, `MANIFEST` sha256 `8c6dcb71` ([ZIG.md](docs/ZIG.md#gaps)) |
+| Model weights, rollback | `LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw` @ `afc7aa0a` (43 files) |
 | Engram tables | `deepseek-ai/DeepSeek-V4.1-Flash-1017` @ `1bae0e10`, files 47 and 48 |
-| Engine | [Elevatormusic/TensorFold](https://github.com/Elevatormusic/TensorFold) @ `cb4ceaff2b8c`, [release dsv41-1.1.1](https://github.com/Elevatormusic/TensorFold/releases/tag/dsv41-1.1.1) (TensorFold 0.6.6 + bertholomus's V4.1 engine + the fork pull requests listed in [What I changed](docs/WHAT-I-CHANGED.md)) |
+| Engine, rollback | [Elevatormusic/TensorFold](https://github.com/Elevatormusic/TensorFold) @ `cb4ceaff2b8c`, [release dsv41-1.1.1](https://github.com/Elevatormusic/TensorFold/releases/tag/dsv41-1.1.1) (TensorFold 0.6.6 + bertholomus's V4.1 engine + the fork pull requests listed in [What I changed](docs/WHAT-I-CHANGED.md)) |
 | Base image | `nvcr.io/nvidia/pytorch:26.07-py3` |
 | Chat template | MiaAI kit `files/chat_template.jinja` @ `6f7d1590` + [our patch](runs/2026-10-17/template-patch.diff) |
 | vLLM comparison | MiaAI kit @ `6f7d1590`, image `sha256:2f0cf3ad...` |
@@ -269,16 +311,16 @@ Every checksum, file size and computer detail: [PROVENANCE](runs/2026-10-17/PROV
 
 | Path | What |
 |---|---|
-| `start.sh`, `stop.sh`, `status.sh`, `verify.sh` | run the server |
-| `scripts/` | download, template fix, setup checks, safe engine install (`_raw_*`: the scripts as they ran on the tested pair) |
-| `docker/` | the engine build |
+| `start.sh`, `stop.sh`, `status.sh`, `verify.sh` | run the server (`ENGINE` in `.env` picks the engine) |
+| `scripts/` | download, template fix, setup checks, the Zig engine (`zig_*.sh`: image, inputs, start, and an optional supervisor), safe engine install for the Python engine (`_raw_*`: the scripts as they ran on the tested pair) |
+| `docker/` | the engine builds (`Dockerfile.zig` for the Zig engine, `Dockerfile` for the Python engine) |
 | `tests/` | the 32 agent tests, the format check, the benchmark, the prompt tests, the Hermes test ([guide](tests/README.md)) |
 | `experiments/memory-topk/` | opt-in image with bounded top-k scratch and an opt-in allocator policy ([guide](docs/MEMORY-TOPK.md)) |
 | `experiments/display-spill/` | opt-in display KV image with SSD spill ([guide](docs/SPILL.md)) |
 | `experiments/tool-output/` | opt-in image that rejects unoffered model tool calls ([guide](docs/TOOL-OUTPUT.md)) |
 | `.github/` | CI (offline tests, ruff, shellcheck, link check), the pull request and issue templates |
 | `runs/2026-10-17/` | every log and result behind this page |
-| `docs/` | how to connect your app, the full story, benchmarks, network, operations, memory, known limits |
+| `docs/` | the Zig engine, the rollback, how to connect your app, the full story, benchmarks, network, operations, memory, known limits |
 
 </details>
 
@@ -292,6 +334,6 @@ Pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first: it giv
 
 ## Credits and licence
 
-This recipe stands on the work of DeepSeek (the model), LibertAIDAI (the compressed weights), turboderp (ExLlamaV3), ashhart and the TensorFold contributors, **bertholomus (the fast V4.1 engine this recipe runs)**, willjriley and Capicua25x (engine fixes), MiaAI-Lab (the vLLM kit and the template) and tonyd2wild (the benchmark method). [Full credits](CREDITS.md)
+This recipe stands on the work of DeepSeek (the model), LibertAIDAI (the 2.9 bpw weights), jayleaton (the 2.8 bpw weights), turboderp (ExLlamaV3), ashhart and the TensorFold contributors, **bertholomus (the fast V4.1 engine this recipe runs)**, willjriley and Capicua25x (engine fixes), MiaAI-Lab (the vLLM kit and the template) and tonyd2wild (the benchmark method). [Full credits](CREDITS.md)
 
 The scripts, tests and documents here are Apache-2.0 ([LICENSE](LICENSE)). The model, the template and the engine keep their own licences.

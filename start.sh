@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
-# Start DeepSeek-V4.1-Flash-1017 on TensorFold, TP=2 across both Sparks: rank 0 on this node (the head), wait for its
-# rendezvous port, then rank 1 on the worker, then wait until the API answers. First start: ~15 min (rank caches);
-# later starts: ~2-4 min.
+# Start DeepSeek-V4.1-Flash-1017 on TensorFold, TP=2 across both Sparks.
+# ENGINE=zig (the default in .env.example): the Zig engine with the 2.8 bpw pack. This script hands over to
+# scripts/zig_start.sh (docs/ZIG.md).
+# ENGINE=python (the rollback): the Python engine 1.1.1 with the 2.9 bpw pack (docs/ROLLBACK.md). Rank 0 starts on this
+# node (the head), then the script waits for its rendezvous port, starts rank 1 on the worker, and waits until the API
+# answers. First start: ~15 min (rank caches); later starts: ~2-4 min.
 set -euo pipefail
 # shellcheck source=scripts/common.sh
 . "$(dirname "$0")/scripts/common.sh"
+
+case "${ENGINE:-zig}" in
+  zig) exec "$ROOT/scripts/zig_start.sh" "$@" ;;
+  python) ;;
+  *) echo "ENGINE must be zig or python" >&2; exit 1 ;;
+esac
 
 # Only the separately selected memory-topk image uses this opt-in policy.
 case "${MEM_CAP-0}" in

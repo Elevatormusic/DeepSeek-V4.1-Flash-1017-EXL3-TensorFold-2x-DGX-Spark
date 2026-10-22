@@ -1,5 +1,7 @@
 # Operations
 
+> **This page is about the Python engine, the rollback (`ENGINE=python`).** The default engine is the Zig engine: read [ZIG.md](ZIG.md) for its start, stop, exit codes and restart rules. `./start.sh`, `./stop.sh`, `./status.sh` and `./verify.sh` work for both engines. The settings that this page names (`MTP_DRAFTS`, `PREFILL_CHUNK`, `VISION`, `MEM_FLOOR_GIB`, `SPILL_GIB`) and the first-start times apply to the Python engine only.
+
 ## Start, stop, check
 
 ```bash

@@ -2,6 +2,8 @@
 
 The head node (rank 0) is the first node to run out of memory. earlyoom then stops the engine. This page explains why, how to read the stop, and which settings give the head more room.
 
+> **The Zig engine (the default)** needs 110 GiB of `MemAvailable` on both nodes at the start. At idle the head has 6.4 GiB free; the 2.8 bpw pack leaves about 3 GiB more than the 2.9 bpw pack. The numbers, and the earlyoom gap for rank 1, are in [ZIG.md](ZIG.md#memory). The rest of this page was measured on the Python engine (the rollback), but the cause (the head is the tight node) is the same.
+
 ## What to do
 
 1. Run `scripts/host_tuning.sh` once (it needs sudo on both nodes). Restart the server after it.
@@ -70,11 +72,11 @@ Keep `vm.min_free_kbytes` at 1 GiB. With 512 MiB the head showed compaction stal
 `scripts/host_tuning.sh` starts earlyoom with these arguments (in `/etc/default/earlyoom`):
 
 ```text
--r 3600 -p -M 1048576,524288 -s 100,100 --prefer ^tensorfold --avoid ^(systemd|sshd|dockerd|containerd|dbus-daemon|NetworkManager|gdm|Xorg|nvidia)
+-r 3600 -p -M 1048576,524288 -s 100,100 --prefer ^(tensorfold|tf-dsv41) --avoid ^(systemd|sshd|dockerd|containerd|dbus-daemon|NetworkManager|gdm|Xorg|nvidia)
 ```
 
 - `-M 1048576,524288`: earlyoom sends SIGTERM when `MemAvailable` is under 1 GiB, and SIGKILL when it is under 512 MiB. The values are in KiB.
-- `--prefer ^tensorfold`: earlyoom stops the engine process first.
+- `--prefer ^(tensorfold|tf-dsv41)`: earlyoom stops the engine process first. The pattern matches rank 0 of the Zig engine (`tensorfold-native`) and of the Python engine, and rank 1 of the Zig engine (`tf-dsv41-lanes`). The containers also run with `--oom-score-adj 1000`, so the kernel OOM killer also picks them first.
 - `--avoid ...`: earlyoom does not stop ssh, Docker, the network manager or the desktop. The node stays reachable.
 - `-s 100,100`: the swap does not change this. The engine runs in `tensorfold.slice`, which has no swap.
 - `-r 3600`: earlyoom prints a status line each hour.
