@@ -264,6 +264,15 @@ Host tests rc 0 first.
 Every next start serves the smoke prompt. Python control: the same 5 invalid fields get 200 (F4). Memory low point:
 head 5,546 MiB, worker 5,485 MiB.
 
+**Sixth run (20:18-20:29Z, release image `d58d25cc`, ID `sha256:9bdfda7f…` on both nodes):** dev with PR #40 @
+`b862c70d`, which adds two Codex fixes: `TCP_USER_TIMEOUT` 20 s on the rank links, and `Model.synchronize` fails a
+round when any RDMA ring was aborted during it (TP=2's ring was not checked before). Host tests rc 0. 4.4a (exit 0 in
+6 s, request `cancelled`), 4.4b (exit 0 in 5 s, streams `cancelled`), 4.5 (streams get `PeerDown`, rank 0 exits 75 in
+7 s), 4.5b (rank 1 exits 75 in 2 s), 4.6 (33 s to a reply), 4.7 (rank 0 exits 75 in 8 s): all pass. Decode check
+(`perf-head.sh`, the window C method): 85.5 tok/s at 1 stream (median of 85.7, 85.2, 85.5), 123.1 tok/s at 4 streams
+(median of 6 reps): +0.3% / +0.1% against 85.3 / 123.0, inside the 2% bar. Memory low point: head 5,537 MiB, worker
+5,393 MiB.
+
 ### Window S1 (08:48-09:54Z, image `2307b3f3`): soak
 
 3,903 s, 4 client threads: ok 2,487, fail 1, reference mismatches 0 (23 reference checks under load); by kind (ok /
@@ -306,5 +315,6 @@ Passed with no fault: B, A (tcm 505 requests 0.00% lost; needle 7/7 up to 1,038,
 Memory against Python 1.1.1 on the 2.8 pack: idle MemAvailable head 6.43 / worker 6.47 GiB on Zig, 6.47 / 6.80 GiB on
 Python; low points head 5.00-5.34 GiB in B/C/R, 3.25 GiB at the 1M needle (A), 4.28-4.36 GiB in the soaks.
 
-**Verdict: go** for Zig + 2.8 (image of `dsv41-zig-dev` @ `952398c5`) as the default when Codex gives PR #40 its 👍.
-The R rerun on that image passed. Rollback: Python 1.1.1 + 2.9.
+**Verdict: go** for Zig + 2.8 (release image `tensorfold-dsv41-zig:d58d25cc`, `dsv41-zig-dev` @ `d58d25cc`) as the
+default when Codex gives PR #40 its 👍. The R rerun and the decode check on that image passed. Launch facts:
+`docs/ZIG.md`. Rollback: Python 1.1.1 + 2.9.

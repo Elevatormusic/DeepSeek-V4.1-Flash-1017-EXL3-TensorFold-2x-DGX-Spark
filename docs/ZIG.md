@@ -24,7 +24,7 @@ Credit: the 2.8 bpw pack is the work of the author of `jayleaton/DeepSeek-V4.1-F
 
 ## Test status (read this first)
 
-- The release tests ran on earlier images of the same branch. The image `952398c5` passed the last robustness window. The image `d58d25cc` differs from it in two CPU-side checks: a `TCP_USER_TIMEOUT` of 20 s on the rank links, and a check of every RDMA ring after a synchronization. The host tests (`zig build test-cuda-host`) for `d58d25cc` are not finished yet.
+- The full release tests ran on earlier images of the same branch. The release image `d58d25cc` adds two checks: a `TCP_USER_TIMEOUT` of 20 s on the rank links, and a check of every RDMA ring after a synchronization. On 2026-10-22 (20:03-20:29Z) it passed the host tests (`zig build test-cuda-host`), the 6 robustness cases (a surviving rank exits with 75 in 2-8 s; clean stops and a restart in 33 s pass) and a decode check: 85.5 tok/s at 1 stream and 123.1 tok/s at 4 streams (median of 3), +0.3 % and +0.1 % against the earlier image. Memory low point: head 5,537 MiB, worker 5,393 MiB.
 - The scripts of this recipe for the Zig engine (`scripts/zig_*.sh`, `docker/Dockerfile.zig`) have offline tests only (`tests/test_zig_engine.py`). Nobody has run them on a pair yet. They use the same commands as the scripts of the tests.
 - [Gaps](#gaps) lists what a public user cannot do yet, and what no test covers.
 
@@ -118,7 +118,7 @@ The build uses Zig 0.17.0 (downloaded from ziglang.org and checked against a sha
 | Item | Value |
 |---|---|
 | Image tag | `tensorfold-dsv41-zig:d58d25cc` |
-| Image ID | TODO-IMAGE-ID |
+| Image ID | `sha256:9bdfda7fe538d64774e7ffdcc8ac2d061b54fe244ab4c51e778f21a38b3d7d51` (the same on both nodes) |
 | Source | `Elevatormusic/TensorFold`, branch `dsv41-zig-dev`, commit `d58d25ccd6dbd624814cc2ccc848f8e5ba84580c` |
 | Base image | `tensorfold-dsv41:3c45bdaeab7d` (NGC PyTorch 26.07: CUDA 13, NCCL, libibverbs; the recipe builds it from `docker/Dockerfile`) |
 
