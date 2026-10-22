@@ -82,7 +82,7 @@ mkdir -p "$CACHE_DIR"; free=\$(df -BG --output=avail "$CACHE_DIR" | tail -1 | tr
   && echo "OK no swap for the engine" || echo "FAIL ${CGROUP_PARENT-tensorfold.slice} has swap or is missing: run scripts/host_tuning.sh"
 diff=""
 for kv in vm.swappiness=10 vm.compaction_proactiveness=0 vm.extfrag_threshold=500 vm.min_free_kbytes=1048576 \
-    vm.watermark_scale_factor=50; do
+    vm.watermark_scale_factor=25; do
   k=\${kv%%=*}; [ "\$(cat /proc/sys/\$(echo "\$k" | tr . /) 2>/dev/null)" = "\${kv#*=}" ] || diff="\$diff \$k"
 done
 [ -z "\$diff" ] && echo "OK memory settings of scripts/host_tuning.sh" \

@@ -1,0 +1,5 @@
+head min_free_kbytes=1048576 watermark_scale_factor=50
+worker min_free_kbytes=1048576 watermark_scale_factor=50
+pass 1: n=124 slow=1 max=1.51 median=0.95 rc 0
+pass 2: n=40 slow=1 max=1.34 median=0.91 rc 1
+tripped in pass 2

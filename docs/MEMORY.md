@@ -46,9 +46,9 @@ Real agent traffic can be heavier than this load. The longest prompt of the gate
 
 ### What `MemAvailable` leaves out
 
-The kernel keeps a reserve and does not count it as available. `scripts/host_tuning.sh` makes this reserve larger (`vm.min_free_kbytes` 1 GiB, `vm.watermark_scale_factor` 50) to prevent compaction stalls. earlyoom reads `MemAvailable`, so it sees less memory than `MemFree` plus the page cache.
+The kernel keeps a reserve and does not count it as available. `scripts/host_tuning.sh` makes this reserve larger (`vm.min_free_kbytes` 1 GiB, `vm.watermark_scale_factor` 25) to prevent compaction stalls. earlyoom reads `MemAvailable`, so it sees less memory than `MemFree` plus the page cache.
 
-On our pair, with the tuning applied, the kernel formula gives the same value as `/proc/meminfo` (to the kB) on both nodes, with these parts ([data](../runs/2026-10-21/INDEX.md#kernel-memory-reserve-of-the-pair-read-only-check)):
+On our pair, the kernel formula gives the same value as `/proc/meminfo` (to the kB) on both nodes. This read was made with the earlier value `vm.watermark_scale_factor` 50, with these parts ([data](../runs/2026-10-21/INDEX.md#kernel-memory-reserve-of-the-pair-read-only-check)):
 
 | Part | Size |
 |---|---|
@@ -57,7 +57,13 @@ On our pair, with the tuning applied, the kernel formula gives the same value as
 | Cut from the reclaimable slab (half of it, at most the sum of the low watermarks) | 0.25 GiB (head), 0.42 GiB (worker) |
 | Hidden in all | 4.55 GiB (head), 4.71 GiB (worker) |
 
-With the kernel defaults, the same formula gives 0.79 GiB for the first part. The tuning adds 1.90 GiB to it. The values stay unchanged: they prevent the stalls of [runs/2026-10-18](../runs/2026-10-18/INDEX.md). Do not change them without the stall test.
+With the kernel defaults, the same formula gives 0.79 GiB for the first part. Scale 50 added 1.90 GiB to it.
+
+`host_tuning.sh` now sets `vm.watermark_scale_factor` 25. By the formula, with the page cache of the loaded engine, this lowers the reserve by about 0.62 GiB, so `MemAvailable` reads higher for the same real state. In the watermark A/B the head low point rose by 0.47 GiB, with no rise in slow prefill chunks in 2 complete runs per side. The 3-run rule was not met: the third run of each side stopped early at the head memory rule ([runs/2026-10-21](../runs/2026-10-21/INDEX.md#watermark-ab-vmwatermark_scale_factor-50-against-25), [runs/2026-10-22](../runs/2026-10-22/INDEX.md)). It adds no free memory: earlyoom and the engine floor now act at less real free memory.
+
+Keep `vm.min_free_kbytes` at 1 GiB. With 512 MiB the head showed compaction stalls and swap (variant V3 of the A/B). These values prevent the stalls of [runs/2026-10-18](../runs/2026-10-18/INDEX.md). Do not change them without the stall test.
+
+**Upgrade:** a node that ran the earlier `host_tuning.sh` still has 50. The preflight memory check fails with "memory settings differ (vm.watermark_scale_factor)" until you run `scripts/host_tuning.sh` again on the head. It is safe to repeat. Restart the server after it.
 
 ## How earlyoom works here
 
