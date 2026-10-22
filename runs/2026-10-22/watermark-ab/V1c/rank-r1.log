@@ -1,0 +1,83 @@
+2026-10-22T00:23:23.795118361Z [tensorfold] warning: non-loopback server has no API key; requests are open
+2026-10-22T00:23:23.876166746Z [tensorfold] loading DeepSeek-v4.1-Flash-1017-TF: DeepSeek-V4.1-Flash (deepseek_v41) on CUDA, rank 1 of 2
+2026-10-22T00:23:23.876807923Z [tensorfold] TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=1 (NVIDIA's PyTorch container default) set to 0: DeepSeek-V4.1-Flash's fp32 GEMMs stay fp32
+2026-10-22T00:23:25.644446893Z [tensorfold] rank 1: NCCL settings by default: NCCL_CUMEM_ENABLE=0 NCCL_CUMEM_HOST_ENABLE=0 NCCL_IB_GID_INDEX=3
+2026-10-22T00:23:51.858401060Z [tensorfold] rank 1: rank cache reading /cache/tf-ds-rank/rank1of2-374dc57bc29bdb8064cc.bin
+2026-10-22T00:23:51.858422452Z [tensorfold] rank 1: layers 0..4 loaded (5 s, 13.7 GiB)
+2026-10-22T00:23:51.858424084Z [tensorfold] rank 1: layers 0..9 loaded (7 s, 26.0 GiB)
+2026-10-22T00:23:51.858425252Z [tensorfold] rank 1: layers 0..14 loaded (9 s, 38.2 GiB)
+2026-10-22T00:23:51.858426404Z [tensorfold] rank 1: layers 0..19 loaded (11 s, 48.9 GiB)
+2026-10-22T00:23:51.858427636Z [tensorfold] rank 1: layers 0..24 loaded (13 s, 58.7 GiB)
+2026-10-22T00:23:51.858428723Z [tensorfold] rank 1: layers 0..29 loaded (16 s, 70.9 GiB)
+2026-10-22T00:23:51.858429795Z [tensorfold] rank 1: layers 0..34 loaded (19 s, 83.2 GiB)
+2026-10-22T00:23:51.858431331Z [tensorfold] rank 1: layers 0..39 loaded (22 s, 95.4 GiB)
+2026-10-22T00:23:51.858432483Z [tensorfold] rank 1: DSpark (3 stages) loaded, 99.0 GiB
+2026-10-22T00:23:51.858433619Z [tensorfold] rank 1: weights in 24 s (from the rank cache)
+2026-10-22T00:23:51.858434755Z [tensorfold] rank 1: weights loaded, MemAvailable 10.8 GiB, page cache 1.9 GiB (page cache release on)
+2026-10-22T00:23:51.914260547Z [tensorfold] rank 1: RDMA GID index of rocep1s0f1 port 1: 3 (detected)
+2026-10-22T00:23:51.914279939Z [tensorfold] rank 1: RDMA GID index of roceP2p1s0f1 port 1: 3 (detected)
+2026-10-22T00:23:57.510508735Z [tensorfold] rank 1 chunk at 0: 0.80s, allocated 100.45 GiB, peak 100.45, reserved 100.69
+2026-10-22T00:23:57.637951367Z [tensorfold] rank 1 chunk at 0: 0.11s, allocated 100.45 GiB, peak 100.45, reserved 100.69
+2026-10-22T00:23:57.691344217Z [tensorfold] rank 1 chunk at 0: 0.05s, allocated 100.45 GiB, peak 100.45, reserved 100.69
+2026-10-22T00:23:57.760710325Z [tensorfold] rank 1 chunk at 0: 0.07s, allocated 100.45 GiB, peak 100.45, reserved 100.69
+2026-10-22T00:23:57.824457921Z [tensorfold] rank 1 chunk at 0: 0.06s, allocated 100.45 GiB, peak 100.45, reserved 100.69
+2026-10-22T00:23:57.893490561Z [tensorfold] rank 1 chunk at 0: 0.07s, allocated 100.45 GiB, peak 100.45, reserved 100.69
+2026-10-22T00:23:57.968973511Z [tensorfold] rank 1 chunk at 0: 0.07s, allocated 100.45 GiB, peak 100.45, reserved 100.69
+2026-10-22T00:23:58.052942543Z [tensorfold] rank 1 chunk at 0: 0.08s, allocated 100.45 GiB, peak 100.45, reserved 100.69
+2026-10-22T00:23:58.135783539Z [tensorfold] rank 1 chunk at 0: 0.08s, allocated 100.45 GiB, peak 100.46, reserved 100.69
+2026-10-22T00:23:58.226139843Z [tensorfold] rank 1 chunk at 0: 0.09s, allocated 100.45 GiB, peak 100.46, reserved 100.69
+2026-10-22T00:23:58.316694320Z [tensorfold] rank 1 chunk at 0: 0.09s, allocated 100.45 GiB, peak 100.46, reserved 100.69
+2026-10-22T00:23:58.416523060Z [tensorfold] rank 1 chunk at 0: 0.10s, allocated 100.45 GiB, peak 100.46, reserved 100.69
+2026-10-22T00:23:58.516578773Z [tensorfold] rank 1 chunk at 0: 0.10s, allocated 100.45 GiB, peak 100.46, reserved 100.69
+2026-10-22T00:23:58.618946348Z [tensorfold] rank 1 chunk at 0: 0.10s, allocated 100.45 GiB, peak 100.46, reserved 100.71
+2026-10-22T00:23:58.722245673Z [tensorfold] rank 1 chunk at 0: 0.10s, allocated 100.45 GiB, peak 100.46, reserved 100.71
+2026-10-22T00:23:58.841994827Z [tensorfold] rank 1 chunk at 0: 0.12s, allocated 100.45 GiB, peak 100.46, reserved 100.71
+2026-10-22T00:23:59.202152251Z [tensorfold] rank 1 chunk at 0: 0.36s, allocated 100.48 GiB, peak 100.49, reserved 100.74
+2026-10-22T00:23:59.357267983Z [tensorfold] rank 1 chunk at 0: 0.15s, allocated 100.48 GiB, peak 100.50, reserved 100.74
+2026-10-22T00:23:59.792518255Z [tensorfold] rank 1 chunk at 0: 0.43s, allocated 100.67 GiB, peak 100.74, reserved 100.98
+2026-10-22T00:24:00.310537596Z [tensorfold] rank 1 chunk at 0: 0.51s, allocated 100.78 GiB, peak 100.97, reserved 101.28
+2026-10-22T00:24:01.289406394Z [tensorfold] rank 1 chunk at 0: 0.97s, allocated 100.93 GiB, peak 101.31, reserved 101.75
+2026-10-22T00:24:03.014514677Z [tensorfold] rank 1 chunk at 0: 1.71s, allocated 101.23 GiB, peak 101.99, reserved 102.70
+2026-10-22T00:24:03.237831797Z [tensorfold] rank 1 chunk at 2048: 0.22s, allocated 101.23 GiB, peak 101.99, reserved 102.70
+2026-10-22T00:24:03.453605691Z [tensorfold] rank 1 chunk at 0: 0.21s, allocated 101.23 GiB, peak 101.99, reserved 102.70
+2026-10-22T00:24:10.565236561Z [tensorfold] rank 1: allocator ceiling 104.9 GiB (holds 102.2, host available 4.2, floor 1.5)
+2026-10-22T00:24:10.567413400Z [tensorfold] rank 1 ready in 46.7s, following rank 0
+2026-10-22T00:25:07.598177385Z [tensorfold] rank 1 chunk at 0: 1.47s, allocated 101.54 GiB, peak 102.30, reserved 102.98
+2026-10-22T00:25:08.571939569Z [tensorfold] rank 1 chunk at 2048: 0.97s, allocated 101.54 GiB, peak 102.30, reserved 102.99
+2026-10-22T00:25:09.433929056Z [tensorfold] rank 1 chunk at 4096: 0.86s, allocated 101.54 GiB, peak 102.31, reserved 102.99
+2026-10-22T00:25:10.400010291Z [tensorfold] rank 1 chunk at 6144: 0.97s, allocated 101.55 GiB, peak 102.31, reserved 102.99
+2026-10-22T00:25:11.480727060Z [tensorfold] rank 1 chunk at 0: 0.92s, allocated 101.55 GiB, peak 102.31, reserved 102.99
+2026-10-22T00:25:12.343341910Z [tensorfold] rank 1 chunk at 2048: 0.86s, allocated 101.55 GiB, peak 102.32, reserved 102.99
+2026-10-22T00:25:13.212494386Z [tensorfold] rank 1 chunk at 4096: 0.87s, allocated 101.56 GiB, peak 102.32, reserved 102.99
+2026-10-22T00:25:14.162870989Z [tensorfold] rank 1 chunk at 6144: 0.95s, allocated 101.57 GiB, peak 102.32, reserved 102.99
+2026-10-22T00:25:15.186958935Z [tensorfold] rank 1 chunk at 0: 0.94s, allocated 101.57 GiB, peak 102.33, reserved 103.01
+2026-10-22T00:25:16.052262337Z [tensorfold] rank 1 chunk at 2048: 0.86s, allocated 101.57 GiB, peak 102.33, reserved 103.01
+2026-10-22T00:25:16.919625748Z [tensorfold] rank 1 chunk at 4096: 0.87s, allocated 101.57 GiB, peak 102.33, reserved 103.01
+2026-10-22T00:25:17.870751906Z [tensorfold] rank 1 chunk at 6144: 0.95s, allocated 101.58 GiB, peak 102.34, reserved 103.02
+2026-10-22T00:25:19.092599611Z [tensorfold] rank 1 chunk at 0: 0.99s, allocated 101.58 GiB, peak 102.34, reserved 103.04
+2026-10-22T00:25:19.958408536Z [tensorfold] rank 1 chunk at 2048: 0.86s, allocated 101.58 GiB, peak 102.34, reserved 103.04
+2026-10-22T00:25:20.838737762Z [tensorfold] rank 1 chunk at 4096: 0.88s, allocated 101.59 GiB, peak 102.35, reserved 103.04
+2026-10-22T00:25:21.722150761Z [tensorfold] rank 1 chunk at 6144: 0.88s, allocated 101.59 GiB, peak 102.35, reserved 103.04
+2026-10-22T00:25:22.606097928Z [tensorfold] rank 1 chunk at 8192: 0.88s, allocated 101.59 GiB, peak 102.35, reserved 103.04
+2026-10-22T00:25:23.490279728Z [tensorfold] rank 1 chunk at 10240: 0.88s, allocated 101.59 GiB, peak 102.35, reserved 103.04
+2026-10-22T00:25:24.379544867Z [tensorfold] rank 1 chunk at 12288: 0.89s, allocated 101.59 GiB, peak 102.35, reserved 103.04
+2026-10-22T00:25:25.304387316Z [tensorfold] rank 1 chunk at 14336: 0.92s, allocated 101.59 GiB, peak 102.35, reserved 103.04
+2026-10-22T00:25:26.199452663Z [tensorfold] rank 1 chunk at 16384: 0.89s, allocated 101.59 GiB, peak 102.35, reserved 103.04
+2026-10-22T00:25:26.213335823Z [tensorfold] rank 1: the lane is broken (rank 0 stopped answering); every step fails from now on
+2026-10-22T00:25:26.213872826Z Traceback (most recent call last):
+2026-10-22T00:25:26.213895562Z   File "/usr/local/bin/tensorfold", line 6, in <module>
+2026-10-22T00:25:26.223136991Z     sys.exit(main())
+2026-10-22T00:25:26.223158095Z              ^^^^^^
+2026-10-22T00:25:26.223160703Z   File "/opt/tensorfold/src/tensorfold/cli.py", line 42, in main
+2026-10-22T00:25:26.223364429Z     return int(args.func(args) or 0)
+2026-10-22T00:25:26.223379308Z                ^^^^^^^^^^^^^^^
+2026-10-22T00:25:26.223381692Z   File "/opt/tensorfold/src/tensorfold/cli.py", line 384, in cmd_serve
+2026-10-22T00:25:26.223576603Z     return _serve_cuda(args, family, model_dir, context)
+2026-10-22T00:25:26.223590266Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-22T00:25:26.223592666Z   File "/opt/tensorfold/src/tensorfold/cli.py", line 293, in _serve_cuda
+2026-10-22T00:25:26.223594586Z     engine.follow()
+2026-10-22T00:25:26.223596042Z   File "/opt/tensorfold/src/tensorfold/families/deepseek_v41/cuda/engine.py", line 389, in follow
+2026-10-22T00:25:26.224179765Z     self.multi.follow(Link(self.nccl.store, rank=self.rank, world=self.world, host=self._master))
+2026-10-22T00:25:26.224200244Z   File "/opt/tensorfold/src/tensorfold/families/deepseek_v41/cuda/multi.py", line 1597, in follow
+2026-10-22T00:25:26.224202980Z     raise RuntimeError("rank 0's step link closed")
+2026-10-22T00:25:26.224221796Z RuntimeError: rank 0's step link closed

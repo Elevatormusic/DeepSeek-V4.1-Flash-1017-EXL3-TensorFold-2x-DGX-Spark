@@ -1,0 +1,564 @@
+2026-10-21T20:23:42.982080989Z [tensorfold] warning: non-loopback server has no API key; requests are open
+2026-10-21T20:23:43.024498079Z [tensorfold] loading DeepSeek-v4.1-Flash-1017-TF: DeepSeek-V4.1-Flash (deepseek_v41) on CUDA, rank 0 of 2
+2026-10-21T20:23:43.024987149Z [tensorfold] TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=1 (NVIDIA's PyTorch container default) set to 0: DeepSeek-V4.1-Flash's fp32 GEMMs stay fp32
+2026-10-21T20:23:44.424883582Z [tensorfold] rank 0: NCCL settings by default: NCCL_CUMEM_ENABLE=0 NCCL_CUMEM_HOST_ENABLE=0 NCCL_IB_GID_INDEX=3
+2026-10-21T20:28:38.500905374Z [tensorfold] rank 0: rank cache writing /cache/tf-ds-rank/rank0of2-e4d64c9ce139acf704db.bin
+2026-10-21T20:28:38.500927725Z [tensorfold] rank 0: layers 0..4 loaded (39 s, 13.7 GiB)
+2026-10-21T20:28:38.500929341Z [tensorfold] rank 0: layers 0..9 loaded (73 s, 26.0 GiB)
+2026-10-21T20:28:38.500930509Z [tensorfold] rank 0: layers 0..14 loaded (108 s, 38.2 GiB)
+2026-10-21T20:28:38.500931709Z [tensorfold] rank 0: layers 0..19 loaded (140 s, 48.9 GiB)
+2026-10-21T20:28:38.500932861Z [tensorfold] rank 0: layers 0..24 loaded (170 s, 58.7 GiB)
+2026-10-21T20:28:38.500934029Z [tensorfold] rank 0: layers 0..29 loaded (207 s, 70.9 GiB)
+2026-10-21T20:28:38.500935101Z [tensorfold] rank 0: layers 0..34 loaded (242 s, 83.2 GiB)
+2026-10-21T20:28:38.500936205Z [tensorfold] rank 0: layers 0..39 loaded (278 s, 95.4 GiB)
+2026-10-21T20:28:38.500937485Z [tensorfold] rank 0: DSpark (3 stages) loaded, 99.0 GiB
+2026-10-21T20:28:38.500938749Z [tensorfold] rank 0: weights in 288 s (written to the rank cache)
+2026-10-21T20:28:38.500940013Z [tensorfold] rank 0: weights loaded, MemAvailable 10.9 GiB, page cache 1.9 GiB (page cache release on)
+2026-10-21T20:28:38.556959978Z [tensorfold] rank 0: RDMA GID index of rocep1s0f1 port 1: 3 (detected)
+2026-10-21T20:28:38.556991306Z [tensorfold] rank 0: RDMA GID index of roceP2p1s0f1 port 1: 3 (detected)
+2026-10-21T20:28:38.590413839Z [tensorfold] decode gathers over RDMA writes
+2026-10-21T20:28:41.285252130Z [tensorfold] vision tower on rank 0: 0.95 GiB; VL bias for 43 gates
+2026-10-21T20:28:42.925654783Z [tensorfold] spilled kept prompts: /cache/tf-ds-spill-wmab-B/dsv41-spill/v1-95b6b554b97f3d32 (0 on disk, 0.00 of 64 GiB)
+2026-10-21T20:28:43.680338927Z [tensorfold] rank 0 chunk at 0: 0.74s, allocated 101.40 GiB, peak 101.40, reserved 101.64
+2026-10-21T20:28:43.809545818Z [tensorfold] rank 0 chunk at 0: 0.11s, allocated 101.40 GiB, peak 101.40, reserved 101.64
+2026-10-21T20:28:43.863995630Z [tensorfold] rank 0 chunk at 0: 0.05s, allocated 101.40 GiB, peak 101.40, reserved 101.64
+2026-10-21T20:28:43.930907401Z [tensorfold] rank 0 chunk at 0: 0.07s, allocated 101.40 GiB, peak 101.40, reserved 101.64
+2026-10-21T20:28:44.000327912Z [tensorfold] rank 0 chunk at 0: 0.07s, allocated 101.40 GiB, peak 101.40, reserved 101.65
+2026-10-21T20:28:44.073054888Z [tensorfold] rank 0 chunk at 0: 0.07s, allocated 101.40 GiB, peak 101.40, reserved 101.65
+2026-10-21T20:28:44.143266228Z [tensorfold] rank 0 chunk at 0: 0.07s, allocated 101.40 GiB, peak 101.40, reserved 101.65
+2026-10-21T20:28:44.223600177Z [tensorfold] rank 0 chunk at 0: 0.08s, allocated 101.40 GiB, peak 101.40, reserved 101.65
+2026-10-21T20:28:44.306696993Z [tensorfold] rank 0 chunk at 0: 0.08s, allocated 101.40 GiB, peak 101.40, reserved 101.65
+2026-10-21T20:28:44.394821690Z [tensorfold] rank 0 chunk at 0: 0.09s, allocated 101.40 GiB, peak 101.40, reserved 101.65
+2026-10-21T20:28:44.485842901Z [tensorfold] rank 0 chunk at 0: 0.09s, allocated 101.40 GiB, peak 101.41, reserved 101.65
+2026-10-21T20:28:44.575488743Z [tensorfold] rank 0 chunk at 0: 0.09s, allocated 101.40 GiB, peak 101.41, reserved 101.65
+2026-10-21T20:28:44.670609856Z [tensorfold] rank 0 chunk at 0: 0.09s, allocated 101.40 GiB, peak 101.41, reserved 101.65
+2026-10-21T20:28:44.767349857Z [tensorfold] rank 0 chunk at 0: 0.10s, allocated 101.40 GiB, peak 101.41, reserved 101.65
+2026-10-21T20:28:44.871295857Z [tensorfold] rank 0 chunk at 0: 0.10s, allocated 101.40 GiB, peak 101.41, reserved 101.65
+2026-10-21T20:28:44.984269559Z [tensorfold] rank 0 chunk at 0: 0.11s, allocated 101.40 GiB, peak 101.41, reserved 101.65
+2026-10-21T20:28:45.426183999Z [tensorfold] rank 0 chunk at 0: 0.44s, allocated 101.43 GiB, peak 101.44, reserved 101.68
+2026-10-21T20:28:45.619707377Z [tensorfold] rank 0 chunk at 0: 0.19s, allocated 101.43 GiB, peak 101.45, reserved 101.68
+2026-10-21T20:28:46.088308046Z [tensorfold] rank 0 chunk at 0: 0.47s, allocated 101.62 GiB, peak 101.68, reserved 101.93
+2026-10-21T20:28:46.779532153Z [tensorfold] rank 0 chunk at 0: 0.69s, allocated 101.73 GiB, peak 101.92, reserved 102.23
+2026-10-21T20:28:47.962307161Z [tensorfold] rank 0 chunk at 0: 1.18s, allocated 101.88 GiB, peak 102.25, reserved 102.70
+2026-10-21T20:28:49.322245805Z [tensorfold] rank 0 chunk at 0: 1.35s, allocated 102.18 GiB, peak 102.94, reserved 103.68
+2026-10-21T20:28:49.543436978Z [tensorfold] rank 0 chunk at 2048: 0.22s, allocated 102.18 GiB, peak 102.94, reserved 103.68
+2026-10-21T20:28:49.759248544Z [tensorfold] rank 0 chunk at 0: 0.20s, allocated 102.18 GiB, peak 102.94, reserved 103.68
+2026-10-21T20:28:50.399829898Z [tensorfold] vision warm-up: small image (184 tokens, 546x546 px) 638 ms, peak +0.06 GiB
+2026-10-21T20:28:50.416209102Z [tensorfold] warm-up: 22 prompt lengths 7.5s, decode graphs {}, reserved 102.42 GiB
+2026-10-21T20:28:57.006792372Z [tensorfold] --parallel warm-up: 73 round graphs, 4 drafter graphs, 6.6s, reserved +644 MiB
+2026-10-21T20:28:57.019969271Z [tensorfold] --parallel 4: 4 streams share one window of 1048576 tokens (an extent each)
+2026-10-21T20:28:57.020421525Z [tensorfold] rank 0: allocator ceiling 105.3 GiB (holds 103.1, host available 3.7, floor 1.5)
+2026-10-21T20:28:57.020435845Z [tensorfold] DeepSeek-V4.1 engine ready: 2 rank(s), context 1048576, DSpark 5 drafts
+2026-10-21T20:28:57.261387764Z [tensorfold] serving DeepSeek-v4.1-Flash-1017-TF at http://172.17.0.1:8888/v1 on CUDA, rank 0 of 2 (sampling: temperature 1.0, top_p 1.0; drafts: on; prompts: bf16 activations; context: 1048576; loaded in 314.2s)
+2026-10-21T20:28:57.887098093Z [tensorfold] 127.0.0.1 "GET /v1/models HTTP/1.1" 200 -
+2026-10-21T20:29:48.305635658Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:29:48.316016156Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:29:48.351233806Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:29:49.335891496Z [tensorfold] rank 0 chunk at 0: 0.97s, allocated 102.52 GiB, peak 103.28, reserved 104.00
+2026-10-21T20:29:50.193118527Z [tensorfold] rank 0 chunk at 2048: 0.85s, allocated 102.52 GiB, peak 103.28, reserved 104.10
+2026-10-21T20:29:51.060254362Z [tensorfold] rank 0 chunk at 4096: 0.87s, allocated 102.52 GiB, peak 103.29, reserved 104.10
+2026-10-21T20:29:52.024573381Z [tensorfold] rank 0 chunk at 6144: 0.96s, allocated 102.53 GiB, peak 103.29, reserved 104.10
+2026-10-21T20:29:52.064691634Z [tensorfold] spilled kept prompt 3fb7a573-000000: 8192 positions, wrote rows 0..8192 and 21.3 MiB in 0.02s
+2026-10-21T20:29:52.065809549Z [tensorfold] done req-2774a3292a4d prompt=8192 cached=0 thinking=False tokens=1 sha=7d608decaea5 finish=length tok/s=0.0 ttft=3.69s prefill=3.67s rounds=0 accepted=0/0
+2026-10-21T20:29:52.137488509Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:29:52.147929902Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:29:52.178217031Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:29:53.174937475Z [tensorfold] rank 0 chunk at 0: 0.99s, allocated 102.53 GiB, peak 103.29, reserved 103.98
+2026-10-21T20:29:54.026987351Z [tensorfold] rank 0 chunk at 2048: 0.85s, allocated 102.53 GiB, peak 103.30, reserved 103.98
+2026-10-21T20:29:54.886891930Z [tensorfold] rank 0 chunk at 4096: 0.86s, allocated 102.54 GiB, peak 103.30, reserved 103.99
+2026-10-21T20:29:55.829146543Z [tensorfold] rank 0 chunk at 6144: 0.94s, allocated 102.55 GiB, peak 103.30, reserved 104.09
+2026-10-21T20:29:55.880011180Z [tensorfold] spilled kept prompt 3fb7a573-000001: 8192 positions, wrote rows 0..8192 and 21.3 MiB in 0.04s
+2026-10-21T20:29:55.880875737Z [tensorfold] done req-9d1a9e94d18d prompt=8192 cached=0 thinking=False tokens=1 sha=c1a6860e444c finish=length tok/s=0.0 ttft=3.67s prefill=3.65s rounds=0 accepted=0/0
+2026-10-21T20:29:55.898160523Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:29:55.916551081Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:29:55.947366448Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:29:56.919477234Z [tensorfold] rank 0 chunk at 0: 0.97s, allocated 102.54 GiB, peak 103.30, reserved 104.00
+2026-10-21T20:29:57.788089315Z [tensorfold] rank 0 chunk at 2048: 0.87s, allocated 102.55 GiB, peak 103.31, reserved 104.00
+2026-10-21T20:29:58.729475426Z [tensorfold] rank 0 chunk at 4096: 0.94s, allocated 102.55 GiB, peak 103.31, reserved 104.01
+2026-10-21T20:29:59.676198091Z [tensorfold] rank 0 chunk at 6144: 0.95s, allocated 102.56 GiB, peak 103.32, reserved 104.01
+2026-10-21T20:29:59.727974740Z [tensorfold] spilled kept prompt 3fb7a573-000002: 8192 positions, wrote rows 0..8192 and 21.3 MiB in 0.04s
+2026-10-21T20:29:59.728992080Z [tensorfold] done req-5e3263f57448 prompt=8192 cached=0 thinking=False tokens=1 sha=c1a6860e444c finish=length tok/s=0.0 ttft=3.74s prefill=3.73s rounds=0 accepted=0/0
+2026-10-21T20:29:59.862839644Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:29:59.908604880Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:29:59.945896282Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:30:00.896103221Z [tensorfold] rank 0 chunk at 0: 0.94s, allocated 102.56 GiB, peak 103.32, reserved 104.00
+2026-10-21T20:30:01.750787068Z [tensorfold] rank 0 chunk at 2048: 0.85s, allocated 102.56 GiB, peak 103.32, reserved 104.10
+2026-10-21T20:30:02.615694134Z [tensorfold] rank 0 chunk at 4096: 0.86s, allocated 102.57 GiB, peak 103.33, reserved 104.10
+2026-10-21T20:30:03.481725693Z [tensorfold] rank 0 chunk at 6144: 0.86s, allocated 102.57 GiB, peak 103.33, reserved 104.10
+2026-10-21T20:30:04.363177297Z [tensorfold] rank 0 chunk at 8192: 0.88s, allocated 102.57 GiB, peak 103.33, reserved 104.10
+2026-10-21T20:30:05.246812141Z [tensorfold] rank 0 chunk at 10240: 0.88s, allocated 102.57 GiB, peak 103.33, reserved 104.10
+2026-10-21T20:30:06.124836963Z [tensorfold] rank 0 chunk at 12288: 0.88s, allocated 102.57 GiB, peak 103.33, reserved 104.10
+2026-10-21T20:30:07.006687738Z [tensorfold] rank 0 chunk at 14336: 0.88s, allocated 102.57 GiB, peak 103.33, reserved 104.10
+2026-10-21T20:30:07.894053914Z [tensorfold] rank 0 chunk at 16384: 0.89s, allocated 102.57 GiB, peak 103.33, reserved 104.11
+2026-10-21T20:30:08.782982932Z [tensorfold] rank 0 chunk at 18432: 0.89s, allocated 102.57 GiB, peak 103.33, reserved 104.11
+2026-10-21T20:30:09.681267431Z [tensorfold] rank 0 chunk at 20480: 0.90s, allocated 102.57 GiB, peak 103.33, reserved 104.11
+2026-10-21T20:30:10.585892944Z [tensorfold] rank 0 chunk at 22528: 0.90s, allocated 102.57 GiB, peak 103.33, reserved 104.11
+2026-10-21T20:30:11.488021269Z [tensorfold] rank 0 chunk at 24576: 0.90s, allocated 102.57 GiB, peak 103.33, reserved 104.11
+2026-10-21T20:30:12.389942844Z [tensorfold] rank 0 chunk at 26624: 0.90s, allocated 102.57 GiB, peak 103.33, reserved 104.11
+2026-10-21T20:30:13.293382255Z [tensorfold] rank 0 chunk at 28672: 0.90s, allocated 102.57 GiB, peak 103.33, reserved 104.11
+2026-10-21T20:30:14.282736919Z [tensorfold] rank 0 chunk at 30720: 0.99s, allocated 102.58 GiB, peak 103.34, reserved 104.11
+2026-10-21T20:30:14.377772099Z [tensorfold] spilled kept prompt 3fb7a573-000003: 32768 positions, wrote rows 0..32768 and 49.6 MiB in 0.08s
+2026-10-21T20:30:14.378987774Z [tensorfold] done req-68e9f42a5418 prompt=32768 cached=0 thinking=False tokens=1 sha=c1a6860e444c finish=length tok/s=0.0 ttft=14.35s prefill=14.33s rounds=0 accepted=0/0
+2026-10-21T20:30:14.465305488Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:30:14.569256196Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:30:14.610272431Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:30:15.996038898Z [tensorfold] rank 0 chunk at 0: 1.37s, allocated 102.58 GiB, peak 103.34, reserved 104.04
+2026-10-21T20:30:17.021919631Z [tensorfold] rank 0 chunk at 2048: 1.02s, allocated 102.58 GiB, peak 103.34, reserved 104.04
+2026-10-21T20:30:17.896966215Z [tensorfold] rank 0 chunk at 4096: 0.87s, allocated 102.59 GiB, peak 103.35, reserved 104.05
+2026-10-21T20:30:18.764402259Z [tensorfold] rank 0 chunk at 6144: 0.87s, allocated 102.59 GiB, peak 103.35, reserved 104.05
+2026-10-21T20:30:19.652769475Z [tensorfold] rank 0 chunk at 8192: 0.89s, allocated 102.59 GiB, peak 103.35, reserved 104.05
+2026-10-21T20:30:20.531180065Z [tensorfold] rank 0 chunk at 10240: 0.88s, allocated 102.59 GiB, peak 103.35, reserved 104.05
+2026-10-21T20:30:21.411968567Z [tensorfold] rank 0 chunk at 12288: 0.88s, allocated 102.59 GiB, peak 103.35, reserved 104.05
+2026-10-21T20:30:22.317077506Z [tensorfold] rank 0 chunk at 14336: 0.90s, allocated 102.59 GiB, peak 103.35, reserved 104.17
+2026-10-21T20:30:23.215011407Z [tensorfold] rank 0 chunk at 16384: 0.90s, allocated 102.59 GiB, peak 103.35, reserved 104.17
+2026-10-21T20:30:24.119331217Z [tensorfold] rank 0 chunk at 18432: 0.90s, allocated 102.59 GiB, peak 103.35, reserved 104.17
+2026-10-21T20:30:25.020304851Z [tensorfold] rank 0 chunk at 20480: 0.90s, allocated 102.59 GiB, peak 103.35, reserved 104.17
+2026-10-21T20:30:26.299460584Z [tensorfold] rank 0 chunk at 22528: 1.28s, allocated 102.59 GiB, peak 103.35, reserved 104.17
+2026-10-21T20:30:27.201638249Z [tensorfold] rank 0 chunk at 24576: 0.90s, allocated 102.59 GiB, peak 103.35, reserved 104.17
+2026-10-21T20:30:28.121219296Z [tensorfold] rank 0 chunk at 26624: 0.92s, allocated 102.59 GiB, peak 103.35, reserved 104.17
+2026-10-21T20:30:29.025984569Z [tensorfold] rank 0 chunk at 28672: 0.90s, allocated 102.59 GiB, peak 103.35, reserved 104.17
+2026-10-21T20:30:29.947655881Z [tensorfold] rank 0 chunk at 30720: 0.92s, allocated 102.59 GiB, peak 103.35, reserved 104.17
+2026-10-21T20:30:30.872700652Z [tensorfold] rank 0 chunk at 32768: 0.92s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:31.795857226Z [tensorfold] rank 0 chunk at 34816: 0.92s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:32.715660775Z [tensorfold] rank 0 chunk at 36864: 0.92s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:33.636940656Z [tensorfold] rank 0 chunk at 38912: 0.92s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:34.566402054Z [tensorfold] rank 0 chunk at 40960: 0.93s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:35.501828676Z [tensorfold] rank 0 chunk at 43008: 0.93s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:36.441357170Z [tensorfold] rank 0 chunk at 45056: 0.94s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:37.387171062Z [tensorfold] rank 0 chunk at 47104: 0.94s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:38.327517284Z [tensorfold] rank 0 chunk at 49152: 0.94s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:39.271203284Z [tensorfold] rank 0 chunk at 51200: 0.94s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:40.215654371Z [tensorfold] rank 0 chunk at 53248: 0.94s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:41.162566361Z [tensorfold] rank 0 chunk at 55296: 0.94s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:42.115665814Z [tensorfold] rank 0 chunk at 57344: 0.95s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:43.074465691Z [tensorfold] rank 0 chunk at 59392: 0.96s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:44.031297819Z [tensorfold] rank 0 chunk at 61440: 0.96s, allocated 102.60 GiB, peak 103.36, reserved 104.17
+2026-10-21T20:30:45.087068109Z [tensorfold] rank 0 chunk at 63488: 1.05s, allocated 102.60 GiB, peak 103.36, reserved 104.18
+2026-10-21T20:30:45.529410596Z [tensorfold] spilled kept prompt 3fb7a573-000004: 65536 positions, wrote rows 0..65536 and 81.3 MiB in 0.43s
+2026-10-21T20:30:45.530889086Z [tensorfold] done req-0cdc9f9ff830 prompt=65536 cached=0 thinking=False tokens=1 sha=c1a6860e444c finish=length tok/s=0.0 ttft=30.49s prefill=30.45s rounds=0 accepted=0/0
+2026-10-21T20:30:45.739080914Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:30:45.974911885Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:30:46.024463989Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:30:46.976599599Z [tensorfold] rank 0 chunk at 0: 0.93s, allocated 102.60 GiB, peak 103.36, reserved 104.07
+2026-10-21T20:30:47.841700453Z [tensorfold] rank 0 chunk at 2048: 0.86s, allocated 102.61 GiB, peak 103.37, reserved 104.07
+2026-10-21T20:30:48.713275825Z [tensorfold] rank 0 chunk at 4096: 0.87s, allocated 102.61 GiB, peak 103.37, reserved 104.17
+2026-10-21T20:30:49.599405839Z [tensorfold] rank 0 chunk at 6144: 0.88s, allocated 102.61 GiB, peak 103.37, reserved 104.17
+2026-10-21T20:30:50.907620146Z [tensorfold] rank 0 chunk at 8192: 1.31s, allocated 102.61 GiB, peak 103.37, reserved 104.17
+2026-10-21T20:30:51.795190973Z [tensorfold] rank 0 chunk at 10240: 0.89s, allocated 102.61 GiB, peak 103.37, reserved 104.17
+2026-10-21T20:30:52.679227417Z [tensorfold] rank 0 chunk at 12288: 0.88s, allocated 102.61 GiB, peak 103.37, reserved 104.17
+2026-10-21T20:30:53.566341081Z [tensorfold] rank 0 chunk at 14336: 0.89s, allocated 102.61 GiB, peak 103.37, reserved 104.17
+2026-10-21T20:30:54.459111314Z [tensorfold] rank 0 chunk at 16384: 0.89s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:30:55.359595195Z [tensorfold] rank 0 chunk at 18432: 0.90s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:30:56.265135007Z [tensorfold] rank 0 chunk at 20480: 0.90s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:30:57.171312387Z [tensorfold] rank 0 chunk at 22528: 0.90s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:30:58.077928390Z [tensorfold] rank 0 chunk at 24576: 0.90s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:30:58.985797748Z [tensorfold] rank 0 chunk at 26624: 0.91s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:30:59.904496998Z [tensorfold] rank 0 chunk at 28672: 0.92s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:00.819969047Z [tensorfold] rank 0 chunk at 30720: 0.91s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:01.745456287Z [tensorfold] rank 0 chunk at 32768: 0.92s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:02.677279036Z [tensorfold] rank 0 chunk at 34816: 0.93s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:03.609921719Z [tensorfold] rank 0 chunk at 36864: 0.93s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:04.537278843Z [tensorfold] rank 0 chunk at 38912: 0.93s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:05.469145133Z [tensorfold] rank 0 chunk at 40960: 0.93s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:06.400937297Z [tensorfold] rank 0 chunk at 43008: 0.93s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:07.337636705Z [tensorfold] rank 0 chunk at 45056: 0.93s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:08.277699557Z [tensorfold] rank 0 chunk at 47104: 0.94s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:09.229231416Z [tensorfold] rank 0 chunk at 49152: 0.95s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:10.177578795Z [tensorfold] rank 0 chunk at 51200: 0.95s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:11.125147714Z [tensorfold] rank 0 chunk at 53248: 0.95s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:12.074882818Z [tensorfold] rank 0 chunk at 55296: 0.95s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:13.027405416Z [tensorfold] rank 0 chunk at 57344: 0.95s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:13.985315176Z [tensorfold] rank 0 chunk at 59392: 0.96s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:14.942328158Z [tensorfold] rank 0 chunk at 61440: 0.96s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:15.905498938Z [tensorfold] rank 0 chunk at 63488: 0.96s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:16.873479716Z [tensorfold] rank 0 chunk at 65536: 0.97s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:17.847233734Z [tensorfold] rank 0 chunk at 67584: 0.97s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:18.821725639Z [tensorfold] rank 0 chunk at 69632: 0.97s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:19.792285579Z [tensorfold] rank 0 chunk at 71680: 0.97s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:20.775657001Z [tensorfold] rank 0 chunk at 73728: 0.98s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:22.812705485Z [tensorfold] rank 0 chunk at 75776: 2.04s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:23.789959370Z [tensorfold] rank 0 chunk at 77824: 0.98s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:24.780372929Z [tensorfold] rank 0 chunk at 79872: 0.99s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:25.764174310Z [tensorfold] rank 0 chunk at 81920: 0.98s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:26.751659789Z [tensorfold] rank 0 chunk at 83968: 0.99s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:27.744845533Z [tensorfold] rank 0 chunk at 86016: 0.99s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:28.741660704Z [tensorfold] rank 0 chunk at 88064: 1.00s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:29.739753598Z [tensorfold] rank 0 chunk at 90112: 1.00s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:30.735969239Z [tensorfold] rank 0 chunk at 92160: 0.99s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:31.735053508Z [tensorfold] rank 0 chunk at 94208: 1.00s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:32.733381015Z [tensorfold] rank 0 chunk at 96256: 1.00s, allocated 102.62 GiB, peak 103.38, reserved 104.17
+2026-10-21T20:31:33.732939206Z [tensorfold] rank 0 chunk at 98304: 1.00s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:34.737284451Z [tensorfold] rank 0 chunk at 100352: 1.00s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:35.755833812Z [tensorfold] rank 0 chunk at 102400: 1.02s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:36.766468697Z [tensorfold] rank 0 chunk at 104448: 1.01s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:37.774454732Z [tensorfold] rank 0 chunk at 106496: 1.01s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:38.785842529Z [tensorfold] rank 0 chunk at 108544: 1.01s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:39.805755300Z [tensorfold] rank 0 chunk at 110592: 1.02s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:40.828638492Z [tensorfold] rank 0 chunk at 112640: 1.02s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:41.860377087Z [tensorfold] rank 0 chunk at 114688: 1.03s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:42.882566126Z [tensorfold] rank 0 chunk at 116736: 1.02s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:43.906713926Z [tensorfold] rank 0 chunk at 118784: 1.02s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:44.933439364Z [tensorfold] rank 0 chunk at 120832: 1.02s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:45.964613026Z [tensorfold] rank 0 chunk at 122880: 1.03s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:46.998543317Z [tensorfold] rank 0 chunk at 124928: 1.03s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:48.038766736Z [tensorfold] rank 0 chunk at 126976: 1.04s, allocated 102.63 GiB, peak 103.39, reserved 104.17
+2026-10-21T20:31:49.205103061Z [tensorfold] rank 0 chunk at 129024: 1.16s, allocated 102.64 GiB, peak 103.40, reserved 104.17
+2026-10-21T20:31:49.663083516Z [tensorfold] spilled kept prompt 3fb7a573-000005: 131072 positions, wrote rows 0..131072 and 148.4 MiB in 0.44s
+2026-10-21T20:31:49.665043459Z [tensorfold] done req-6cac168798db prompt=131072 cached=0 thinking=False tokens=1 sha=9ff0419d067b finish=length tok/s=0.0 ttft=63.20s prefill=63.13s rounds=0 accepted=0/0
+2026-10-21T20:31:50.089167754Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:31:50.100012396Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:31:50.130032349Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:31:51.071832862Z [tensorfold] rank 0 chunk at 0: 0.94s, allocated 102.64 GiB, peak 103.40, reserved 104.11
+2026-10-21T20:31:52.795620556Z [tensorfold] rank 0 chunk at 2048: 1.72s, allocated 102.64 GiB, peak 103.40, reserved 104.11
+2026-10-21T20:31:53.678164238Z [tensorfold] rank 0 chunk at 4096: 0.88s, allocated 102.65 GiB, peak 103.41, reserved 104.11
+2026-10-21T20:31:54.637410187Z [tensorfold] rank 0 chunk at 6144: 0.96s, allocated 102.65 GiB, peak 103.41, reserved 104.12
+2026-10-21T20:31:54.736462327Z [tensorfold] spilled kept prompt 3fb7a573-000006: 8192 positions, wrote rows 0..8192 and 21.3 MiB in 0.08s
+2026-10-21T20:31:54.738422799Z [tensorfold] done req-f8b8e0091298 prompt=8192 cached=0 thinking=False tokens=1 sha=c1a6860e444c finish=length tok/s=0.0 ttft=4.52s prefill=4.50s rounds=0 accepted=0/0
+2026-10-21T20:31:54.821237872Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:31:54.839536498Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:31:54.864291161Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:31:55.802760113Z [tensorfold] rank 0 chunk at 0: 0.93s, allocated 102.65 GiB, peak 103.41, reserved 104.11
+2026-10-21T20:31:56.671860895Z [tensorfold] rank 0 chunk at 2048: 0.87s, allocated 102.66 GiB, peak 103.42, reserved 104.21
+2026-10-21T20:31:57.544170002Z [tensorfold] rank 0 chunk at 4096: 0.87s, allocated 102.66 GiB, peak 103.42, reserved 104.21
+2026-10-21T20:31:58.501107679Z [tensorfold] rank 0 chunk at 6144: 0.96s, allocated 102.67 GiB, peak 103.42, reserved 104.21
+2026-10-21T20:31:58.550116495Z [tensorfold] spilled kept prompt 3fb7a573-000007: 8192 positions, wrote rows 0..8192 and 21.3 MiB in 0.03s
+2026-10-21T20:31:58.551652745Z [tensorfold] done req-76beb2884b2c prompt=8192 cached=0 thinking=False tokens=1 sha=895ea7bfb9e6 finish=length tok/s=0.0 ttft=3.65s prefill=3.63s rounds=0 accepted=0/0
+2026-10-21T20:31:58.569554205Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:31:58.587759248Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:31:58.618755917Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:31:59.594476364Z [tensorfold] rank 0 chunk at 0: 0.94s, allocated 102.67 GiB, peak 103.43, reserved 104.13
+2026-10-21T20:32:00.473854549Z [tensorfold] rank 0 chunk at 2048: 0.88s, allocated 102.67 GiB, peak 103.43, reserved 104.23
+2026-10-21T20:32:01.350698345Z [tensorfold] rank 0 chunk at 4096: 0.87s, allocated 102.67 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:02.305128167Z [tensorfold] rank 0 chunk at 6144: 0.95s, allocated 102.68 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:02.356848061Z [tensorfold] spilled kept prompt 3fb7a573-000008: 8192 positions, wrote rows 0..8192 and 21.3 MiB in 0.04s
+2026-10-21T20:32:02.358308710Z [tensorfold] done req-b5f6dba7eb4c prompt=8192 cached=0 thinking=False tokens=1 sha=57d9aaa33d57 finish=length tok/s=0.0 ttft=3.70s prefill=3.65s rounds=0 accepted=0/0
+2026-10-21T20:32:02.461220676Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:32:02.515053600Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:32:02.550922009Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:32:03.493441547Z [tensorfold] rank 0 chunk at 0: 0.93s, allocated 102.67 GiB, peak 103.44, reserved 104.13
+2026-10-21T20:32:04.361609464Z [tensorfold] rank 0 chunk at 2048: 0.87s, allocated 102.67 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:05.233443623Z [tensorfold] rank 0 chunk at 4096: 0.87s, allocated 102.67 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:06.111268382Z [tensorfold] rank 0 chunk at 6144: 0.87s, allocated 102.67 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:07.003787144Z [tensorfold] rank 0 chunk at 8192: 0.89s, allocated 102.68 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:07.892046118Z [tensorfold] rank 0 chunk at 10240: 0.89s, allocated 102.68 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:08.780052678Z [tensorfold] rank 0 chunk at 12288: 0.89s, allocated 102.68 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:09.674564380Z [tensorfold] rank 0 chunk at 14336: 0.89s, allocated 102.68 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:10.568564917Z [tensorfold] rank 0 chunk at 16384: 0.89s, allocated 102.68 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:11.469023588Z [tensorfold] rank 0 chunk at 18432: 0.90s, allocated 102.68 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:12.371555708Z [tensorfold] rank 0 chunk at 20480: 0.90s, allocated 102.68 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:13.286050275Z [tensorfold] rank 0 chunk at 22528: 0.91s, allocated 102.68 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:14.198384468Z [tensorfold] rank 0 chunk at 24576: 0.91s, allocated 102.68 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:15.111006102Z [tensorfold] rank 0 chunk at 26624: 0.91s, allocated 102.68 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:16.024422197Z [tensorfold] rank 0 chunk at 28672: 0.91s, allocated 102.68 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:17.022081876Z [tensorfold] rank 0 chunk at 30720: 1.00s, allocated 102.69 GiB, peak 103.44, reserved 104.23
+2026-10-21T20:32:17.220052484Z [tensorfold] spilled kept prompt 3fb7a573-000009: 32768 positions, wrote rows 0..32768 and 49.6 MiB in 0.18s
+2026-10-21T20:32:17.221897532Z [tensorfold] done req-081a5619cbcd prompt=32768 cached=0 thinking=False tokens=1 sha=c1a6860e444c finish=length tok/s=0.0 ttft=14.49s prefill=14.46s rounds=0 accepted=0/0
+2026-10-21T20:32:17.316524495Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:32:17.426375265Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:32:17.467590580Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:32:18.419072215Z [tensorfold] rank 0 chunk at 0: 0.94s, allocated 102.67 GiB, peak 103.44, reserved 104.15
+2026-10-21T20:32:19.295537414Z [tensorfold] rank 0 chunk at 2048: 0.87s, allocated 102.68 GiB, peak 103.44, reserved 104.15
+2026-10-21T20:32:20.173566512Z [tensorfold] rank 0 chunk at 4096: 0.88s, allocated 102.68 GiB, peak 103.44, reserved 104.15
+2026-10-21T20:32:21.050838222Z [tensorfold] rank 0 chunk at 6144: 0.88s, allocated 102.68 GiB, peak 103.44, reserved 104.15
+2026-10-21T20:32:21.945515477Z [tensorfold] rank 0 chunk at 8192: 0.89s, allocated 102.68 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:22.832777627Z [tensorfold] rank 0 chunk at 10240: 0.88s, allocated 102.68 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:23.721968812Z [tensorfold] rank 0 chunk at 12288: 0.89s, allocated 102.68 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:24.614090049Z [tensorfold] rank 0 chunk at 14336: 0.89s, allocated 102.68 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:25.515464176Z [tensorfold] rank 0 chunk at 16384: 0.90s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:26.426545144Z [tensorfold] rank 0 chunk at 18432: 0.91s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:27.331291164Z [tensorfold] rank 0 chunk at 20480: 0.90s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:28.232335521Z [tensorfold] rank 0 chunk at 22528: 0.90s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:29.136041115Z [tensorfold] rank 0 chunk at 24576: 0.90s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:30.048088116Z [tensorfold] rank 0 chunk at 26624: 0.91s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:30.965932870Z [tensorfold] rank 0 chunk at 28672: 0.92s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:31.886885965Z [tensorfold] rank 0 chunk at 30720: 0.92s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:32.820886206Z [tensorfold] rank 0 chunk at 32768: 0.93s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:33.750969105Z [tensorfold] rank 0 chunk at 34816: 0.93s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:34.679343517Z [tensorfold] rank 0 chunk at 36864: 0.93s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:35.608900389Z [tensorfold] rank 0 chunk at 38912: 0.93s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:36.544894915Z [tensorfold] rank 0 chunk at 40960: 0.93s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:37.479315097Z [tensorfold] rank 0 chunk at 43008: 0.93s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:38.420420277Z [tensorfold] rank 0 chunk at 45056: 0.94s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:39.368177766Z [tensorfold] rank 0 chunk at 47104: 0.95s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:40.307952282Z [tensorfold] rank 0 chunk at 49152: 0.94s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:41.252529355Z [tensorfold] rank 0 chunk at 51200: 0.94s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:42.193078110Z [tensorfold] rank 0 chunk at 53248: 0.94s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:43.142446286Z [tensorfold] rank 0 chunk at 55296: 0.95s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:44.095514480Z [tensorfold] rank 0 chunk at 57344: 0.95s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:45.055461431Z [tensorfold] rank 0 chunk at 59392: 0.96s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:46.015395631Z [tensorfold] rank 0 chunk at 61440: 0.96s, allocated 102.69 GiB, peak 103.45, reserved 104.25
+2026-10-21T20:32:47.083781509Z [tensorfold] rank 0 chunk at 63488: 1.07s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:32:47.501155311Z [tensorfold] spilled kept prompt 3fb7a573-000010: 65536 positions, wrote rows 0..65536 and 81.3 MiB in 0.40s
+2026-10-21T20:32:47.503311830Z [tensorfold] done req-944c4d98ca20 prompt=65536 cached=0 thinking=False tokens=1 sha=c1a6860e444c finish=length tok/s=0.0 ttft=29.63s prefill=29.59s rounds=0 accepted=0/0
+2026-10-21T20:32:47.714274681Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:32:47.947677535Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:32:48.003610695Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:32:48.962587559Z [tensorfold] rank 0 chunk at 0: 0.94s, allocated 102.68 GiB, peak 103.46, reserved 104.15
+2026-10-21T20:32:49.876094326Z [tensorfold] rank 0 chunk at 2048: 0.91s, allocated 102.69 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:32:50.748697567Z [tensorfold] rank 0 chunk at 4096: 0.87s, allocated 102.69 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:32:51.674136111Z [tensorfold] rank 0 chunk at 6144: 0.92s, allocated 102.69 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:32:52.557890028Z [tensorfold] rank 0 chunk at 8192: 0.88s, allocated 102.69 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:32:53.443055765Z [tensorfold] rank 0 chunk at 10240: 0.88s, allocated 102.69 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:32:54.330266454Z [tensorfold] rank 0 chunk at 12288: 0.89s, allocated 102.69 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:32:55.224120670Z [tensorfold] rank 0 chunk at 14336: 0.89s, allocated 102.69 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:32:56.122981121Z [tensorfold] rank 0 chunk at 16384: 0.90s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:32:57.023640334Z [tensorfold] rank 0 chunk at 18432: 0.90s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:32:57.924760811Z [tensorfold] rank 0 chunk at 20480: 0.90s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:32:58.831191891Z [tensorfold] rank 0 chunk at 22528: 0.90s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:32:59.746070265Z [tensorfold] rank 0 chunk at 24576: 0.91s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:00.657416079Z [tensorfold] rank 0 chunk at 26624: 0.91s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:01.570136096Z [tensorfold] rank 0 chunk at 28672: 0.91s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:02.484256381Z [tensorfold] rank 0 chunk at 30720: 0.91s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:03.410346761Z [tensorfold] rank 0 chunk at 32768: 0.92s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:04.346488078Z [tensorfold] rank 0 chunk at 34816: 0.93s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:05.281688167Z [tensorfold] rank 0 chunk at 36864: 0.93s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:06.211687751Z [tensorfold] rank 0 chunk at 38912: 0.93s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:07.144045199Z [tensorfold] rank 0 chunk at 40960: 0.93s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:08.087925896Z [tensorfold] rank 0 chunk at 43008: 0.94s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:09.027821235Z [tensorfold] rank 0 chunk at 45056: 0.94s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:09.966959314Z [tensorfold] rank 0 chunk at 47104: 0.94s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:10.925147829Z [tensorfold] rank 0 chunk at 49152: 0.96s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:11.875597432Z [tensorfold] rank 0 chunk at 51200: 0.95s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:12.821236577Z [tensorfold] rank 0 chunk at 53248: 0.94s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:13.773712318Z [tensorfold] rank 0 chunk at 55296: 0.95s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:14.723463784Z [tensorfold] rank 0 chunk at 57344: 0.95s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:15.679645129Z [tensorfold] rank 0 chunk at 59392: 0.95s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:16.639865067Z [tensorfold] rank 0 chunk at 61440: 0.96s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:17.605814630Z [tensorfold] rank 0 chunk at 63488: 0.96s, allocated 102.70 GiB, peak 103.46, reserved 104.25
+2026-10-21T20:33:18.585166540Z [tensorfold] rank 0 chunk at 65536: 0.98s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:19.564957105Z [tensorfold] rank 0 chunk at 67584: 0.98s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:20.542246641Z [tensorfold] rank 0 chunk at 69632: 0.98s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:21.520485344Z [tensorfold] rank 0 chunk at 71680: 0.98s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:22.511678666Z [tensorfold] rank 0 chunk at 73728: 0.99s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:23.501173868Z [tensorfold] rank 0 chunk at 75776: 0.99s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:24.490303954Z [tensorfold] rank 0 chunk at 77824: 0.99s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:25.475328362Z [tensorfold] rank 0 chunk at 79872: 0.98s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:26.457402127Z [tensorfold] rank 0 chunk at 81920: 0.98s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:27.445951259Z [tensorfold] rank 0 chunk at 83968: 0.99s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:28.441240396Z [tensorfold] rank 0 chunk at 86016: 0.99s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:29.435351508Z [tensorfold] rank 0 chunk at 88064: 0.99s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:30.436536832Z [tensorfold] rank 0 chunk at 90112: 1.00s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:31.431732582Z [tensorfold] rank 0 chunk at 92160: 0.99s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:32.429440116Z [tensorfold] rank 0 chunk at 94208: 1.00s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:33.428941563Z [tensorfold] rank 0 chunk at 96256: 1.00s, allocated 102.70 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:34.432154340Z [tensorfold] rank 0 chunk at 98304: 1.00s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:35.473908993Z [tensorfold] rank 0 chunk at 100352: 1.04s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:36.489548187Z [tensorfold] rank 0 chunk at 102400: 1.01s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:37.507087134Z [tensorfold] rank 0 chunk at 104448: 1.02s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:38.521672654Z [tensorfold] rank 0 chunk at 106496: 1.01s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:39.535340372Z [tensorfold] rank 0 chunk at 108544: 1.01s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:40.554734324Z [tensorfold] rank 0 chunk at 110592: 1.02s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:41.576921865Z [tensorfold] rank 0 chunk at 112640: 1.02s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:42.603329695Z [tensorfold] rank 0 chunk at 114688: 1.02s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:43.638673474Z [tensorfold] rank 0 chunk at 116736: 1.03s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:44.665607512Z [tensorfold] rank 0 chunk at 118784: 1.03s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:45.701774603Z [tensorfold] rank 0 chunk at 120832: 1.03s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:46.731051979Z [tensorfold] rank 0 chunk at 122880: 1.03s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:47.765611318Z [tensorfold] rank 0 chunk at 124928: 1.03s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:48.805076639Z [tensorfold] rank 0 chunk at 126976: 1.04s, allocated 102.71 GiB, peak 103.47, reserved 104.26
+2026-10-21T20:33:49.977137246Z [tensorfold] rank 0 chunk at 129024: 1.17s, allocated 102.72 GiB, peak 103.48, reserved 104.26
+2026-10-21T20:33:50.400930627Z [tensorfold] spilled kept prompt 3fb7a573-000011: 131072 positions, wrote rows 0..131072 and 148.4 MiB in 0.41s
+2026-10-21T20:33:50.404051622Z [tensorfold] done req-554a9c638c97 prompt=131072 cached=0 thinking=False tokens=1 sha=c1a6860e444c finish=length tok/s=0.0 ttft=61.99s prefill=61.92s rounds=0 accepted=0/0
+2026-10-21T20:33:50.855598809Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:33:50.877665168Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:33:50.910801049Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:33:50.956951741Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:33:51.046024387Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:33:51.088096408Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:33:51.182288137Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:33:51.385448959Z [tensorfold] 127.0.0.1 "POST /tokenize HTTP/1.1" 200 -
+2026-10-21T20:33:51.432247169Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:33:51.477558120Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:33:51.535079727Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:33:51.642322234Z [tensorfold] 127.0.0.1 "POST /v1/completions HTTP/1.1" 200 -
+2026-10-21T20:33:52.401781419Z [tensorfold] rank 0 chunk at 0: 0.96s, allocated 102.70 GiB, peak 103.48, reserved 104.18
+2026-10-21T20:33:53.345676191Z [tensorfold] rank 0 chunk at 2048: 0.89s, allocated 102.70 GiB, peak 103.48, reserved 104.18
+2026-10-21T20:33:54.241529959Z [tensorfold] rank 0 chunk at 4096: 0.89s, allocated 102.70 GiB, peak 103.48, reserved 104.28
+2026-10-21T20:33:55.135827767Z [tensorfold] rank 0 chunk at 6144: 0.89s, allocated 102.70 GiB, peak 103.48, reserved 104.28
+2026-10-21T20:33:56.046451141Z [tensorfold] rank 0 chunk at 8192: 0.91s, allocated 102.71 GiB, peak 103.48, reserved 104.28
+2026-10-21T20:33:56.949609315Z [tensorfold] rank 0 chunk at 10240: 0.90s, allocated 102.71 GiB, peak 103.48, reserved 104.28
+2026-10-21T20:33:57.864639777Z [tensorfold] rank 0 chunk at 12288: 0.91s, allocated 102.71 GiB, peak 103.48, reserved 104.28
+2026-10-21T20:33:58.774983236Z [tensorfold] rank 0 chunk at 14336: 0.91s, allocated 102.71 GiB, peak 103.48, reserved 104.28
+2026-10-21T20:33:59.692271819Z [tensorfold] rank 0 chunk at 16384: 0.91s, allocated 102.71 GiB, peak 103.48, reserved 104.28
+2026-10-21T20:34:00.558666899Z [tensorfold] rank 0 chunk at 18432: 0.87s, allocated 102.72 GiB, peak 103.48, reserved 104.28
+2026-10-21T20:34:02.382621938Z [tensorfold] rank 0 chunk at 0: 0.93s, allocated 102.72 GiB, peak 103.48, reserved 104.28
+2026-10-21T20:34:04.214879780Z [tensorfold] rank 0 chunk at 2048: 0.88s, allocated 102.72 GiB, peak 103.48, reserved 104.28
+2026-10-21T20:34:06.011736394Z [tensorfold] rank 0 chunk at 4096: 0.89s, allocated 102.72 GiB, peak 103.48, reserved 104.28
+2026-10-21T20:34:07.793552081Z [tensorfold] rank 0 chunk at 6144: 0.89s, allocated 102.72 GiB, peak 103.48, reserved 104.28
+2026-10-21T20:34:09.603395402Z [tensorfold] rank 0 chunk at 8192: 0.90s, allocated 102.73 GiB, peak 103.49, reserved 104.28
+2026-10-21T20:34:11.405467031Z [tensorfold] rank 0 chunk at 10240: 0.90s, allocated 102.73 GiB, peak 103.49, reserved 104.28
+2026-10-21T20:34:13.215950550Z [tensorfold] rank 0 chunk at 12288: 0.90s, allocated 102.73 GiB, peak 103.49, reserved 104.28
+2026-10-21T20:34:15.047639764Z [tensorfold] rank 0 chunk at 14336: 0.91s, allocated 102.73 GiB, peak 103.49, reserved 104.28
+2026-10-21T20:34:16.888924399Z [tensorfold] rank 0 chunk at 16384: 0.91s, allocated 102.73 GiB, peak 103.49, reserved 104.28
+2026-10-21T20:34:18.722112256Z [tensorfold] rank 0 chunk at 18432: 0.91s, allocated 102.73 GiB, peak 103.49, reserved 104.28
+2026-10-21T20:34:20.568575966Z [tensorfold] rank 0 chunk at 20480: 0.91s, allocated 102.73 GiB, peak 103.49, reserved 104.28
+2026-10-21T20:34:22.420967706Z [tensorfold] rank 0 chunk at 22528: 0.93s, allocated 102.73 GiB, peak 103.49, reserved 104.28
+2026-10-21T20:34:24.274981346Z [tensorfold] rank 0 chunk at 24576: 0.92s, allocated 102.73 GiB, peak 103.49, reserved 104.28
+2026-10-21T20:34:26.145885292Z [tensorfold] rank 0 chunk at 26624: 0.92s, allocated 102.73 GiB, peak 103.49, reserved 104.28
+2026-10-21T20:34:28.007977964Z [tensorfold] rank 0 chunk at 28672: 0.93s, allocated 102.73 GiB, peak 103.49, reserved 104.28
+2026-10-21T20:34:29.878930446Z [tensorfold] rank 0 chunk at 30720: 0.93s, allocated 102.73 GiB, peak 103.49, reserved 104.28
+2026-10-21T20:34:31.761595157Z [tensorfold] rank 0 chunk at 32768: 0.93s, allocated 102.73 GiB, peak 103.49, reserved 104.29
+2026-10-21T20:34:33.641088797Z [tensorfold] rank 0 chunk at 34816: 0.94s, allocated 102.73 GiB, peak 103.49, reserved 104.29
+2026-10-21T20:34:35.525768228Z [tensorfold] rank 0 chunk at 36864: 0.94s, allocated 102.73 GiB, peak 103.49, reserved 104.29
+2026-10-21T20:34:37.418885582Z [tensorfold] rank 0 chunk at 38912: 0.94s, allocated 102.73 GiB, peak 103.49, reserved 104.29
+2026-10-21T20:34:39.339199119Z [tensorfold] rank 0 chunk at 40960: 0.95s, allocated 102.73 GiB, peak 103.49, reserved 104.29
+2026-10-21T20:34:41.250974247Z [tensorfold] rank 0 chunk at 43008: 0.96s, allocated 102.73 GiB, peak 103.49, reserved 104.29
+2026-10-21T20:34:43.182067910Z [tensorfold] rank 0 chunk at 45056: 0.95s, allocated 102.73 GiB, peak 103.49, reserved 104.29
+2026-10-21T20:34:45.089335816Z [tensorfold] rank 0 chunk at 47104: 0.95s, allocated 102.74 GiB, peak 103.50, reserved 104.29
+2026-10-21T20:34:46.731692178Z [tensorfold] rank 0 chunk at 49152: 0.66s, allocated 102.74 GiB, peak 103.50, reserved 104.29
+2026-10-21T20:34:48.348186086Z [tensorfold] rank 0 chunk at 0: 0.92s, allocated 102.74 GiB, peak 103.50, reserved 104.29
+2026-10-21T20:34:50.171758802Z [tensorfold] rank 0 chunk at 2048: 0.88s, allocated 102.74 GiB, peak 103.50, reserved 104.29
+2026-10-21T20:34:51.984049760Z [tensorfold] rank 0 chunk at 4096: 0.89s, allocated 102.75 GiB, peak 103.51, reserved 104.29
+2026-10-21T20:34:53.798912358Z [tensorfold] rank 0 chunk at 6144: 0.89s, allocated 102.75 GiB, peak 103.51, reserved 104.29
+2026-10-21T20:34:55.601031732Z [tensorfold] rank 0 chunk at 8192: 0.90s, allocated 102.75 GiB, peak 103.51, reserved 104.29
+2026-10-21T20:34:57.428729439Z [tensorfold] rank 0 chunk at 10240: 0.90s, allocated 102.75 GiB, peak 103.51, reserved 104.29
+2026-10-21T20:34:59.263092516Z [tensorfold] rank 0 chunk at 12288: 0.90s, allocated 102.75 GiB, peak 103.51, reserved 104.29
+2026-10-21T20:35:01.405207972Z [tensorfold] rank 0 chunk at 14336: 1.23s, allocated 102.75 GiB, peak 103.51, reserved 104.41
+2026-10-21T20:35:03.570000030Z [tensorfold] rank 0 chunk at 16384: 0.91s, allocated 102.75 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:05.428780047Z [tensorfold] rank 0 chunk at 18432: 0.91s, allocated 102.75 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:07.288091361Z [tensorfold] rank 0 chunk at 20480: 0.92s, allocated 102.75 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:09.147848150Z [tensorfold] rank 0 chunk at 22528: 0.92s, allocated 102.75 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:11.025796710Z [tensorfold] rank 0 chunk at 24576: 0.94s, allocated 102.75 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:11.134050072Z [tensorfold] spilled kept prompt 3fb7a573-000012: 18432 positions, wrote rows 0..18432 and 33.7 MiB in 0.07s
+2026-10-21T20:35:11.137468858Z [tensorfold] done req-efeab93d4b8c prompt=20023 cached=0 thinking=False tokens=1500 sha=d58f653b2ce8 finish=length tok/s=21.2 ttft=9.14s prefill=9.06s rounds=1016 accepted=483/1389
+2026-10-21T20:35:12.979596589Z [tensorfold] rank 0 chunk at 26624: 0.92s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:14.858383202Z [tensorfold] rank 0 chunk at 28672: 0.92s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:16.742625013Z [tensorfold] rank 0 chunk at 30720: 0.92s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:18.625265491Z [tensorfold] rank 0 chunk at 32768: 0.94s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:20.515697925Z [tensorfold] rank 0 chunk at 34816: 0.94s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:22.409718798Z [tensorfold] rank 0 chunk at 36864: 0.94s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:24.308278744Z [tensorfold] rank 0 chunk at 38912: 0.95s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:26.221699660Z [tensorfold] rank 0 chunk at 40960: 0.96s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:28.174519240Z [tensorfold] rank 0 chunk at 43008: 0.95s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:30.080192402Z [tensorfold] rank 0 chunk at 45056: 0.95s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:31.989164979Z [tensorfold] rank 0 chunk at 47104: 0.95s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:32.648110347Z [tensorfold] spilled kept prompt 3fb7a573-000013: 49152 positions, wrote rows 0..49152 and 67.2 MiB in 0.30s
+2026-10-21T20:35:32.650808929Z [tensorfold] done req-d9c1f55c9f35 prompt=50192 cached=0 thinking=False tokens=1500 sha=f42ae2e092ab finish=length tok/s=32.6 ttft=55.26s prefill=22.79s rounds=555 accepted=944/1199
+2026-10-21T20:35:33.641182958Z [tensorfold] rank 0 chunk at 49152: 0.96s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:34.600049896Z [tensorfold] rank 0 chunk at 51200: 0.96s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:35.563034036Z [tensorfold] rank 0 chunk at 53248: 0.96s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:36.530132144Z [tensorfold] rank 0 chunk at 55296: 0.97s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:37.500806575Z [tensorfold] rank 0 chunk at 57344: 0.97s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:38.475926237Z [tensorfold] rank 0 chunk at 59392: 0.97s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:39.451752538Z [tensorfold] rank 0 chunk at 61440: 0.97s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:40.429858542Z [tensorfold] rank 0 chunk at 63488: 0.98s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:41.411124488Z [tensorfold] rank 0 chunk at 65536: 0.98s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:42.402611082Z [tensorfold] rank 0 chunk at 67584: 0.99s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:43.391654071Z [tensorfold] rank 0 chunk at 69632: 0.99s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:44.382428750Z [tensorfold] rank 0 chunk at 71680: 0.99s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:45.381460805Z [tensorfold] rank 0 chunk at 73728: 1.00s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:46.386428166Z [tensorfold] rank 0 chunk at 75776: 1.00s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:47.389335761Z [tensorfold] rank 0 chunk at 77824: 1.00s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:48.392476539Z [tensorfold] rank 0 chunk at 79872: 1.00s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:49.409948303Z [tensorfold] rank 0 chunk at 81920: 1.02s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:50.413435914Z [tensorfold] rank 0 chunk at 83968: 1.00s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:51.419868779Z [tensorfold] rank 0 chunk at 86016: 1.00s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:52.441436401Z [tensorfold] rank 0 chunk at 88064: 1.02s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:53.458182204Z [tensorfold] rank 0 chunk at 90112: 1.02s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:54.473887803Z [tensorfold] rank 0 chunk at 92160: 1.01s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:55.491436181Z [tensorfold] rank 0 chunk at 94208: 1.02s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:56.508014723Z [tensorfold] rank 0 chunk at 96256: 1.01s, allocated 102.70 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:57.521825917Z [tensorfold] rank 0 chunk at 98304: 1.01s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:57.866657494Z [tensorfold] rank 0 chunk at 100352: 0.34s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:35:59.187955021Z [tensorfold] rank 0 chunk at 0: 0.94s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:01.033869391Z [tensorfold] rank 0 chunk at 2048: 0.88s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:02.827587826Z [tensorfold] rank 0 chunk at 4096: 0.89s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:04.618102340Z [tensorfold] rank 0 chunk at 6144: 0.89s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:06.422538099Z [tensorfold] rank 0 chunk at 8192: 0.91s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:08.253725612Z [tensorfold] rank 0 chunk at 10240: 0.90s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:10.067387374Z [tensorfold] rank 0 chunk at 12288: 0.90s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:11.911359340Z [tensorfold] rank 0 chunk at 14336: 0.91s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:13.756697161Z [tensorfold] rank 0 chunk at 16384: 0.91s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:15.590959620Z [tensorfold] rank 0 chunk at 18432: 0.91s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:17.456383721Z [tensorfold] rank 0 chunk at 20480: 0.92s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:19.325236500Z [tensorfold] rank 0 chunk at 22528: 0.93s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:21.187364716Z [tensorfold] rank 0 chunk at 24576: 0.92s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:23.052820379Z [tensorfold] rank 0 chunk at 26624: 0.92s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:24.950241778Z [tensorfold] rank 0 chunk at 28672: 0.94s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:26.825986464Z [tensorfold] rank 0 chunk at 30720: 0.93s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:28.711644346Z [tensorfold] rank 0 chunk at 32768: 0.93s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:30.601913975Z [tensorfold] rank 0 chunk at 34816: 0.94s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:32.050660169Z [tensorfold] spilled kept prompt 3fb7a573-000014: 100352 positions, wrote rows 0..100352 and 114.8 MiB in 0.50s
+2026-10-21T20:36:32.053746030Z [tensorfold] done req-95da3351b318 prompt=100621 cached=0 thinking=False tokens=1500 sha=0ed6e9e70041 finish=length tok/s=43.9 ttft=126.33s prefill=47.67s rounds=490 accepted=1009/1252
+2026-10-21T20:36:33.005629532Z [tensorfold] rank 0 chunk at 36864: 0.94s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:33.954387224Z [tensorfold] rank 0 chunk at 38912: 0.95s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:34.908671743Z [tensorfold] rank 0 chunk at 40960: 0.95s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:35.857396572Z [tensorfold] rank 0 chunk at 43008: 0.95s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:36.811759540Z [tensorfold] rank 0 chunk at 45056: 0.95s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:37.773605233Z [tensorfold] rank 0 chunk at 47104: 0.96s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:38.733412966Z [tensorfold] rank 0 chunk at 49152: 0.96s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:39.695809762Z [tensorfold] rank 0 chunk at 51200: 0.96s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:40.664428038Z [tensorfold] rank 0 chunk at 53248: 0.97s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:41.629691961Z [tensorfold] rank 0 chunk at 55296: 0.96s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:42.601203572Z [tensorfold] rank 0 chunk at 57344: 0.97s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:43.572999359Z [tensorfold] rank 0 chunk at 59392: 0.97s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:44.554926403Z [tensorfold] rank 0 chunk at 61440: 0.98s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:45.524349497Z [tensorfold] rank 0 chunk at 63488: 0.97s, allocated 102.71 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:46.506341424Z [tensorfold] rank 0 chunk at 65536: 0.98s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:47.492939157Z [tensorfold] rank 0 chunk at 67584: 0.99s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:48.478394303Z [tensorfold] rank 0 chunk at 69632: 0.98s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:49.470273842Z [tensorfold] rank 0 chunk at 71680: 0.99s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:50.467023331Z [tensorfold] rank 0 chunk at 73728: 0.99s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:51.470573370Z [tensorfold] rank 0 chunk at 75776: 1.00s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:52.470856063Z [tensorfold] rank 0 chunk at 77824: 1.00s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:53.472705246Z [tensorfold] rank 0 chunk at 79872: 1.00s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:54.474859310Z [tensorfold] rank 0 chunk at 81920: 1.00s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:55.484999631Z [tensorfold] rank 0 chunk at 83968: 1.01s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:56.487190817Z [tensorfold] rank 0 chunk at 86016: 1.00s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:57.502087282Z [tensorfold] rank 0 chunk at 88064: 1.01s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:58.515964920Z [tensorfold] rank 0 chunk at 90112: 1.01s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:36:59.528720115Z [tensorfold] rank 0 chunk at 92160: 1.01s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:00.545392464Z [tensorfold] rank 0 chunk at 94208: 1.01s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:01.557919918Z [tensorfold] rank 0 chunk at 96256: 1.01s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:02.574769516Z [tensorfold] rank 0 chunk at 98304: 1.01s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:03.598427121Z [tensorfold] rank 0 chunk at 100352: 1.02s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:04.629759065Z [tensorfold] rank 0 chunk at 102400: 1.03s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:05.663252394Z [tensorfold] rank 0 chunk at 104448: 1.03s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:06.692901227Z [tensorfold] rank 0 chunk at 106496: 1.03s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:07.722179070Z [tensorfold] rank 0 chunk at 108544: 1.03s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:08.757215404Z [tensorfold] rank 0 chunk at 110592: 1.03s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:09.795059712Z [tensorfold] rank 0 chunk at 112640: 1.04s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:10.835050844Z [tensorfold] rank 0 chunk at 114688: 1.04s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:11.883371642Z [tensorfold] rank 0 chunk at 116736: 1.05s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:12.926749995Z [tensorfold] rank 0 chunk at 118784: 1.04s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:13.969937471Z [tensorfold] rank 0 chunk at 120832: 1.04s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:15.025054309Z [tensorfold] rank 0 chunk at 122880: 1.05s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:16.072559002Z [tensorfold] rank 0 chunk at 124928: 1.05s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:17.130698646Z [tensorfold] rank 0 chunk at 126976: 1.06s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:18.177212593Z [tensorfold] rank 0 chunk at 129024: 1.04s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:19.261627274Z [tensorfold] rank 0 chunk at 131072: 1.08s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:20.341788997Z [tensorfold] rank 0 chunk at 133120: 1.08s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:21.425529204Z [tensorfold] rank 0 chunk at 135168: 1.08s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:22.499278490Z [tensorfold] rank 0 chunk at 137216: 1.07s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:23.595335787Z [tensorfold] rank 0 chunk at 139264: 1.09s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:24.684866278Z [tensorfold] rank 0 chunk at 141312: 1.09s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:25.773011831Z [tensorfold] rank 0 chunk at 143360: 1.09s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:26.864046783Z [tensorfold] rank 0 chunk at 145408: 1.09s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:27.952028899Z [tensorfold] rank 0 chunk at 147456: 1.09s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:29.057990963Z [tensorfold] rank 0 chunk at 149504: 1.10s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:30.163620886Z [tensorfold] rank 0 chunk at 151552: 1.10s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:31.265070602Z [tensorfold] rank 0 chunk at 153600: 1.10s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:32.367234924Z [tensorfold] rank 0 chunk at 155648: 1.10s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:33.470126300Z [tensorfold] rank 0 chunk at 157696: 1.10s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:34.571271044Z [tensorfold] rank 0 chunk at 159744: 1.10s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:35.683684738Z [tensorfold] rank 0 chunk at 161792: 1.11s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:36.803587796Z [tensorfold] rank 0 chunk at 163840: 1.12s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:37.911262678Z [tensorfold] rank 0 chunk at 165888: 1.11s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:39.019295000Z [tensorfold] rank 0 chunk at 167936: 1.11s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:40.133273652Z [tensorfold] rank 0 chunk at 169984: 1.11s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:41.242053621Z [tensorfold] rank 0 chunk at 172032: 1.11s, allocated 102.72 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:42.367472456Z [tensorfold] rank 0 chunk at 174080: 1.12s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:43.494305622Z [tensorfold] rank 0 chunk at 176128: 1.13s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:44.626763072Z [tensorfold] rank 0 chunk at 178176: 1.13s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:45.748100821Z [tensorfold] rank 0 chunk at 180224: 1.12s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:46.874032810Z [tensorfold] rank 0 chunk at 182272: 1.12s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:48.005104332Z [tensorfold] rank 0 chunk at 184320: 1.13s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:49.152829679Z [tensorfold] rank 0 chunk at 186368: 1.15s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:50.277063598Z [tensorfold] rank 0 chunk at 188416: 1.12s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:51.410893177Z [tensorfold] rank 0 chunk at 190464: 1.13s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:52.550636398Z [tensorfold] rank 0 chunk at 192512: 1.14s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:53.695675488Z [tensorfold] rank 0 chunk at 194560: 1.14s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:54.849932864Z [tensorfold] rank 0 chunk at 196608: 1.15s, allocated 102.73 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:37:55.990610533Z [tensorfold] rank 0 chunk at 198656: 1.14s, allocated 102.74 GiB, peak 103.51, reserved 104.42
+2026-10-21T20:38:09.526570725Z [tensorfold] spilled kept prompt 3fb7a573-000015: 198656 positions, wrote rows 0..198656 and 210.1 MiB in 0.55s
+2026-10-21T20:38:09.530662486Z [tensorfold] done req-b1645706806a prompt=200082 cached=0 thinking=False tokens=1500 sha=0d2a3aa664b6 finish=length tok/s=111.0 ttft=244.38s prefill=100.38s rounds=352 accepted=1147/1239

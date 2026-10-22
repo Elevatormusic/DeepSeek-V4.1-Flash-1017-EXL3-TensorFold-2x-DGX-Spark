@@ -1,0 +1,34 @@
+[wmab 21:16:03Z] queue: worker lock (marker wmab-1792617371)
+[wmab 21:26:23Z] still waiting for the worker lock (10 min)
+[wmab 21:36:43Z] still waiting for the worker lock (20 min)
+[wmab 21:47:04Z] still waiting for the worker lock (30 min)
+[wmab 21:57:24Z] still waiting for the worker lock (40 min)
+[wmab 22:07:44Z] still waiting for the worker lock (50 min)
+[wmab 22:16:43Z] worker lock held; queue: head lock
+[wmab 22:16:48Z] both locks held at 22:16:48Z
+[wmab 22:16:50Z] === V2r: min_free_kbytes=524288 watermark_scale_factor=50 (2 s into the window)
+head min_free_kbytes=524288 watermark_scale_factor=50
+worker min_free_kbytes=524288 watermark_scale_factor=50
+[wmab 22:17:04Z] V2r zones: head min_MiB=512 low_MiB=1135 high_MiB=1758 totalreserve_MiB=2242 | worker min_MiB=512 low_MiB=1135 high_MiB=1758 totalreserve_MiB=2242
+[wmab 22:23:48Z] V2r idle (engine loaded): head 3882 MiB
+[wmab 22:25:48Z] V2r stall test pass 1: n=124 slow=0 max=1.2 median=0.94 (client rc 0)
+[wmab 22:27:50Z] V2r stall test pass 2: n=124 slow=1 max=1.72 median=0.94 (client rc 0)
+[wmab 22:32:09Z] V2r long run: elapsed 258s errors=0 LONG_EXIT=0
+[wmab 22:32:20Z] V2r done
+[wmab 22:32:20Z] === V1r: min_free_kbytes=1048576 watermark_scale_factor=25 (932 s into the window)
+head min_free_kbytes=1048576 watermark_scale_factor=25
+worker min_free_kbytes=1048576 watermark_scale_factor=25
+[wmab 22:32:34Z] V1r zones: head min_MiB=1024 low_MiB=1336 high_MiB=1647 totalreserve_MiB=2131 | worker min_MiB=1024 low_MiB=1336 high_MiB=1647 totalreserve_MiB=2131
+[wmab 22:34:26Z] V1r idle (engine loaded): head 3714 MiB
+[wmab 22:36:27Z] V1r stall test pass 1: n=124 slow=0 max=1.3 median=0.94 (client rc 0)
+[wmab 22:38:27Z] V1r stall test pass 2: n=124 slow=0 max=1.17 median=0.94 (client rc 0)
+[wmab 22:42:46Z] V1r long run: elapsed 258s errors=0 LONG_EXIT=0
+[wmab 22:42:58Z] V1r done
+[wmab 22:42:58Z] all settings done
+[wmab 22:42:58Z] release: stop test containers, restore the vm values, free the locks
+head restore: min_free_kbytes=1048576 (saved 1048576) watermark_scale_factor=50 (saved 50)
+worker restore: min_free_kbytes=1048576 (saved 1048576) watermark_scale_factor=50 (saved 50)
+[wmab 22:42:59Z] RESTORE_OK both nodes read back the saved values
+[wmab 22:43:09Z] markers: head [/tmp/wmab-1792617371.holder.log ] worker [/tmp/wmab-1792617371.holder.log ]
+[wmab 22:43:09Z] containers: head [] worker []
+[wmab 22:43:09Z] vm values: head 1048576/50 worker 1048576/50

@@ -1,0 +1,9 @@
+{"length": 8192, "rep": 0, "prompt_tokens": 8192, "ttft_s": 3.7062512789998436, "prefill_tps": 2210.319641956566}
+
+{"length": 8192, "rep": 0, "prompt_tokens": 8192, "ttft_s": 3.7006597319996217, "prefill_tps": 2213.6593454306912}
+{"length": 8192, "rep": 1, "prompt_tokens": 8192, "ttft_s": 3.7125191610102775, "prefill_tps": 2206.5879379248063}
+
+{"length": 32768, "rep": 0, "prompt_tokens": 32768, "ttft_s": 14.641051717990194, "prefill_tps": 2238.0905846904643}
+{"length": 65536, "rep": 0, "prompt_tokens": 65536, "ttft_s": 29.813620949993492, "prefill_tps": 2198.1898847484445}
+{"length": 131072, "rep": 0, "prompt_tokens": 131072, "ttft_s": 62.12020804399799, "prefill_tps": 2109.973616108391}
+

@@ -1,0 +1,21 @@
+{"length": 8192, "rep": 0, "prompt_tokens": 8192, "ttft_s": 3.719540541002061, "prefill_tps": 2202.422559909251}
+
+{"length": 8192, "rep": 0, "prompt_tokens": 8192, "ttft_s": 3.7554574240057264, "prefill_tps": 2181.3587734039797}
+{"length": 8192, "rep": 1, "prompt_tokens": 8192, "ttft_s": 4.20486141499714, "prefill_tps": 1948.2211639085783}
+
+{"length": 32768, "rep": 0, "prompt_tokens": 32768, "ttft_s": 15.207281429000432, "prefill_tps": 2154.7572557913677}
+Traceback (most recent call last):
+  File "/home/<user>/wmab/v41/src127.py", line 17, in <module>
+    runpy.run_path(path, run_name="__main__")
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/<user>/deploy/tensorfold-v41-20261017/tf-lane/tools/dsv41/kit_bench.py", line 386, in <module>
+    main()
+  File "/home/<user>/deploy/tensorfold-v41-20261017/tf-lane/tools/dsv41/kit_bench.py", line 377, in main
+    out = {"ready": cmd_ready, "decode": cmd_decode, "concurrent": cmd_concurrent, "sustained": cmd_sustained,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/<user>/deploy/tensorfold-v41-20261017/tf-lane/tools/dsv41/kit_bench.py", line 304, in cmd_prefill
+    "prefill_tps": r["prompt_tokens"] / r["ttft_s"]}
+                   ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for /: 'NoneType' and 'NoneType'

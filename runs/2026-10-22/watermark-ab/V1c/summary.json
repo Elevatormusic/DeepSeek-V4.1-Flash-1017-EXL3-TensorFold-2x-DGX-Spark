@@ -1,0 +1,170 @@
+{
+ "name": "V1c",
+ "windows": {
+  "idle0": [
+   1792628591.7523217,
+   1792628597.754981,
+   "0"
+  ],
+  "idle": [
+   1792628685.9943216,
+   1792628705.9973917,
+   "0"
+  ],
+  "pf1": [
+   1792628706.0041952,
+   1792628726.2928228,
+   "1"
+  ],
+  "all": [
+   1792628706.0027409,
+   1792628726.3453896,
+   "0"
+  ]
+ },
+ "zone_head": "min_MiB=1024 low_MiB=1336 high_MiB=1647 totalreserve_MiB=2131",
+ "zone_worker": "min_MiB=1024 low_MiB=1336 high_MiB=1647 totalreserve_MiB=2131",
+ "idle_unloaded": {
+  "head": {
+   "min_avail_mib": 117150,
+   "min_avail_at": "00:23:12",
+   "min_free_mib": 118673,
+   "median_avail_mib": 117187,
+   "samples": 6
+  },
+  "worker": {
+   "min_avail_mib": 116811,
+   "min_avail_at": "00:23:16",
+   "min_free_mib": 118071,
+   "median_avail_mib": 116813,
+   "samples": 6
+  }
+ },
+ "idle_loaded": {
+  "head": {
+   "min_avail_mib": 3082,
+   "min_avail_at": "00:25:04",
+   "min_free_mib": 4132,
+   "median_avail_mib": 3225,
+   "samples": 20
+  },
+  "worker": {
+   "min_avail_mib": 3754,
+   "min_avail_at": "00:25:05",
+   "min_free_mib": 4805,
+   "median_avail_mib": 3790,
+   "samples": 20
+  }
+ },
+ "stall_test": {
+  "pf1": {
+   "rank0": {
+    "n": 21,
+    "median": 0.89,
+    "mean": 0.931,
+    "p95": 0.99,
+    "max": 1.47,
+    "slow13": 1,
+    "slow20": 0,
+    "slow_sec": 1.47
+   },
+   "rank1": {
+    "n": 21,
+    "median": 0.89,
+    "mean": 0.931,
+    "p95": 0.99,
+    "max": 1.47,
+    "slow13": 1,
+    "slow20": 0,
+    "slow_sec": 1.47
+   },
+   "rc": "1"
+  }
+ },
+ "prefill_tps": {
+  "8192": [
+   1893,
+   2235,
+   2233
+  ]
+ },
+ "all": {
+  "head_mem": {
+   "min_avail_mib": 1275,
+   "min_avail_at": "00:25:25",
+   "min_free_mib": 2151,
+   "median_avail_mib": 1630,
+   "samples": 20
+  },
+  "worker_mem": {
+   "min_avail_mib": 3109,
+   "min_avail_at": "00:25:13",
+   "min_free_mib": 4278,
+   "median_avail_mib": 3372,
+   "samples": 20
+  },
+  "vm_head": {
+   "compact_stall": 0,
+   "compact_fail": 0,
+   "compact_success": 0,
+   "compact_daemon_wake": 8,
+   "allocstall": 0,
+   "pgscan_direct": 0,
+   "pgsteal_direct": 0,
+   "pgscan_kswapd": 0,
+   "pgsteal_kswapd": 0,
+   "pageoutrun": 42,
+   "pswpin": 16,
+   "pswpout": 0,
+   "pgmajfault": 19,
+   "pgmigrate_success": 44479,
+   "compact_migrate_scanned": 745482,
+   "compact_free_scanned": 176441,
+   "kswapd_cpu_s": 0.0,
+   "kcompactd_cpu_s": 0.5,
+   "seconds": 19
+  },
+  "vm_worker": {
+   "compact_stall": 19,
+   "compact_fail": 4,
+   "compact_success": 15,
+   "compact_daemon_wake": 806,
+   "allocstall": 4,
+   "pgscan_direct": 261,
+   "pgsteal_direct": 261,
+   "pgscan_kswapd": 75484,
+   "pgsteal_kswapd": 75478,
+   "pageoutrun": 1270,
+   "pswpin": 0,
+   "pswpout": 2,
+   "pgmajfault": 157,
+   "pgmigrate_success": 38819,
+   "compact_migrate_scanned": 3761046,
+   "compact_free_scanned": 4237108,
+   "kswapd_cpu_s": 0.18,
+   "kcompactd_cpu_s": 0.8,
+   "seconds": 19
+  }
+ },
+ "rank_log_counts": {
+  "rank-r0.log": {
+   "WARNING": 0,
+   "Traceback": 0,
+   "OutOfMemory": 0,
+   "admission_waits": 0,
+   "late_capture": 0
+  },
+  "rank-r1.log": {
+   "WARNING": 0,
+   "Traceback": 1,
+   "OutOfMemory": 0,
+   "admission_waits": 0,
+   "late_capture": 0
+  }
+ },
+ "earlyoom_head": "",
+ "earlyoom_worker": "",
+ "trip": "TRIP 00:25:25 head: MemAvailable 1286616 KiB under 1310720 KiB",
+ "notes": "head min_free_kbytes=1048576 watermark_scale_factor=25\nworker min_free_kbytes=1048576 watermark_scale_factor=25\npass 1: n=21 slow=1 max=1.47 median=0.89 rc 1\ntripped in pass 1",
+ "pf_errors": 2
+}
