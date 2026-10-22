@@ -251,6 +251,9 @@ DOCKER_STUB = r"""case "$1 $2" in
     echo 'memory config={"privateKey":"@FAKE_WORD_D@"}'
     echo "memory aws accessKeyId=@FAKE_WORD_E@ apiToken: @FAKE_WORD_F@"
     echo "memory KeyError in cacheKeys ok"
+    echo 'memory config2={"auth":"@FAKE_WORD_D@"}'
+    echo "memory args3: --auth @FAKE_WORD_E@"
+    echo "memory author and authority ok"
     ;;
   "image inspect") echo "id sha256:0123456789abcdef, created 2026-10-21T00:00:00Z" ;;
   "ps -a") echo "tfv41-r0 | tensorfold-dsv41:test | Up 3 hours" ;;
@@ -344,7 +347,7 @@ API_KEY_FILE={d}/keys
             "driver 580.178.04", "NVRM: Failed memdescAlloc", "free -m",
             "IMAGE=tensorfold-dsv41:test", "TF_COMMIT=730d41abd8f4", "id sha256:0123456789abcdef",
             "PARALLEL=4", "CONTEXT=1048576", "SPILL_GIB=64", "PREFILL_CHUNK=1024", "VISION=0",
-            "auth file: set (the file is not read)", "NCCL error 4",
+            "API access file: set (the file is not read)", "NCCL error 4",
         ):
             with self.subTest(fact=fact):
                 self.assertIn(fact, text)
@@ -380,6 +383,9 @@ API_KEY_FILE={d}/keys
         self.assertIn('memory config={"private[removed]' + chr(10), text)
         self.assertIn("memory aws access[removed]" + chr(10), text)
         self.assertIn("memory KeyError in cacheKeys ok", text)
+        self.assertIn('memory config2={"[removed]' + chr(10), text)
+        self.assertIn("memory args3: --[removed]" + chr(10), text)
+        self.assertIn("memory author and authority ok", text)
         # a flag that only contains "token" in a longer word keeps its value
         self.assertIn("--max-num-batched-tokens 8192 --port 8888 tokenizer ok", text)
         # a quoted value with spaces goes as a whole, and the text after it stays

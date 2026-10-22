@@ -4,7 +4,7 @@
 # It only reads. It changes no setting and sends nothing. It never prints a key or a token:
 #   - It prints the settings of .env from a fixed list of names, not the whole file. API_KEY_FILE shows only "set".
 #   - A final filter removes keys in known formats, the rest of each line from a word that names a credential (key,
-#     token, secret, password, Authorization, Bearer, cookie), home paths and the host names of the two nodes.
+#     token, secret, password, auth, Authorization, Bearer, cookie), home paths and the host names of the two nodes.
 # Read the file before you post it. docs/MEMORY.md explains how to read the numbers.
 set -uo pipefail
 # shellcheck source=common.sh
@@ -109,7 +109,7 @@ report=$({
       DROP_UNOFFERED_TOOL_CALLS CGROUP_PARENT RESTART_POLICY PREFLIGHT; do
     if [ -n "${!k+x}" ]; then echo "$k=${!k}"; else echo "$k=(not set)"; fi
   done
-  if [ -n "${API_KEY_FILE:-}" ]; then echo "auth file: set (the file is not read)"; else echo "auth file: not set"; fi
+  if [ -n "${API_KEY_FILE:-}" ]; then echo "API access file: set (the file is not read)"; else echo "API access file: not set"; fi
 
   section "head node"
   node_script | bash -s -- "${IMAGE:-}" 2>&1
@@ -135,8 +135,9 @@ filter=(-E
   # in JSON or follow any Authorization scheme, so a rule for each value form always misses one. "token" counts
   # only as a whole word part (token, hf_token, token-budget), not in tokens or tokenizer.
   -e 's/(api[_-]?key|secret|passw(or)?d|authori[sz]ation|bearer|cookie|credential|token([^a-z]|$)).*$/[removed]/Ig'
-  # "key" alone or as the last part of a name (--key, --access-key, ssh_key), not in keys or monkey
-  -e 's/(^|[^a-z])key([^a-z]|$).*$/\1[removed]/Ig'
+  # "key" or "auth" alone or as the last part of a name (--key, --access-key, ssh_key, --auth, "auth":), not in
+  # keys, monkey, author or authority
+  -e 's/(^|[^a-z])(key|auth)([^a-z]|$).*$/\1[removed]/Ig'
   # a camel-case name part (privateKey, accessKeyId, apiToken, clientSecret): case-sensitive, after a lower-case
   # letter or a digit, so KeyError and Tokenizer stay
   -e 's/([a-z0-9])(Key|Token|Secret|Passw|Credential|Cookie|Auth)([^a-z]|$).*$/\1[removed]/g'
