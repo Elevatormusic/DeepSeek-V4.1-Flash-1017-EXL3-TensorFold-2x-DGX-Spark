@@ -1,0 +1,20 @@
+[tensorfold] warning: non-loopback server has no API key; requests are open
+[tensorfold] loading DeepSeek-v4.1-Flash-1017-TF: DeepSeek-V4.1-Flash (deepseek_v41) on CUDA, rank 1 of 2
+[tensorfold] TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=1 (NVIDIA's PyTorch container default) set to 0: DeepSeek-V4.1-Flash's fp32 GEMMs stay fp32
+[tensorfold] rank 1: NCCL settings by default: NCCL_CUMEM_ENABLE=0 NCCL_CUMEM_HOST_ENABLE=0 NCCL_IB_GID_INDEX=3
+[tensorfold] rank 1: rank cache reading /cache/tf-ds-rank/rank1of2-374dc57bc29bdb8064cc.bin
+[tensorfold] rank 1: layers 0..4 loaded (5 s, 13.7 GiB)
+[tensorfold] rank 1: layers 0..9 loaded (7 s, 26.0 GiB)
+[tensorfold] rank 1: layers 0..14 loaded (9 s, 38.2 GiB)
+[tensorfold] rank 1: layers 0..19 loaded (11 s, 48.9 GiB)
+[tensorfold] rank 1: layers 0..24 loaded (13 s, 58.7 GiB)
+[tensorfold] rank 1: layers 0..29 loaded (16 s, 70.9 GiB)
+[tensorfold] rank 1: layers 0..34 loaded (18 s, 83.2 GiB)
+[tensorfold] rank 1: layers 0..39 loaded (21 s, 95.4 GiB)
+[tensorfold] rank 1: DSpark (3 stages) loaded, 99.0 GiB
+[tensorfold] rank 1: weights in 23 s (from the rank cache)
+[tensorfold] rank 1: weights loaded, MemAvailable 10.1 GiB, page cache 2.0 GiB (page cache release on)
+[tensorfold] rank 1: RDMA GID index of rocep1s0f1 port 1: 3 (detected)
+[tensorfold] rank 1: RDMA GID index of roceP2p1s0f1 port 1: 3 (detected)
+[tensorfold] rank 1: allocator ceiling 104.4 GiB (holds 102.2, host available 3.7, floor 1.5)
+[tensorfold] rank 1 ready in 45.2s, following rank 0

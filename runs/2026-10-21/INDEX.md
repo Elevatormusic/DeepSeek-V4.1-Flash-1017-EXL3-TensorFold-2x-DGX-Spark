@@ -100,3 +100,56 @@ The tuned values raise `totalreserve` by 1.90 GiB (2.69 against 0.79 GiB) and th
 | `kernel-reserve/head-raw.txt`, `kernel-reserve/worker-raw.txt` | the raw reads: the four sysctl values, `/proc/meminfo`, and the watermarks, protection and free pages of each zone from `/proc/zoneinfo` |
 | `kernel-reserve/compute_reserve.py` | the calculation (`python3 -I compute_reserve.py`) |
 | `kernel-reserve/result.txt` | the output of that script |
+
+## Release gate of engine 1.1.1
+
+Same pair of DGX Spark. Two lock windows on 21 October 2026 (UTC 19:13 to 19:50 and 21:42 to 22:16). Window 2 repeated window 1 with the step order swapped (candidate first), to check the head memory result. Each step started a fresh engine with a new prompt-spill folder, then ran the same checks in the same order. Settings, equal in all steps (production settings): `CONTEXT=1048576`, `PARALLEL=4`, `SPILL_GIB=64`, decode graphs on.
+
+1. start, then a structured-output smoke test;
+2. `v41_suite.py` (32 tests, recipe main with the cache-safe prefill rows), sent straight to the engine;
+3. `v41_grammar_check.py 2` (14 checks);
+4. `v41_bench.py` (1 to 4 streams, prefix cache);
+5. cold 32K prefill: 3 interleaved runs each of random natural text (B) and kit_bench words (D), `cached_tokens` 0;
+6. live checks of the new fixes (`live_checks.py`, 22 checks);
+7. a long run: 4 streams at the same time with prompts of 20K, 50K, 100K and 200K tokens, 1,500 new tokens each, with `MemAvailable` read each second on both nodes;
+8. (candidate only) SIGTERM to rank 0 during a 100K-token prefill.
+
+| Step | Engine image | Engine source |
+|---|---|---|
+| Baseline (release 1.1.0) | `tensorfold-dsv41:fc9200a44463` | the same git tree as `730d41abd8f4`, the commit of release [dsv41-1.1.0](https://github.com/Elevatormusic/TensorFold/releases/tag/dsv41-1.1.0) |
+| 1.1.1 | `tensorfold-dsv41:cb4ceaff2b8c` | the commit of release [dsv41-1.1.1](https://github.com/Elevatormusic/TensorFold/releases/tag/dsv41-1.1.1) that the recipe now pins |
+
+Each cell shows window 1 / window 2.
+
+| Check | Baseline 1.1.0 | 1.1.1 |
+|---|---|---|
+| Suite (`v41_suite.py`) | 32/32, 32/32 | 32/32, 32/32 |
+| Grammar check | 14/14, 14/14 | 14/14, 14/14 |
+| Decode, 1 stream, prose / code | 53.4 / 101.4 and 53.4 / 101.3 tok/s | 54.8 / 99.9 and 54.7 / 99.4 tok/s |
+| Decode, 4 streams, prose, per stream / aggregate | 27.3 / 101.1 and 27.1 / 100.3 tok/s | 27.2 / 101.8 and 27.0 / 101.2 tok/s |
+| Decode, 4 streams, code, per stream / aggregate | 40.3 / 147.7 and 40.1 / 147.3 tok/s | 40.2 / 148.9 and 40.0 / 148.0 tok/s |
+| Prefill, 32K, cold, random natural text, median of 3 | 1,862 and 1,950 tok/s | 1,966 and 1,959 tok/s |
+| Prefill, 32,768 tokens, cold, kit_bench words, median of 3 | 2,121 and 2,228 tok/s | 2,250 and 2,234 tok/s |
+| Prefix cache, 24K prompt, cold / warm TTFT | 11.37 s / 1.11 s and 11.21 s / 1.31 s | 11.14 s / 1.07 s and 11.21 s / 1.17 s |
+| Live checks of the new fixes | 5/22 and 5/22 | 22/22 and 22/22 |
+| Long run, errors | 0 and 0 | 0 and 0 |
+| Long run, lowest head `MemAvailable` | 1,848 and 1,684 MiB | 1,621 and 1,584 MiB |
+| Long run, lowest worker `MemAvailable` | 2,037 and 2,391 MiB | 2,660 and 2,371 MiB |
+| earlyoom events, late graph captures | none, 0 | none, 0 |
+
+- The token hashes of the 4 long prompts are the same in all four runs (`d58f653b2ce8`, `f42ae2e092ab`, `0ed6e9e70041`, `0d2a3aa664b6`).
+- Decode and prefill differences are inside the noise (about 2%). Every prefill value is cold: `cached_tokens` was 0 for all of them.
+- **Head memory.** The lowest head `MemAvailable` of 1.1.1 is 227 MiB (window 1) and 100 MiB (window 2) below 1.1.0. The long runs started with less free memory on 1.1.1 (3,085 and 2,820 MiB, against 3,703 and 3,130 MiB), and the fall from that level is smaller. The image holds about 0.14 GiB more on the head (`reserved +644 MiB` against `+508 MiB` in the `--parallel` warm-up; probable source: the second draft graph of fork PR #25). The low point stays 0.58 GiB over the 1 GiB earlyoom limit. The 1.1.0 baseline alone spans 1,450 to 1,848 MiB across windows. The release notes list this as a known issue.
+- RDMA: with `NCCL_IB_GID_INDEX` and `TF_RDMA_GID_INDEX` unset, the 1.1.1 engine detects index 3 on both ports of both nodes and uses the RDMA gather (`data/e-gid.log`). 1.1.0 ran with the index pinned to 3.
+- SIGTERM to rank 0, 11 s into a 100K-token prefill (window 2): exit code 0 after 2.6 s, no `terminate called` in either rank log (`data/e-sigterm-*.log`; the window 1 SIGTERM run is in `data/gate111-run.log` and in the stop-time rank logs `data/r0-*` and `data/r1-*`).
+- A first try of window 2 was stopped after its candidate step, because its prompt-spill folder came from window 1 and gave prefix-cache hits. Its logs are not used and not kept.
+
+Files:
+
+| File | Content |
+|---|---|
+| `gate-1.1.1/gate-report.md` | the gate report (host names and home paths removed) |
+| `gate-1.1.1/data/b-*`, `c-*` | window 1: baseline and 1.1.1 steps (suite, grammar check, bench, cold prefill, live checks, long run, lowest memory, earlyoom check, rank logs) |
+| `gate-1.1.1/data/d-*`, `e-*` | window 2: baseline and 1.1.1 steps, the same files |
+| `gate-1.1.1/data/mem-*-full-*` | `MemAvailable` in kB each second, head and worker, over the whole step |
+| `gate-1.1.1/scripts/` | the launcher, the window scripts and the new test scripts |

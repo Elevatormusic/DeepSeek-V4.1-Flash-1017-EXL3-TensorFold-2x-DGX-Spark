@@ -63,6 +63,20 @@ Draft ranking (fork PR #20): `TF_DS_DEPTH_POLICY=rank` is the default. The engin
 
 **Little free memory on the head.** The 1.1.0 release notes give a known issue: with 4 long streams, the lowest `MemAvailable` on the head was 1.45 GiB in the gate run, against the 1 GiB earlyoom limit. If the head has less free memory at idle (for example because other processes use it), set `PREFILL_CHUNK=1024` or `PARALLEL=2` in `.env`, then run `./stop.sh && ./start.sh`. No run in this repo measures these two values on 1.1.0.
 
+## Engine switches of release 1.1.1
+
+The engine release [dsv41-1.1.1](https://github.com/Elevatormusic/TensorFold/releases/tag/dsv41-1.1.1) adds the settings below. The release notes explain each change. `start.sh` does not set them: the engine default is the tested value. To change one, add `-e NAME=value` to `run_args` in `start.sh`, then restart the server.
+
+| Setting | Default | Effect |
+|---|---|---|
+| `TF_DS_DRAFT_COUPLED` | `1` | The drafts of a sampled stream follow the stream's own keyed draw (fork PR #25). Output tokens do not change. `0`: greedy drafts for every stream, and no second draft graph. |
+| `TF_DS_DRAFT_COUPLED_SCALE` | `0.5` | Drafter temperature as a part of the stream temperature, for coupled drafts. |
+| `TF_EXL3_L2_DELAY_NS` | `0` | The decode L2 prefetch issues at once (fork PR #26). `3000` restores the wait of 1.1.0. |
+| `TF_SHUTDOWN_GRACE_S` | `3` | Seconds that the server waits for the current round after SIGTERM or Ctrl-C (fork PR #34). The exit code is 0. |
+| `GID_INDEX` (`.env`) | `3` | `-1` makes the engine read the RoCE v2 IPv4 GID index of each port from sysfs (fork PR #22). The log shows `RDMA GID index of ... (detected)`. A value of 0 or more fixes the index. |
+
+**Known issue: head memory margin.** In the long run of the 1.1.1 gate (4 streams with 20K, 50K, 100K and 200K prompts), the lowest head `MemAvailable` was 1.58 to 1.62 GiB, against 1.68 to 1.85 GiB for 1.1.0. The new image holds about 0.14 GiB more on the head (the second draft graph of fork PR #25). The rest of the gap came from less free memory at the start of each window. There was no earlyoom stop, and the low point stayed 0.58 GiB over the 1 GiB earlyoom limit. With less free memory at idle, use the low-memory settings (`PREFILL_CHUNK=1024` or `PARALLEL=2`; see "Little free memory on the head" above). `TF_DS_DRAFT_COUPLED=0` gives back part of the extra memory (not measured). Run record: [runs/2026-10-21](../runs/2026-10-21/INDEX.md#release-gate-of-engine-111).
+
 ## When the lane breaks
 
 The engine keeps serving when one request fails:
@@ -89,7 +103,7 @@ A broken lane ends both rank processes with **exit code 75** after 5 s (`TF_DS_E
   . ./.env; watch -n 1 "grep MemAvailable /proc/meminfo; ssh -o BatchMode=yes $WORKER_SSH grep MemAvailable /proc/meminfo"
   ```
 
-  In the traces in [runs/2026-10-20/INDEX.md](../runs/2026-10-20/INDEX.md), image requests made the head run out first. These traces ran on a validation image (`deepseek-v41-tp2` at 434301e with fork PRs #13, #14 and #15), before fork PRs #21 and #24, which the shipped `730d41abd8f4` has. The values on the shipped image can differ. The head runs the vision tower and decodes the images. The worker went down to about 2.0 GiB.
+  In the traces in [runs/2026-10-20/INDEX.md](../runs/2026-10-20/INDEX.md), image requests made the head run out first. These traces ran on a validation image (`deepseek-v41-tp2` at 434301e with fork PRs #13, #14 and #15), before fork PRs #21 and #24, which the shipped `cb4ceaff2b8c` has. The values on the shipped image can differ. The head runs the vision tower and decodes the images. The worker went down to about 2.0 GiB.
 
   | Load | `PARALLEL` | Head lowest `MemAvailable` | Result |
   |---|---|---|---|

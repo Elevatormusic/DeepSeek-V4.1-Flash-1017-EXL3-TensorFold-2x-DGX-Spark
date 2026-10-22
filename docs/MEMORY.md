@@ -101,7 +101,7 @@ Before you call it a memory stop, find a stop event within a few seconds of the 
 
 If you find one, rank 0 got SIGTERM while it processed a prompt, and the container exits with code 134. All cases in the traces of this repo were of this type. If you find no stop event, treat it as an engine crash: open an issue with the output of `scripts/oom_report.sh` and the full log of rank 0.
 
-For a SIGTERM, engine fork [PR #34](https://github.com/Elevatormusic/TensorFold/pull/34) makes rank 0 end with exit code 0 and without this line. The pinned image `730d41abd8f4` does not have that change yet, so it still prints the line. The memory cause stays: earlyoom still stops the engine. Use the journal to find out why.
+For a SIGTERM, engine fork [PR #34](https://github.com/Elevatormusic/TensorFold/pull/34) makes rank 0 end with exit code 0 and without this line. Release 1.1.1 (the pinned image `cb4ceaff2b8c`) has that change. Release 1.1.0 (`730d41abd8f4`) and older still print the line. The memory cause stays: earlyoom still stops the engine. Use the journal to find out why.
 
 ## Settings for a head with little memory
 

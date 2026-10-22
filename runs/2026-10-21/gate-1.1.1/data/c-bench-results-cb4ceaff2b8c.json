@@ -1,0 +1,96 @@
+{
+ "concurrency": [
+  {
+   "kind": "prose",
+   "streams": 1,
+   "per_stream_tok_s": 54.8,
+   "min_stream_tok_s": 54.8,
+   "aggregate_tok_s": 54.4,
+   "ttft_s": 0.09,
+   "tokens": 512
+  },
+  {
+   "kind": "prose",
+   "streams": 2,
+   "per_stream_tok_s": 39.7,
+   "min_stream_tok_s": 39.1,
+   "aggregate_tok_s": 77.3,
+   "ttft_s": 0.13,
+   "tokens": 1024
+  },
+  {
+   "kind": "prose",
+   "streams": 3,
+   "per_stream_tok_s": 33.6,
+   "min_stream_tok_s": 30.9,
+   "aggregate_tok_s": 92.5,
+   "ttft_s": 0.18,
+   "tokens": 1536
+  },
+  {
+   "kind": "prose",
+   "streams": 4,
+   "per_stream_tok_s": 27.2,
+   "min_stream_tok_s": 25.5,
+   "aggregate_tok_s": 101.8,
+   "ttft_s": 0.22,
+   "tokens": 2048
+  },
+  {
+   "kind": "code",
+   "streams": 1,
+   "per_stream_tok_s": 99.9,
+   "min_stream_tok_s": 99.9,
+   "aggregate_tok_s": 98.1,
+   "ttft_s": 0.11,
+   "tokens": 512
+  },
+  {
+   "kind": "code",
+   "streams": 2,
+   "per_stream_tok_s": 64.4,
+   "min_stream_tok_s": 62.8,
+   "aggregate_tok_s": 122.8,
+   "ttft_s": 0.15,
+   "tokens": 1024
+  },
+  {
+   "kind": "code",
+   "streams": 3,
+   "per_stream_tok_s": 49.7,
+   "min_stream_tok_s": 48.5,
+   "aggregate_tok_s": 141.4,
+   "ttft_s": 0.23,
+   "tokens": 1536
+  },
+  {
+   "kind": "code",
+   "streams": 4,
+   "per_stream_tok_s": 40.2,
+   "min_stream_tok_s": 37.4,
+   "aggregate_tok_s": 148.9,
+   "ttft_s": 0.27,
+   "tokens": 2048
+  }
+ ],
+ "prefix": [
+  {
+   "step": "cold: document A, question 1",
+   "prompt_tokens": 24209,
+   "cached_tokens": 0,
+   "ttft_s": 11.14
+  },
+  {
+   "step": "warm: document A, question 2",
+   "prompt_tokens": 24210,
+   "cached_tokens": 22528,
+   "ttft_s": 1.07
+  },
+  {
+   "step": "cold: document B (same size)",
+   "prompt_tokens": 24374,
+   "cached_tokens": 0,
+   "ttft_s": 11.23
+  }
+ ]
+}

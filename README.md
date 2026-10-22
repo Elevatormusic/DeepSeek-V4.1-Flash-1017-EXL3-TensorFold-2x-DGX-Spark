@@ -30,7 +30,7 @@ Prefill with cold prompts (bertholomus's kit_bench client, median of 3 runs):
 |---|---:|---:|---:|---:|---:|
 | Prefill (tok/s) | 2,166 | 2,179 | 2,110 | 1,989 | 1,266 (1 run) |
 
-The kit_bench numbers use a small-vocabulary prompt (random words from a list of about 150 words). Random natural text gives 1,963 tok/s at 32K on release 1.1.0 (median of 3, cold prompt).
+The kit_bench numbers use a small-vocabulary prompt (random words from a list of about 150 words). Random natural text gives 1,963 tok/s at 32K on release 1.1.0 and 1,959 to 1,966 tok/s on release 1.1.1 (median of 3, cold prompt).
 
 ---
 
@@ -241,6 +241,8 @@ Aggregate throughput is all completion tokens of all requests divided by the wal
 
 The table above is for the image of 17 October. The gate run of release 1.1.0 (`730d41abd8f4`) has 4 streams at 99.3 tok/s aggregate for prose and 145.7 tok/s for code, 3.3% and 3.0% above the previous image in the same session ([runs/2026-10-21](runs/2026-10-21/INDEX.md)). It is one pass.
 
+The gate runs of release 1.1.1 (`cb4ceaff2b8c`) are in [runs/2026-10-21](runs/2026-10-21/INDEX.md#release-gate-of-engine-111). Decode and cold 32K prefill are equal to 1.1.0 within the noise (random natural text: 1,966 and 1,959 tok/s, median of 3; 1.1.0: 1,862 and 1,950 tok/s).
+
 Method, definitions and every run: [Benchmarks](docs/BENCHMARKS.md).
 
 </details>
@@ -252,7 +254,7 @@ Method, definitions and every run: [Benchmarks](docs/BENCHMARKS.md).
 |---|---|
 | Model weights | `LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw` @ `afc7aa0a` (43 files) |
 | Engram tables | `deepseek-ai/DeepSeek-V4.1-Flash-1017` @ `1bae0e10`, files 47 and 48 |
-| Engine | [Elevatormusic/TensorFold](https://github.com/Elevatormusic/TensorFold) @ `730d41abd8f4`, [release dsv41-1.1.0](https://github.com/Elevatormusic/TensorFold/releases/tag/dsv41-1.1.0) (TensorFold 0.6.6 + bertholomus's V4.1 engine + the fork pull requests listed in [What I changed](docs/WHAT-I-CHANGED.md)) |
+| Engine | [Elevatormusic/TensorFold](https://github.com/Elevatormusic/TensorFold) @ `cb4ceaff2b8c`, [release dsv41-1.1.1](https://github.com/Elevatormusic/TensorFold/releases/tag/dsv41-1.1.1) (TensorFold 0.6.6 + bertholomus's V4.1 engine + the fork pull requests listed in [What I changed](docs/WHAT-I-CHANGED.md)) |
 | Base image | `nvcr.io/nvidia/pytorch:26.07-py3` |
 | Chat template | MiaAI kit `files/chat_template.jinja` @ `6f7d1590` + [our patch](runs/2026-10-17/template-patch.diff) |
 | vLLM comparison | MiaAI kit @ `6f7d1590`, image `sha256:2f0cf3ad...` |

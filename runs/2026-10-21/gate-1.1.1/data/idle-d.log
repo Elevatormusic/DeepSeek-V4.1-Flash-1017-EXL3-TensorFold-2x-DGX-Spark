@@ -1,0 +1,3 @@
+[gate111 21:57:24Z] STEP d (fc9200a44463, GID mode pinned): idle memory before the start: head: 117035 MiB | worker: 116381 MiB
+[gate111 22:02:43Z] d idle memory after the start: head: 3152 MiB | worker: 3624 MiB
+[gate111 22:12:02Z] d idle memory before the long run: head: 3130 MiB | worker: 3706 MiB
