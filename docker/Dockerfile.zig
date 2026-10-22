@@ -13,7 +13,13 @@ ARG ZIG_SHA256=9e8d11661d4ae3bd57702a3832781e23ad151dde5798e16a5ccd503f65234ff8
 RUN curl -fsSL -o /tmp/zig.tar.xz "https://ziglang.org/download/${ZIG_VERSION}/zig-aarch64-linux-${ZIG_VERSION}.tar.xz" && \
     echo "${ZIG_SHA256}  /tmp/zig.tar.xz" | sha256sum -c - && \
     mkdir -p /opt/zig && tar -xJf /tmp/zig.tar.xz -C /opt/zig --strip-components=1 && rm /tmp/zig.tar.xz && /opt/zig/zig version
-RUN git clone -q --depth 1 --branch v0.2.8 --recurse-submodules --shallow-submodules https://github.com/mlc-ai/xgrammar /opt/xgrammar
+# xgrammar v0.2.8 at the one commit that the annotated tag v0.2.8 points to (a tag can move; a commit cannot). The
+# submodules come from the commits that this tree records.
+ARG XGRAMMAR_REF=97787376faee5ed8466cfad57c99855e4ce2f6aa
+RUN git init -q /opt/xgrammar && cd /opt/xgrammar && git remote add origin https://github.com/mlc-ai/xgrammar && \
+    git fetch -q --depth 1 origin "${XGRAMMAR_REF}" && git checkout -q --detach FETCH_HEAD && \
+    test "$(git rev-parse HEAD)" = "${XGRAMMAR_REF}" && \
+    git submodule update -q --init --recursive --depth 1
 ARG TF_REPO=https://github.com/Elevatormusic/TensorFold.git
 ARG TF_REF
 RUN test -n "${TF_REF}" || { echo "set --build-arg TF_REF=<full commit>"; exit 1; } \

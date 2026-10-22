@@ -113,7 +113,7 @@ The Python engine uses other folders (`tf-ds-rank`, `tf-ds-spill`, `triton`, `nv
 | `tf-dsv41-lanes` | `/opt/tensorfold/bin/tf-dsv41-lanes` | rank 1 (worker): the follower |
 | `tf-dsv41-rank-cache` | `/opt/tensorfold/bin/tf-dsv41-rank-cache` | makes the weight file of a rank |
 
-The build uses Zig 0.17.0 (downloaded from ziglang.org and checked against a sha256 in the Dockerfile) with `-Dsm=121 -Doptimize=ReleaseFast`, and xgrammar v0.2.8 for structured output. The image has the labels `tf.engine=zig` and `tf.ref=<full commit>`. `scripts/zig_build_image.sh` checks the label and checks that both nodes hold the same image ID.
+The build uses Zig 0.17.0 (downloaded from ziglang.org and checked against a sha256 in the Dockerfile) with `-Dsm=121 -Doptimize=ReleaseFast`, and xgrammar v0.2.8 for structured output. xgrammar is fetched by the full commit `97787376faee` (the commit of the tag v0.2.8; the build checks it), with its submodules at the commits that this tree records. The image has the labels `tf.engine=zig` and `tf.ref=<full commit>`. `scripts/zig_build_image.sh` checks the label and checks that both nodes hold the same image ID.
 
 | Item | Value |
 |---|---|

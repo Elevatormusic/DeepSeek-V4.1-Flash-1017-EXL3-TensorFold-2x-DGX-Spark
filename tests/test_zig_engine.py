@@ -913,6 +913,16 @@ class Files(unittest.TestCase):
         for binary in ("tensorfold-native", "tf-dsv41-lanes"):
             self.assertIn(binary, text)
 
+    def test_every_source_in_the_dockerfile_is_fixed_to_a_hash(self):
+        text = (ROOT / "docker" / "Dockerfile.zig").read_text(encoding="utf-8")
+        self.assertRegex(text, r"ARG XGRAMMAR_REF=[0-9a-f]{40}\n")
+        self.assertIn('test "$(git rev-parse HEAD)" = "${XGRAMMAR_REF}"', text)
+        self.assertIn("git submodule update -q --init --recursive --depth 1", text)
+        self.assertNotIn("--branch", text)                          # a tag or branch name can move
+        self.assertNotIn("git clone", text)
+        self.assertIn('test "$(git rev-parse HEAD)" = "${TF_REF}"', text)
+        self.assertIn('sha256sum -c -', text)                        # the Zig archive
+
     def test_zig_scripts_are_listed_with_the_rollback_note(self):
         for name in ("scripts/zig_start.sh", "scripts/zig_supervise.sh", "scripts/zig_inputs.sh",
                      "scripts/zig_build_image.sh", "scripts/zig_gid.sh"):
