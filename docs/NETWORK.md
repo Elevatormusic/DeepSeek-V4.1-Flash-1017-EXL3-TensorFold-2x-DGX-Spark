@@ -71,6 +71,8 @@ ibv_devinfo -d rocep1s0f1 -i 1 | grep active_mtu
 
 RoCE v2 over IPv4 uses one entry of the port's GID table. On the measured pair it was index 3 (`GID_INDEX=3`).
 
+**The Zig engine (the default) reads the index on each node at each start** (`ZIG_RDMA_GID_INDEX=auto`, `scripts/zig_gid.sh`), and it never sets `NCCL_IB_GID_INDEX`. A moved index does not break it. Set a number in `ZIG_RDMA_GID_INDEX` only to force one. The rest of this section is about the Python engine (`ENGINE=python`).
+
 **Trap:** after a link flap (a cable reseat, or one node rebooting), the GID tables on the two nodes can shift, and a fixed index then points at different entries on each side. NCCL init then hangs or fails. If that happens:
 
 1. Look at the table on both nodes:

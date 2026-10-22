@@ -2,6 +2,8 @@
 
 The head node (rank 0) is the first node to run out of memory. earlyoom then stops the engine. This page explains why, how to read the stop, and which settings give the head more room.
 
+> **The Zig engine (the default)** needs 110 GiB of `MemAvailable` on both nodes at the start. At idle the head has 6.4 GiB free; the 2.8 bpw pack leaves about 3 GiB more than the 2.9 bpw pack. The numbers, and the earlyoom gap for rank 1, are in [ZIG.md](ZIG.md#memory). The rest of this page was measured on the Python engine (the rollback), but the cause (the head is the tight node) is the same.
+
 ## What to do
 
 1. Run `scripts/host_tuning.sh` once (it needs sudo on both nodes). Restart the server after it.
