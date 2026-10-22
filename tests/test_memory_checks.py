@@ -324,17 +324,14 @@ API_KEY_FILE={d}/keys
                 self.assertIn(message, r.stderr)
                 self.assertNotIn("report written", r.stdout)
 
-    def test_failed_rank_temp_file_stops_the_report(self):
+    def test_report_needs_no_temporary_file(self):
         t = self.prepared()
-        # mktemp works once (the report's own file), then fails (the file for the log of rank 0)
-        real = shutil.which("mktemp")
-        t.stub("mktemp", f'n=$(cat "{t.dir}/mk" 2>/dev/null || echo 0); echo $((n + 1)) > "{t.dir}/mk"\n'
-                         f'[ "$n" = 0 ] && exec {real} "$@"\nexit 1\n')
+        t.stub("mktemp", "exit 1\n")                 # no temporary file can be made
         r = t.run(["bash", "scripts/oom_report.sh", str(t.dir / "out" / "r.txt")], {"HOME": "/home/ubuntu"})
-        self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn("cannot make a temporary file for the log of rank 0", r.stderr)
-        self.assertNotIn("report written", r.stdout)
-        self.assertFalse((t.dir / "out" / "r.txt").exists())
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        text = (t.dir / "out" / "r.txt").read_text(encoding="utf-8")
+        self.assertIn("terminate called without an active exception", text)
+        self.assertIn("NCCL error 4", text)
 
     def test_report_holds_the_facts_of_both_nodes(self):
         text = self.report()

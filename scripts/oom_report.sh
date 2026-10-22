@@ -17,8 +17,6 @@ exec 3>&2
 fail() { echo "error: $*" >&3; exit 1; }
 [ -d "$out" ] && fail "$out is a folder; give a file name"
 mkdir -p "$LOGS" "$(dirname "$out")" || fail "cannot make the folder for $out"
-raw=$(mktemp) || fail "cannot make a temporary file"
-trap 'rm -f "$raw"' EXIT
 head_name=$(hostname 2>/dev/null || true)
 worker_name=$(wssh hostname 2>/dev/null || true)
 
@@ -81,24 +79,23 @@ log_filter() { grep -a -i -E 'memory|earlyoom|terminate|mem avail|NCCL error' | 
 # One rank. $1 = rank (0 or 1). Without the container (./stop.sh removes it), it reads the newest log that ./stop.sh
 # saved in logs/.
 engine_lines() {
-  local rank=$1 src="docker logs tfv41-r$1" f rc tmp
-  tmp=$(mktemp) || fail "cannot make a temporary file for the log of rank $rank"
+  local rank=$1 src="docker logs tfv41-r$1" f rc lines
+  # at most 50 lines, so they stay in memory (no temporary file that can fail). rc = the status of docker logs
   if [ "$rank" = 0 ]; then
-    docker logs tfv41-r0 2>&1 | log_filter > "$tmp"; rc=${PIPESTATUS[0]}
+    lines=$(docker logs tfv41-r0 2>&1 | log_filter; exit "${PIPESTATUS[0]}"); rc=$?
   else
-    wssh "docker logs tfv41-r1" 2>&1 | log_filter > "$tmp"; rc=${PIPESTATUS[0]}
+    lines=$(wssh "docker logs tfv41-r1" 2>&1 | log_filter; exit "${PIPESTATUS[0]}"); rc=$?
   fi
   if [ "$rc" -ne 0 ]; then
     f=$(ls -t "$LOGS"/r"$rank"-*.log 2>/dev/null | head -1)
-    if [ -n "$f" ]; then log_filter < "$f" > "$tmp"; src="saved log ${f##*/}"; else : > "$tmp"; src="no container and no saved log"; fi
+    if [ -n "$f" ]; then lines=$(log_filter < "$f"); src="saved log ${f##*/}"; else lines=""; src="no container and no saved log"; fi
   fi
   echo
   echo "--- rank $rank engine log ($src): last 50 lines with memory, earlyoom or terminate"
-  cat "$tmp"
-  rm -f "$tmp"
+  [ -z "$lines" ] || printf '%s\n' "$lines"
 }
 
-{
+report=$({
   echo "OOM report of the DeepSeek-V4.1 TensorFold recipe"
   echo "made $(date -u +%Y-%m-%dT%H:%M:%SZ) by scripts/oom_report.sh. Read docs/MEMORY.md to read the numbers."
 
@@ -126,7 +123,7 @@ engine_lines() {
     printf '%s\n' "$worker_out" | head -3
   fi
   engine_lines 1
-} > "$raw" 2>&1
+} 2>&1)
 
 # Final filter. Fixed strings (node names, WORKER_SSH, $HOME) go through a sed pattern with escaped characters.
 esc() { printf '%s' "$1" | sed 's/[][\.*^$/|&(){}+?]/\\&/g'; }
@@ -149,7 +146,7 @@ filter=(-E
 [ -n "${WORKER_SSH:-}" ] && filter+=(-e "s/$(esc "$WORKER_SSH")/<worker>/g")
 [ "${#worker_name}" -ge 3 ] && filter+=(-e "s/$(esc "$worker_name")/worker/g")
 [ "${#head_name}" -ge 3 ] && filter+=(-e "s/$(esc "$head_name")/head/g")
-if ! sed "${filter[@]}" "$raw" > "$out"; then
+if ! printf '%s\n' "$report" | sed "${filter[@]}" > "$out"; then
   rm -f "$out"                     # a part of the report (for example on a full disk) is not a report
   fail "cannot write the report to $out"
 fi
