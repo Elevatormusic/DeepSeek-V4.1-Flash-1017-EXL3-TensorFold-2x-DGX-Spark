@@ -1,0 +1,1 @@
+TRIP 00:22:47 head: MemAvailable 1254712 KiB under 1310720 KiB

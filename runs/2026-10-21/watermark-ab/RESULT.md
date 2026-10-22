@@ -4,8 +4,9 @@ Date: 2026-10-21 (UTC, node clock). Same pair of DGX Spark as the other runs of 
 
 ## Short result
 
-- **V1 (`vm.min_free_kbytes` 1 GiB, `vm.watermark_scale_factor` 25) is not worse than the baseline B (1 GiB, 50) on stalls.** In two stall tests of 248 prefill chunks each, V1 has 1 and 0 slow chunks (over 1.3 s). B has 4 and 0. The baseline itself varies from 0 to 4 slow chunks, so this run shows "not worse", not "better".
-- **V1 raises the head `MemAvailable` by about 0.47 GiB** (477 MiB, lowest value in the long 4-stream run; mean of two runs against the mean of two B runs). The kernel formula gives +934 MiB (0.91 GiB). The measured gain is about half of it, because the free memory of the node differs between two starts by about 0.4 GiB.
+- **V1 (`vm.min_free_kbytes` 1 GiB, `vm.watermark_scale_factor` 25) is not worse than the baseline B (1 GiB, 50) on stalls in these runs.** In two complete stall tests of 248 prefill chunks each, V1 has 1 and 0 slow chunks (over 1.3 s). B has 4 and 0. The baseline itself varies from 0 to 4 slow chunks, so this run shows "not worse", not "better".
+- **The 3-run rule of CONTRIBUTING.md is not met.** Each side has 2 complete runs. A third run of each side (B3 and V1c, a later window) started, but the 1.25 GiB head memory rule stopped both early, on the baseline too: B3 after 164 chunks (2 slow, max 1.51 s) and V1c after 21 chunks (1 slow, max 1.47 s). They show no stall rise for V1. They also show that the head margin is small with either value.
+- **V1 raises the head `MemAvailable` reading by about 0.47 GiB** (477 MiB measured, lowest value in the long 4-stream run; mean of two complete runs against the mean of two B runs). The kernel formula gives +934 MiB (0.91 GiB). The measured gain is about half of it, because the free memory of the node differs between two starts by 0.4 GiB or more. The lowest head value of B alone ranges from 1,157 MiB (B3, partial run) to 1,867 MiB, which is wider than the measured gain. Only the formula part is fixed.
 - **This is a lower reserve, not more free memory.** The engine holds the same memory in every run. With V1 the kernel keeps about 0.9 GiB less in reserve, so `MemAvailable` reads higher for the same real state. earlyoom (1 GiB limit) and the engine floor (1.5 GiB) now act at less real free memory. This lowers false stops. It does not prevent a real out-of-memory case.
 - **V3 (512 MiB, 25) is not safe.** It gives +1.6 GiB, but the head shows memory pressure: 4,195 compaction stalls in the stall test (B: 2 and 0), 25,437 swap-in pages and 24,018 major faults in the long run (B: 72 and 109), and a chunk of 2.54 s.
 - **V2 (512 MiB, 50) is irregular.** Its first run reached 1,192 MiB on the head and the watchdog stopped it (limit 1,280 MiB). Its repeat reached 1,982 MiB. It gives the same measured gain as V1 (+466 MiB) with a less regular low point.
@@ -35,7 +36,7 @@ Equal in all runs (the A/B rule of CONTRIBUTING.md):
 | `MEM_FLOOR_GIB` | 1.5 |
 | Host tuning | `scripts/host_tuning.sh` applied on both nodes (swappiness 10, compaction_proactiveness 0, extfrag_threshold 500, THP never, earlyoom as in the script). Only the two `vm` values below changed, at runtime with `sysctl -w`. |
 | Prompts | Random-word prompts of `kit_bench.py prefill`, a new seed each time: no prefix cache hit (cold). |
-| Runs per side | 2 (B and B2; V1 and V1r; V2 stopped and V2r; V3 once). This is under the 3 runs of the A/B rule: see "Limits". |
+| Runs per side | 2 complete runs (B and B2; V1 and V1r; V2 stopped and V2r; V3 once), plus a third run of B and of V1 (B3 and V1c) that the memory rule stopped early. This is under the 3 complete runs of the A/B rule: see "Limits". |
 
 Steps in each run: set the two values on both nodes; start the engine fresh; wait 30 s; measure idle `MemAvailable` for 20 s; run the stall test twice; run the long 4-stream run once.
 
@@ -43,7 +44,7 @@ Steps in each run: set the two values on both nodes; start the engine fresh; wai
 - **Long run:** 4 streams at the same time with prompts of 20K, 50K, 100K and 200K tokens, 1,500 new tokens each (`capdrive.py long`, seed 7). The token hashes equal those of the 1.1.0 gate in all runs that finished.
 - **Samples at 1 s on both nodes** (`mem-head.csv`, `mem-worker.csv`): `MemAvailable`, `MemFree`, `Cached`, `/proc/vmstat` counters (`compact_*`, `allocstall*`, `pgscan*`, `pgsteal*`, `pswpin`, `pswpout`, `pgmajfault`) and the CPU time of kswapd0 and kcompactd0.
 - **Watchdog** (`scripts/watch.sh`): it stops the test containers when the head `MemAvailable` is under 1.25 GiB or when earlyoom logs a stop. It never touches other containers.
-- **Order:** B, V1, V2, V3, B2 in the first window (20:23 to 21:15 UTC), then V2r and V1r in the second window (22:16 to 22:43 UTC). Both locks of the pair were held, so no other job ran.
+- **Order:** B, V1, V2, V3, B2 in the first window (20:23 to 21:15 UTC), then V2r and V1r in the second window (22:16 to 22:43 UTC), then B3 and V1c in the third window (00:17 to 00:26 UTC on the next day). Both locks of the pair were held in each window, so no other job ran. The third window began with less free memory on the head: idle `MemAvailable` 2,843 MiB for B3 (B: 3,467, B2: 3,051), and the 1.25 GiB rule stopped B3 in pass 2 and V1c in pass 1.
 - The two `vm` values were read back after each window. Both nodes ended at 1,048,576 and 50.
 
 ## Results
@@ -54,8 +55,10 @@ Steps in each run: set the two values on both nodes; start the engine fresh; wai
 |---|---|---|---|---|---|---|---|---|---|
 | B | 3,467 / 3,469 | 1,451 | 1,347 / 2,698 | 0.94 s, 1.03 s, 2.04 s, 4 | 1.23 s, 0 | 2,197 / 2,268 / 2,178 / 2,093 | 2/1/1 | 6/0/0 | 0 |
 | B2 | 3,051 / 3,707 | 1,867 | 1,686 / 2,520 | 0.94 s, 1.03 s, 1.18 s, 0 | 1.14 s, 0 | 2,212 / 2,247 / 2,205 / 2,110 | 0/0/1,928 | 0/0/0 | 0 |
+| B3 (stopped) | 2,843 / 2,966 | 1,157 (whole run) | no long run | 164 chunks: 0.94 s, 1.07 s, 1.51 s, 2 | no long run | 2,176 / 2,157 / 2,173 / 2,068 | 183/164/86 | no long run | stopped by the head memory rule at 1,225 MiB |
 | V1 | 3,835 / 4,103 | 2,340 | 2,228 / 2,636 | 0.94 s, 1.04 s, 1.31 s, 1 | 1.19 s, 0 | 2,200 / 2,254 / 2,182 / 2,110 | 120/15/15 | 497/153/152 | 0 |
 | V1r | 3,702 / 4,082 | 1,926 | 1,759 / 3,044 | 0.94 s, 1.04 s, 1.30 s, 0 | 1.39 s, 1 | 2,196 / 2,228 / 2,195 / 2,108 | 0/0/0 | 0/0/0 | 0 |
+| V1c (stopped) | 3,225 / 3,790 | 1,275 (whole run) | no long run | 21 chunks: 0.89 s, 0.99 s, 1.47 s, 1 | no long run | 2,233 (8K only) | n/a | no long run | stopped by the head memory rule at 1,256 MiB |
 | V2 (stopped) | 3,598 / 4,211 | 1,192 | no long run | 151 chunks: 0.93 s, 1.04 s, 1.19 s, 0 | no long run | 2,174 / 2,257 / 2,203 / 2,106 | 1/1/1 | no long run | stopped by the watchdog |
 | V2r | 3,872 / 3,969 | 2,103 | 1,982 / 2,999 | 0.94 s, 1.03 s, 1.72 s, 1 | 1.15 s, 0 | 2,150 / 2,178 / 2,204 / 2,113 | 46/2/2 | 4/1/1 | 0 |
 | V3 | 4,564 / 4,709 | 3,240 | 3,114 / 3,327 | 0.94 s, 1.06 s, 2.54 s, 4 | 2.19 s, 3 | 2,148 / 2,032 / 2,183 / 2,112 | 4,195/443/412 | 1,927/1,189/713 | 0 |
@@ -76,13 +79,14 @@ Extra head numbers for V3 (long run): swap-in 25,437 pages, swap-out 26,960 page
 1. Chunk times do not separate B, V1 and V2. The median is 0.94 s everywhere. The slow chunks are rare and change from run to run: B gave 4 in one run and 0 in the next.
 2. The `/proc/vmstat` compaction counters change a lot between two runs of the same setting (head `allocstall` 1 in B and 1,928 in B2; worker `compact_stall` 0 in V1 and 807 in V1r). They do not match the chunk times. Use the chunk times, the swap-in and the major faults as the stall signal.
 3. V3 is the only setting with a clear sign of pressure in the swap and major-fault numbers, and it has the largest chunk (2.54 s).
-4. The head `MemAvailable` moves by about 1 GiB from second to second during a prefill (see `mem-head.csv`), also at B. A single low value (V2: 1,192 MiB) can be an excursion, so the means of two runs are the fair figure.
+4. The head `MemAvailable` moves by about 1 GiB from second to second during a prefill (see `mem-head.csv`), also at B. A single low value (V2: 1,192 MiB; B3: 1,157 MiB) can be an excursion, so the means of complete runs are the fair figure. The lowest head value of B alone ranges from 1,157 to 1,867 MiB.
+5. In the third window the baseline (B3) and V1 (V1c) both fell to the 1.25 GiB rule in a 32K prefill of the stall test. The head margin is thin with either value, as the 1.1.0 gate also found. V1 changes the reading by the kernel formula (0.91 GiB). It does not give the head a larger real margin.
 
 ## Limits
 
-- Two runs per setting (V3: one). The A/B rule of CONTRIBUTING.md asks for at least 3 per side. This run makes no speed claim. It makes two claims: V1 is not worse than B on slow chunks in these runs, and V1 reads about 0.47 GiB higher in `MemAvailable`.
+- Two complete runs per side (V3: one). The A/B rule of CONTRIBUTING.md asks for at least 3. The third runs (B3, V1c) were stopped early by the head memory rule and have 164 and 21 chunks. This run makes no speed claim. It supports one claim: no stall rise for V1 in the runs made (2 complete, 1 partial). It does not prove V1 is equal to B on stalls. The kernel formula, not the measurement, gives the size of the reading change (+0.91 GiB); the measured gain (+0.47 GiB) is inside the spread between starts.
 - One engine image, one model view, THP off, one pass of the long run for each setting.
-- The test ran for about 1 hour 20 minutes in total. It does not cover a slow drift of the page cache over days.
+- The test ran for about 1 hour 30 minutes in total. It does not cover a slow drift of the page cache over days.
 - The gain is a change of the reading. The real free memory is the same.
 
 ## Files
@@ -97,5 +101,5 @@ Extra head numbers for V3 (long run): swap-in 25,437 pages, swap-out 26,960 page
 | `<run>/long4.log` | the long run (`capdrive.py long`): TTFT, decode tok/s and token hash of each stream |
 | `<run>/zone-head.txt`, `<run>/zone-worker.txt` | sums of the zone watermarks and the reserve |
 | `<run>/notes.txt`, `<run>/windows.tsv`, `<run>/trip.txt`, `<run>/earlyoom-*.txt`, `<run>/start.log` | notes, the time windows, the watchdog result, the earlyoom lines (empty in all runs), the engine start |
-| `window1-orchestrate.log`, `window2-orchestrate.log`, `env.txt` | the console output of the two windows and the node state |
+| `window1-orchestrate.log`, `window2-orchestrate.log`, `window3-orchestrate.log`, `env.txt` | the console output of the three windows and the node state |
 | `scripts/` | the scripts as they ran (home path and host names replaced) |
