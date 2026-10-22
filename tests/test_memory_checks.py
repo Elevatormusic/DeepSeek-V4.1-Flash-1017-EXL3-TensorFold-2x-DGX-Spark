@@ -99,7 +99,8 @@ class Tree:
         return subprocess.run(argv, cwd=self.dir, env=env, capture_output=True, text=True, timeout=60, check=False)
 
 
-ENV_BASE = """HEAD_IP=10.100.80.1
+ENV_BASE = """ENGINE=python
+HEAD_IP=10.100.80.1
 WORKER_IP=10.100.80.2
 WORKER_SSH=10.100.80.2
 RDMA_DEVICES=

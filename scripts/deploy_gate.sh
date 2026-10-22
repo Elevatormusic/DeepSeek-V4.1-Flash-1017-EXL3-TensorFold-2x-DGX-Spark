@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy a new engine image with an automatic rollback: switch IMAGE in .env, restart both ranks, then a live
+# Deploy a new engine image (ENGINE=python only) with an automatic rollback: switch IMAGE in .env, restart both ranks, then a live
 # structured-output request, the 32-test suite and the --parallel grammar check. Any failure puts OLD back.
 #   scripts/deploy_gate.sh NEW_TAG OLD_TAG        (tags of tensorfold-dsv41, both already on both nodes)
 #   SKIP_BENCH=1 scripts/deploy_gate.sh ...       (skip the concurrency benchmark at the end)
@@ -7,6 +7,11 @@ set -u
 NEW=$1 OLD=$2
 # shellcheck source=common.sh
 . "$(dirname "$0")/common.sh"
+# This gate swaps IMAGE, the Python engine image. It does not know ZIG_IMAGE (docs/ZIG.md, "Update the engine").
+if [ "${ENGINE:-zig}" != python ]; then
+  echo "deploy_gate.sh works with ENGINE=python only (the rollback). Set ENGINE=python in .env to use it." >&2
+  exit 2
+fi
 OUT="$ROOT/runs/$(date -u +%Y-%m-%d)"
 mkdir -p "$OUT"
 export V41_BASE_URL="$API" V41_MODEL="$SERVED_NAME"

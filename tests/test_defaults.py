@@ -23,7 +23,13 @@ PROTECTED = {
     "THINKING": "0",
     # On since engine 1.1.0: a call to a tool that the request did not offer is dropped.
     "DROP_UNOFFERED_TOOL_CALLS": "1",
-    # The engine build. A change here must come with new gate results (see CONTRIBUTING.md).
+    # The engine. Since 2026-10-22 the default is the Zig engine with the 2.8 bpw pack; the Python engine 1.1.1 with the
+    # 2.9 bpw pack is the rollback (ENGINE=python). The user decided this on 2026-10-22 (CHANGELOG.md).
+    "ENGINE": "zig",
+    # The engine builds. A change here must come with new gate results (see CONTRIBUTING.md).
+    # Zig engine: fork branch dsv41-zig-dev. Rollback (Python 1.1.1):
+    "ZIG_TF_COMMIT": "d58d25ccd6dbd624814cc2ccc848f8e5ba84580c",
+    "ZIG_IMAGE": "tensorfold-dsv41-zig:d58d25cc",
     "TF_COMMIT": "cb4ceaff2b8c",
     "IMAGE": "tensorfold-dsv41:cb4ceaff2b8c",
 }
@@ -98,6 +104,21 @@ class ProtectedDefaults(unittest.TestCase):
                          "IMAGE and TF_COMMIT in .env.example name different engine builds")
         self.assertIn(env["TF_COMMIT"], (ROOT / "README.md").read_text(encoding="utf-8"),
                       "README.md does not name the engine build of .env.example")
+
+    def test_zig_image_matches_commit(self):
+        """The Zig image tag is the first 8 characters of the full fork commit, and the README names it."""
+        env = env_example()
+        self.assertEqual(env["ZIG_IMAGE"].rsplit(":", 1)[-1], env["ZIG_TF_COMMIT"][:8],
+                         "ZIG_IMAGE and ZIG_TF_COMMIT in .env.example name different engine builds")
+        self.assertRegex(env["ZIG_TF_COMMIT"], r"^[0-9a-f]{40}$")
+        self.assertIn(env["ZIG_TF_COMMIT"][:8], (ROOT / "README.md").read_text(encoding="utf-8"),
+                      "README.md does not name the Zig engine build of .env.example")
+
+    def test_start_sh_dispatches_on_engine(self):
+        """start.sh hands over to the Zig start for ENGINE=zig, and keeps the Python start for ENGINE=python."""
+        text = start_sh()
+        self.assertIn('case "${ENGINE:-zig}" in', text, f"start.sh must read ENGINE with the fallback zig. {HOW}")
+        self.assertIn('zig) exec "$ROOT/scripts/zig_start.sh"', text)
 
 
 class FallbacksMatchEnvExample(unittest.TestCase):
