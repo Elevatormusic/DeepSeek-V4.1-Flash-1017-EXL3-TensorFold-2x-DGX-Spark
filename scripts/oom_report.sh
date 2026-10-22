@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Collects the facts that a memory report needs, on both nodes, into one text file. Attach the file to an issue.
 #   scripts/oom_report.sh [OUTPUT_FILE]       (run it on the head; default: logs/oom-report-<UTC time>.txt)
-# It only reads. It changes no setting and sends nothing. It never prints a key or a token:
+# It only reads. It changes no setting and sends nothing. It removes the keys and tokens that it can find:
 #   - It prints the settings of .env from a fixed list of names, not the whole file. API_KEY_FILE shows only "set".
-#   - A final filter removes keys in known formats, the rest of each line from a word that names a credential (key,
-#     token, secret, password, auth, authentication, Authorization, Bearer, cookie), home paths and the host names of
-#     the two nodes.
+#   - A final filter removes keys in known formats (Hugging Face, OpenAI, GitHub, GitLab, Slack, AWS, Google, JWT and
+#     others), each word of 32 or more characters with upper-case letters, lower-case letters and digits (the form of
+#     most random keys), the rest of each line from a word that names a credential (key, token, secret, password,
+#     auth, authentication, Authorization, Bearer, cookie), home paths and the host names of the two nodes.
 # Read the file before you post it. docs/MEMORY.md explains how to read the numbers.
 set -uo pipefail
 # shellcheck source=common.sh
@@ -129,7 +130,11 @@ report=$({
 # Final filter. Fixed strings (node names, WORKER_SSH, $HOME) go through a sed pattern with escaped characters.
 esc() { printf '%s' "$1" | sed 's/[][\.*^$/|&(){}+?]/\\&/g'; }
 filter=(-E
-  -e 's/(hf_|sk-|ghp_|gho_|ghs_|xox[bp]-|github_pat_)[A-Za-z0-9_-]{8,}/[removed]/g'
+  # known key prefixes: Hugging Face, OpenAI and Anthropic, Stripe, GitHub, GitLab, Slack, npm, PyPI, DigitalOcean,
+  # Google OAuth and API keys, JWT
+  -e 's/(hf_|sk-|[sr]k_(live|test)_|gh[pousr]_|github_pat_|glpat-|gldt-|glrt-|glptt-|xox[abeprs]-|xapp-|npm_|pypi-|do[opr]_v1_|ya29\.|AIza|eyJ)[A-Za-z0-9_.-]{8,}/[removed]/g'
+  # AWS key IDs: a fixed 4-letter prefix and 16 upper-case letters or digits (case-sensitive)
+  -e 's/(A3T[A-Z0-9]|AKIA|ASIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA)[A-Z0-9]{16}/[removed]/g'
   # Basic is a common word, so it counts only with a value of base64 text after it
   -e 's/(^|[^a-z])basic[[:space:]]+[A-Za-z0-9+\/=]{8,}.*$/\1[removed]/Ig'
   # from the first word that names a credential to the end of the line. A value can be quoted, escaped, nested
@@ -149,10 +154,21 @@ filter=(-E
 [ -n "${WORKER_SSH:-}" ] && filter+=(-e "s/$(esc "$WORKER_SSH")/<worker>/g")
 [ "${#worker_name}" -ge 3 ] && filter+=(-e "s/$(esc "$worker_name")/worker/g")
 [ "${#head_name}" -ge 3 ] && filter+=(-e "s/$(esc "$head_name")/head/g")
-if ! printf '%s\n' "$report" | sed "${filter[@]}" > "$out"; then
+# A key with no known prefix and no name: each word of 32 or more characters ([A-Za-z0-9_+-]) that has upper-case
+# letters, lower-case letters and digits. Hex hashes, paths and lower-case names stay. Plain awk (also mawk).
+long_words='{
+  s = $0; o = ""
+  while (match(s, /[A-Za-z0-9_+-][A-Za-z0-9_+-]*/)) {
+    w = substr(s, RSTART, RLENGTH)
+    if (length(w) >= 32 && w ~ /[A-Z]/ && w ~ /[a-z]/ && w ~ /[0-9]/) w = "[removed]"
+    o = o substr(s, 1, RSTART - 1) w; s = substr(s, RSTART + RLENGTH)
+  }
+  print o s
+}'
+if ! printf '%s\n' "$report" | sed "${filter[@]}" | LC_ALL=C awk "$long_words" > "$out"; then
   rm -f "$out"                     # a part of the report (for example on a full disk) is not a report
   fail "cannot write the report to $out"
 fi
 
 echo "report written to $out"
-echo "Read it, then attach it to your issue. The filter removes keys and tokens, but check it for anything else that is private."
+echo "Read it, then attach it to your issue. The filter removes the keys and tokens that it finds, but check it for keys and anything else that is private."

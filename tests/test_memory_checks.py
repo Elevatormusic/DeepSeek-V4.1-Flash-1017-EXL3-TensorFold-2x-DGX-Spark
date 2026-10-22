@@ -31,6 +31,9 @@ FAKE_ARG_C = "Ps" * 6
 FAKE_WORD_D = "Wd" * 5
 FAKE_WORD_E = "Xe" * 5
 FAKE_WORD_F = "Yf" * 5
+FAKE_GITLAB = "gl" + "pat-" + "Gq" * 10                     # a GitLab token form
+FAKE_AWS_ID = "AK" + "IA" + "QZ7" * 5 + "Q"               # an AWS key ID form (4 + 16 characters)
+FAKE_LONG = "Ab3" * 12                                    # a key with no known prefix (36 characters, mixed)
 
 needs_bash = unittest.skipUnless(shutil.which("bash") and os.name == "posix", "needs bash on Linux or macOS")
 
@@ -54,7 +57,8 @@ def fill(text: str) -> str:
     for name, value in (("FAKE_HUB", FAKE_HUB), ("FAKE_AUTH", FAKE_AUTH), ("FAKE_QS", FAKE_QS),
                         ("FAKE_OTHER", FAKE_OTHER), ("FAKE_ARG_A", FAKE_ARG_A),
                         ("FAKE_ARG_B", FAKE_ARG_B), ("FAKE_ARG_C", FAKE_ARG_C), ("FAKE_WORD_D", FAKE_WORD_D),
-                        ("FAKE_WORD_E", FAKE_WORD_E), ("FAKE_WORD_F", FAKE_WORD_F)):
+                        ("FAKE_WORD_E", FAKE_WORD_E), ("FAKE_WORD_F", FAKE_WORD_F),
+                        ("FAKE_GITLAB", FAKE_GITLAB), ("FAKE_AWS_ID", FAKE_AWS_ID), ("FAKE_LONG", FAKE_LONG)):
         text = text.replace(f"@{name}@", value)
     return text
 
@@ -258,6 +262,10 @@ DOCKER_STUB = r"""case "$1 $2" in
     echo "memory args4: --authentication @FAKE_WORD_E@"
     echo "memory args5: --authn @FAKE_WORD_F@"
     echo "memory store: userAuthenticator=@FAKE_WORD_D@"
+    echo "memory request failed for @FAKE_GITLAB@ at push"
+    echo "memory s3 client id @FAKE_AWS_ID@ region us-east-1"
+    echo "memory upstream sent @FAKE_LONG@ then closed"
+    echo "memory digest 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08 tensorfold_deepseek_v41_graph_capture_window_4 ok"
     ;;
   "image inspect") echo "id sha256:0123456789abcdef, created 2026-10-21T00:00:00Z" ;;
   "ps -a") echo "tfv41-r0 | tensorfold-dsv41:test | Up 3 hours" ;;
@@ -370,7 +378,8 @@ API_KEY_FILE={d}/keys
     def test_no_secret_in_the_report(self):
         text = self.report()
         for fake in (FAKE_HUB, FAKE_SK, FAKE_AUTH, FAKE_QS, FAKE_OTHER, FAKE_ARG_A, FAKE_ARG_B,
-                     FAKE_ARG_C, FAKE_WORD_D, FAKE_WORD_E, FAKE_WORD_F, "SOME_SECRET", "HF_TOKEN",
+                     FAKE_ARG_C, FAKE_WORD_D, FAKE_WORD_E, FAKE_WORD_F, FAKE_GITLAB, FAKE_AWS_ID, FAKE_LONG,
+                     "SOME_SECRET", "HF_TOKEN",
                      "/home/ubuntu", "spark-test1"):
             with self.subTest(fake=fake):
                 self.assertNotIn(fake, text)
@@ -390,6 +399,13 @@ API_KEY_FILE={d}/keys
         self.assertIn('memory config2={"[removed]' + chr(10), text)
         self.assertIn("memory args3: --[removed]" + chr(10), text)
         self.assertIn("memory author and authority ok", text)
+        # raw keys with no name before them: known prefixes and long mixed words
+        self.assertIn("memory request failed for [removed] at push" + chr(10), text)
+        self.assertIn("memory s3 client id [removed] region us-east-1" + chr(10), text)
+        self.assertIn("memory upstream sent [removed] then closed" + chr(10), text)
+        # a hex hash and a long lower-case name stay
+        self.assertIn("memory digest 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08 "
+                      "tensorfold_deepseek_v41_graph_capture_window_4 ok", text)
         self.assertIn('memory config3={"[removed]' + chr(10), text)
         self.assertIn("memory args4: --[removed]" + chr(10), text)
         self.assertIn("memory args5: --[removed]" + chr(10), text)
