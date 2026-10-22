@@ -5,7 +5,7 @@ Each item was checked against the files in this repo. The file that supports the
 
 ## The Zig engine
 
-The Zig engine is the default since 22 October 2026. Its own list of gaps (the image not built from this recipe, the base image that can differ, the third-party kernel kit, the unfinished host tests, earlyoom and rank 1, the values not measured) is in [ZIG.md](ZIG.md#gaps). The list below was made for the Python engine (the rollback); a limit there that ZIG.md does not repeat has not been measured on the Zig engine.
+The Zig engine is the default since 22 October 2026. Its own list of gaps (the image not built from this recipe, the base image that can differ, the third-party kernel kit, earlyoom and rank 1, the values not measured) is in [ZIG.md](ZIG.md#gaps). The list below was made for the Python engine (the rollback); a limit there that ZIG.md does not repeat has not been measured on the Zig engine.
 
 ## Not measured
 
