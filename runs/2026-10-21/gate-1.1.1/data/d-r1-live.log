@@ -1,0 +1,16 @@
+[tensorfold] warning: non-loopback server has no API key; requests are open
+[tensorfold] loading DeepSeek-v4.1-Flash-1017-TF: DeepSeek-V4.1-Flash (deepseek_v41) on CUDA, rank 1 of 2
+[tensorfold] TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=1 (NVIDIA's PyTorch container default) set to 0: DeepSeek-V4.1-Flash's fp32 GEMMs stay fp32
+[tensorfold] rank 1: rank cache writing /cache/tf-ds-rank/rank1of2-fe727b9b41d318620a37.bin
+[tensorfold] rank 1: layers 0..4 loaded (37 s, 13.7 GiB)
+[tensorfold] rank 1: layers 0..9 loaded (71 s, 26.0 GiB)
+[tensorfold] rank 1: layers 0..14 loaded (106 s, 38.2 GiB)
+[tensorfold] rank 1: layers 0..19 loaded (137 s, 48.9 GiB)
+[tensorfold] rank 1: layers 0..24 loaded (168 s, 58.7 GiB)
+[tensorfold] rank 1: layers 0..29 loaded (204 s, 70.9 GiB)
+[tensorfold] rank 1: layers 0..34 loaded (239 s, 83.2 GiB)
+[tensorfold] rank 1: layers 0..39 loaded (273 s, 95.4 GiB)
+[tensorfold] rank 1: DSpark (3 stages) loaded, 99.0 GiB
+[tensorfold] rank 1: weights in 282 s (written to the rank cache)
+[tensorfold] rank 1: allocator ceiling 104.3 GiB (holds 102.1, host available 3.7, floor 1.5)
+[tensorfold] rank 1 ready in 308.0s, following rank 0

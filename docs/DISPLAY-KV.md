@@ -26,7 +26,7 @@ client is active. The launcher refuses active ranks and incompatible clients.
 ## Opt-in use
 
 First complete the ordinary recipe setup, including network and host tuning.
-The launcher builds from `IMAGE` in `.env`. It checks the pristine source of the 1.0.0 engine `07aa02585f64`, not the engine that `docker/build.sh` builds now (`730d41abd8f4`). For this experiment, build the 1.0.0 base on the head, copy it to the worker, and set `IMAGE=tensorfold-dsv41:07aa02585f64` in `.env` (see the return steps below). Run these commands from the repository root:
+The launcher builds from `IMAGE` in `.env`. It checks the pristine source of the 1.0.0 engine `07aa02585f64`, not the engine that `docker/build.sh` builds now (`cb4ceaff2b8c`). For this experiment, build the 1.0.0 base on the head, copy it to the worker, and set `IMAGE=tensorfold-dsv41:07aa02585f64` in `.env` (see the return steps below). Run these commands from the repository root:
 
 ```bash
 docker build --build-arg TF_COMMIT=07aa02585f64 -t tensorfold-dsv41:07aa02585f64 docker
@@ -63,7 +63,7 @@ They contain a configuration snapshot. Do not publish them or their secrets.
 If startup fails, the launcher attempts to restore DRM defaults. It does not
 start an ordinary-memory fallback. Inspect `--check` if restore fails.
 
-To return to the ordinary engine after all GPU and DRM clients have stopped, first set `IMAGE=tensorfold-dsv41:730d41abd8f4` in `.env` again (the ordinary engine; `TF_COMMIT` in `.env` should still be `730d41abd8f4`). Then run:
+To return to the ordinary engine after all GPU and DRM clients have stopped, first set `IMAGE=tensorfold-dsv41:cb4ceaff2b8c` in `.env` again (the ordinary engine; `TF_COMMIT` in `.env` should still be `cb4ceaff2b8c`). Then run:
 
 ```bash
 ./stop.sh

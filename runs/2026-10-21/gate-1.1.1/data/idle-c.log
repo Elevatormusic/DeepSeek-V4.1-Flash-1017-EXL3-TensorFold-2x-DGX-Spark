@@ -1,0 +1,3 @@
+[gate111 19:28:12Z] STEP c (cb4ceaff2b8c, GID mode auto): idle memory before the start: head: 117872 MiB | worker: 115843 MiB
+[gate111 19:36:24Z] c idle memory after the start: head: 3181 MiB | worker: 3988 MiB
+[gate111 19:45:37Z] c idle memory before the long run: head: 3085 MiB | worker: 3761 MiB

@@ -1,0 +1,348 @@
+[
+ {
+  "group": "speed",
+  "name": "decode_prose_off",
+  "pass": true,
+  "tok_s": 58.0,
+  "per_prompt": [
+   55.0,
+   61.0
+  ],
+  "ttft_s": [
+   0.19,
+   0.17
+  ]
+ },
+ {
+  "group": "speed",
+  "name": "decode_code_off",
+  "pass": true,
+  "tok_s": 95.4,
+  "per_prompt": [
+   95.7,
+   95.1
+  ],
+  "ttft_s": [
+   0.18,
+   0.2
+  ]
+ },
+ {
+  "group": "speed",
+  "name": "decode_prose_think",
+  "pass": true,
+  "tok_s": 61.7,
+  "per_prompt": [
+   61.7
+  ],
+  "ttft_s": [
+   0.26
+  ]
+ },
+ {
+  "group": "speed",
+  "name": "decode_code_think",
+  "pass": true,
+  "tok_s": 77.8,
+  "per_prompt": [
+   77.8
+  ],
+  "ttft_s": [
+   0.27
+  ]
+ },
+ {
+  "group": "speed",
+  "name": "prefill_8k",
+  "pass": true,
+  "prompt_tokens": 8035,
+  "cached_tokens": 0,
+  "ttft_s": 5.12,
+  "prefill_tok_s": 1568.0
+ },
+ {
+  "group": "speed",
+  "name": "prefill_32k",
+  "pass": true,
+  "prompt_tokens": 32076,
+  "cached_tokens": 0,
+  "ttft_s": 16.27,
+  "prefill_tok_s": 1971.0
+ },
+ {
+  "group": "tools",
+  "name": "single_call_off",
+  "pass": true,
+  "s": 1.2,
+  "finish": "tool_calls",
+  "detail": "[{\"id\": \"call_67e6790665d74154b4908ce2\", \"type\": \"function\", \"function\": {\"name\": \"get_weather\", \"arguments\": \"{\\\"city\\\":\\\"Tokyo\\\",\\\"unit\\\":\\\"celsius\\\"}\"}}]"
+ },
+ {
+  "group": "tools",
+  "name": "single_call_think",
+  "pass": true,
+  "s": 1.1,
+  "finish": "tool_calls",
+  "detail": "[{\"id\": \"call_c15c3ae4d1aa4318b44058b7\", \"type\": \"function\", \"function\": {\"name\": \"get_weather\", \"arguments\": \"{\\\"city\\\":\\\"Tokyo\\\",\\\"unit\\\":\\\"celsius\\\"}\"}}]"
+ },
+ {
+  "group": "tools",
+  "name": "no_call_when_not_needed",
+  "pass": true,
+  "s": 0.5,
+  "detail": {
+   "role": "assistant",
+   "content": "Paris"
+  }
+ },
+ {
+  "group": "tools",
+  "name": "tool_choice_required",
+  "pass": true,
+  "s": 1.7,
+  "detail": {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_ccde368c5818473da2d2175e",
+     "type": "function",
+     "function": {
+      "name": "get_weather",
+      "arguments": "{\"city\":\"Tokyo\",\"unit\":\"celsius\"}"
+     }
+    },
+    {
+     "id": "call_0de666a33dad4a498b7b29f8",
+     "type": "function",
+     "function": {
+      "name": "get_time",
+      "arguments": "{\"timezone\":\"Asia/Tokyo\"}"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "group": "tools",
+  "name": "tool_choice_named",
+  "pass": true,
+  "s": 1.3,
+  "detail": {
+   "role": "assistant",
+   "content": null,
+   "tool_calls": [
+    {
+     "id": "call_f60f2fafa57c48c2bbbaaa08",
+     "type": "function",
+     "function": {
+      "name": "get_time",
+      "arguments": "{\"timezone\":\"Europe/Paris\"}"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "group": "tools",
+  "name": "nested_arguments",
+  "pass": true,
+  "s": 1.8,
+  "detail": {
+   "title": "Q4 roadmap",
+   "start": "2026-10-20T14:00:00",
+   "duration_minutes": 45,
+   "attendees": [
+    {
+     "name": "Ana",
+     "email": "ana@example.com"
+    },
+    {
+     "name": "Raj",
+     "email": "raj@example.com"
+    }
+   ],
+   "reminder": {
+    "minutes_before": 10
+   }
+  }
+ },
+ {
+  "group": "tools",
+  "name": "parallel_calls_one_turn",
+  "pass": true,
+  "s": 1.5,
+  "n_calls": 2,
+  "detail": [
+   "lima",
+   "oslo"
+  ]
+ },
+ {
+  "group": "tools",
+  "name": "tool_result_round_trip_off",
+  "pass": true,
+  "s": 1.5,
+  "detail": "it's currently **3\u00b0c in berlin** with windy conditions and light rain \u2014 so yes, **definitely bring a coat**. with wind and rain on top of near-freezing temperatures, it'll feel even colder, so a warm, water-resistant jacket (and maybe a scarf) is a good idea."
+ },
+ {
+  "group": "tools",
+  "name": "tool_result_round_trip_think",
+  "pass": true,
+  "s": 1.6,
+  "detail": "**berlin weather:** 3\u00b0c, windy with light rain.\n\n**coat verdict:** yes \u2014 definitely bring a coat. at 3\u00b0c with wind and rain, you'll want a warm, water-resistant coat (and ideally a scarf and something to keep the wind out)."
+ },
+ {
+  "group": "tools",
+  "name": "streaming_tool_call_deltas",
+  "pass": true,
+  "s": 0.9,
+  "detail": {
+   "name": "get_weather",
+   "args": "{\"city\":\"Madrid\",\"unit\":\"fahrenheit\"}"
+  }
+ },
+ {
+  "group": "tools",
+  "name": "agent_loop_off",
+  "pass": true,
+  "steps": 4,
+  "s": 4.1,
+  "detail": {
+   "out.txt": "8042",
+   "last": "Verified: `config.json` gives `\"port\": 8041`, and I wrote `8042` to `out.txt`.\n\nDONE"
+  }
+ },
+ {
+  "group": "tools",
+  "name": "agent_loop_think",
+  "pass": true,
+  "steps": 4,
+  "s": 3.9,
+  "detail": {
+   "out.txt": "8042",
+   "last": "DONE"
+  }
+ },
+ {
+  "group": "schema",
+  "name": "json_schema_strict_off",
+  "pass": true,
+  "valid": "5/5",
+  "detail": []
+ },
+ {
+  "group": "schema",
+  "name": "json_schema_strict_think",
+  "pass": true,
+  "valid": "3/3",
+  "detail": []
+ },
+ {
+  "group": "schema",
+  "name": "json_object_mode",
+  "pass": true,
+  "detail": {
+   "city": "Lisbon",
+   "country": "Portugal",
+   "population": 545923
+  }
+ },
+ {
+  "group": "schema",
+  "name": "choice_constraint",
+  "pass": true,
+  "got": "negative"
+ },
+ {
+  "group": "schema",
+  "name": "regex_constraint",
+  "pass": true,
+  "got": "(555) 123-4567"
+ },
+ {
+  "group": "schema",
+  "name": "json_from_prompt_only",
+  "pass": true,
+  "valid": "5/5"
+ },
+ {
+  "group": "reasoning",
+  "name": "thinking_modes",
+  "pass": true,
+  "detail": {
+   "off": {
+    "reasoning_chars": 0,
+    "answer_ok": true,
+    "tokens": 2,
+    "s": 0.2
+   },
+   "low": {
+    "reasoning_chars": 181,
+    "answer_ok": true,
+    "tokens": 81,
+    "s": 1.1
+   },
+   "high": {
+    "reasoning_chars": 137,
+    "answer_ok": true,
+    "tokens": 49,
+    "s": 0.8
+   },
+   "max": {
+    "reasoning_chars": 217,
+    "answer_ok": true,
+    "tokens": 93,
+    "s": 1.4
+   }
+  }
+ },
+ {
+  "group": "reasoning",
+  "name": "no_think_tag_leak",
+  "pass": true,
+  "detail": "No. 221 equals 13 \u00d7 17, so it is not prime."
+ },
+ {
+  "group": "format",
+  "name": "stop_sequence",
+  "pass": true,
+  "got": "1 2 3 4 5 6"
+ },
+ {
+  "group": "format",
+  "name": "multilingual_utf8",
+  "pass": true,
+  "detail": "Japanese: \u56f3\u66f8\u9928\u306f9\u6642\u306b\u958b\u304d\u307e\u3059\u3002  \nFrench: La biblioth\u00e8que ouvre \u00e0 neuf heures."
+ },
+ {
+  "group": "long_context",
+  "name": "needle_64k",
+  "pass": true,
+  "prompt_tokens": 64030,
+  "s": 29.2,
+  "got": "ORCHID-7731"
+ },
+ {
+  "group": "long_context",
+  "name": "needle_200k",
+  "pass": true,
+  "prompt_tokens": 200030,
+  "s": 84.8,
+  "got": "ORCHID-7731"
+ },
+ {
+  "group": "router",
+  "name": "chat_tools_stream",
+  "pass": true,
+  "s": 1.3,
+  "detail": "{\"city\":\"Rome\",\"unit\":\"celsius\"}"
+ },
+ {
+  "group": "router",
+  "name": "default_request_hermes_shape",
+  "pass": true,
+  "s": 0.1,
+  "reasoning_chars": 0
+ }
+]

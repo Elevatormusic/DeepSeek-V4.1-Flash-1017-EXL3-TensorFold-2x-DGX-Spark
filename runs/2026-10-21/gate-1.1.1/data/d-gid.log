@@ -1,0 +1,3 @@
+head:
+[tensorfold] decode gathers over RDMA writes
+worker:

@@ -1,0 +1,287 @@
+[
+ {
+  "name": "special_token_text/thinking_off/think_end",
+  "pass": true,
+  "extra_think_end_ids": 0,
+  "extra_user_ids": 0,
+  "plain_run_found": true,
+  "n_ids": 7
+ },
+ {
+  "name": "special_token_text/thinking_off/user_tag",
+  "pass": true,
+  "extra_think_end_ids": 0,
+  "extra_user_ids": 0,
+  "plain_run_found": true,
+  "n_ids": 9
+ },
+ {
+  "name": "special_token_text/thinking_off/both_in_prose",
+  "pass": true,
+  "extra_think_end_ids": 0,
+  "extra_user_ids": 0,
+  "plain_run_found": null,
+  "n_ids": 19
+ },
+ {
+  "name": "special_token_text/thinking_on/think_end",
+  "pass": true,
+  "extra_think_end_ids": 0,
+  "extra_user_ids": 0,
+  "plain_run_found": true,
+  "n_ids": 33
+ },
+ {
+  "name": "special_token_text/thinking_on/user_tag",
+  "pass": true,
+  "extra_think_end_ids": 0,
+  "extra_user_ids": 0,
+  "plain_run_found": true,
+  "n_ids": 35
+ },
+ {
+  "name": "special_token_text/thinking_on/both_in_prose",
+  "pass": true,
+  "extra_think_end_ids": 0,
+  "extra_user_ids": 0,
+  "plain_run_found": null,
+  "n_ids": 45
+ },
+ {
+  "name": "special_token_text/chat_request_200",
+  "pass": true,
+  "status": 200
+ },
+ {
+  "name": "dsml_cut/required/4",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "",
+   ""
+  ]
+ },
+ {
+  "name": "dsml_cut/required/8",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "",
+   ""
+  ]
+ },
+ {
+  "name": "dsml_cut/required/16",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "",
+   ""
+  ]
+ },
+ {
+  "name": "dsml_cut/required/24",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "",
+   ""
+  ]
+ },
+ {
+  "name": "dsml_cut/required/40",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "",
+   ""
+  ]
+ },
+ {
+  "name": "dsml_cut/required/64",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "",
+   ""
+  ]
+ },
+ {
+  "name": "dsml_cut/auto/4",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "I'll check the",
+   "I'll check the"
+  ]
+ },
+ {
+  "name": "dsml_cut/auto/8",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "I'll check the weather in both cities",
+   "I'll check the weather in both cities"
+  ]
+ },
+ {
+  "name": "dsml_cut/auto/16",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "I'll check the weather in both cities for you.",
+   "I'll check the weather in both cities for you."
+  ]
+ },
+ {
+  "name": "dsml_cut/auto/24",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "I'll check the weather in both cities for you.",
+   "I'll check the weather in both cities for you."
+  ]
+ },
+ {
+  "name": "dsml_cut/auto/40",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "I'll check the weather in both cities for you.",
+   "I'll check the weather in both cities for you."
+  ]
+ },
+ {
+  "name": "dsml_cut/auto/64",
+  "pass": true,
+  "no_raw_dsml": true,
+  "stream_equals_nonstream": true,
+  "finish": [
+   "length",
+   "length"
+  ],
+  "calls": [
+   0,
+   0
+  ],
+  "content_head": [
+   "I'll check the weather in both cities for you.",
+   "I'll check the weather in both cities for you."
+  ]
+ },
+ {
+  "name": "dsml_cut/control_full_call",
+  "pass": true,
+  "status": 200,
+  "finish": "tool_calls"
+ },
+ {
+  "name": "json_schema/three_requests_valid",
+  "pass": true
+ },
+ {
+  "name": "json_schema/prompt_shows_schema_only",
+  "pass": true,
+  "schema_names_in_prompt": true,
+  "openai_wrapper_in_prompt": false
+ }
+]
