@@ -19,7 +19,7 @@
 #      Measured with 2 bench runs each (248 prompt chunks): background compaction on gave 46 slow chunks (over
 #      1.3 s), the first version of this script (extfrag_threshold 1000, kernel watermarks) gave 5, these values
 #      gave 2 (both at 1.31 s) and 128K prompts at 1,986 and 1,981 tokens/s (runs/2026-10-18/INDEX.md).
-#      Scale 25 in place of 50 shows no stall rise and reads higher in MemAvailable (formula 0.9 GiB), because the
+#      Scale 25 in place of 50 shows no stall rise and reads higher in MemAvailable (about 0.6 GiB), because the
 #      kernel keeps less in reserve (2 complete runs each; runs/2026-10-21/watermark-ab/). It adds no free memory.
 #   3. earlyoom (required; the script stops if it is missing) stops the engine, not the node, when memory runs
 #      out. It sends SIGTERM to the process named "tensorfold" below 1 GiB available and SIGKILL below 0.5 GiB.

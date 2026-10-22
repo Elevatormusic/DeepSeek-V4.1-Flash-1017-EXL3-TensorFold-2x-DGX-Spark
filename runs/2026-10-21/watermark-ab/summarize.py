@@ -1,23 +1,37 @@
 #!/usr/bin/env python3
-"""Make the summary table of the watermark A/B test from the summary.json file of each run.
+"""Make the summary table of the watermark A/B test from the files of each run.
 
   python3 -I summarize.py > summary-table.txt
 
 Each <run>/summary.json comes from scripts/analyze.py (rank-0 chunk times, 1 s memory samples, /proc/vmstat deltas).
 MemAvailable is in MiB. A slow chunk is a prefill chunk over 1.3 s. Standard library only.
+The runs B3 and V1c ran after midnight UTC, so they are in ../../2026-10-22/watermark-ab/.
+
+The formula check uses the identity of the kernel function si_mem_available():
+  MemAvailable = MemFree - totalreserve + X
+  X = (page cache - min(page cache / 2, sum of low watermarks)) + (reclaimable - min(reclaimable / 2, sum of low watermarks))
+Per sample, X = MemAvailable - MemFree + totalreserve. A lower low watermark lowers a cut only when the cut is
+capped by it. If X does not change between two settings, no cut is capped, and the gain is the drop of totalreserve.
 """
+import csv
 import json
 import os
+import re
 import statistics
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+LATER = os.path.join(HERE, "..", "..", "2026-10-22", "watermark-ab")   # third window, after midnight UTC
 RUNS = ["B", "B2", "B3", "V1", "V1r", "V1c", "V2", "V2r", "V3"]
 GROUPS = [("B (B, B2)", ["B", "B2"]), ("V1 (V1, V1r)", ["V1", "V1r"]), ("V2 (V2r only for the long run)", ["V2", "V2r"]), ("V3", ["V3"])]
 PARTIAL = ["B3", "V1c"]   # third window: stopped early by the head memory rule, no long run
 
 
+def rundir(name):
+    return os.path.join(LATER if name in PARTIAL else HERE, name)
+
+
 def load(name):
-    with open(os.path.join(HERE, name, "summary.json")) as f:
+    with open(os.path.join(rundir(name), "summary.json")) as f:
         return json.load(f)
 
 
@@ -55,7 +69,7 @@ for n in RUNS:
           f" | {lh.get('compact_stall')}/{lh.get('compact_fail')}/{lh.get('allocstall')} | {err}")
 
 print()
-print("Per setting (mean of the runs; gain against the mean of B and B2)")
+print("Per setting (mean of the complete runs; gain against the mean of B and B2)")
 base_idle = statistics.mean(data[n]["idle_loaded"]["head"]["median_avail_mib"] for n in ("B", "B2"))
 base_low = statistics.mean(data[n]["long"]["head_mem"]["min_avail_mib"] for n in ("B", "B2"))
 for label, names in GROUPS:
@@ -76,3 +90,47 @@ for n in PARTIAL:
     ch = get(st, "both", "rank0", default=None) or get(st, "pf1", "rank0", default={})
     print(f"{n}: idle head {s['idle_loaded']['head']['median_avail_mib']}; lowest head {get(s, 'all', 'head_mem', 'min_avail_mib')}; "
           f"chunks {ch.get('n')}, slow {ch.get('slow13')}, max {ch.get('max')} s; stop: {s['trip']}")
+
+
+def zone_sums(name):
+    text = open(os.path.join(rundir(name), "zone-head.txt")).read()
+    return {k: int(v) for k, v in re.findall(r"(\w+)_MiB=(\d+)", text)}
+
+
+def idle_x(name):
+    """Mean of X = MemAvailable - MemFree + totalreserve over the idle window of the head (MiB)."""
+    reserve = zone_sums(name)["totalreserve"]
+    win = None
+    with open(os.path.join(rundir(name), "windows.tsv")) as f:
+        for line in f:
+            p = line.rstrip("\n").split("\t")
+            if p[0] == "idle":
+                win = (float(p[1]), float(p[2]))
+    xs, avail, free, cached = [], [], [], []
+    with open(os.path.join(rundir(name), "mem-head.csv")) as f:
+        for r in csv.DictReader(f):
+            if win[0] <= float(r["epoch"]) <= win[1]:
+                a, fr = float(r["MemAvailable"]) / 1024, float(r["MemFree"]) / 1024
+                xs.append(a - fr + reserve)
+                avail.append(a)
+                free.append(fr)
+                cached.append(float(r["Cached"]) / 1024)
+    return reserve, statistics.mean(xs), statistics.mean(avail), statistics.mean(free), statistics.mean(cached)
+
+
+print()
+print("Formula check at the engine-loaded idle state of the head (MiB): X = MemAvailable - MemFree + totalreserve")
+rows = {n: idle_x(n) for n in ("B", "B2", "V1", "V1r", "V2r", "V3", "B3", "V1c")}
+for n, (res, x, a, fr, ca) in rows.items():
+    print(f"{n}: totalreserve {res}, MemAvailable {a:.0f}, MemFree {fr:.0f}, Cached {ca:.0f}, X {x:.0f}")
+res_b = statistics.mean(rows[n][0] for n in ("B", "B2"))
+x_b = statistics.mean(rows[n][1] for n in ("B", "B2"))
+print(f"B mean: totalreserve {res_b:.0f}, X {x_b:.0f}")
+print("Gain at the same MemFree = drop of totalreserve + change of X (the cuts):")
+for label, names in (("V1", ("V1", "V1r")), ("V2", ("V2r",)), ("V3", ("V3",))):
+    res = statistics.mean(rows[n][0] for n in names)
+    x = statistics.mean(rows[n][1] for n in names)
+    drop = res_b - res
+    print(f"{label}: totalreserve drop {drop:.0f}, change of X {x - x_b:+.0f}, gain {drop + x - x_b:.0f}")
+print("Full-cut bound (both low-watermark cuts capped at their sum, a page cache of 3.2 GiB or more): "
+      "V1 +934, V2 +1,024, V3 +1,958")

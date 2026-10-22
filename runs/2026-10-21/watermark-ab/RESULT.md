@@ -6,22 +6,24 @@ Date: 2026-10-21 (UTC, node clock). Same pair of DGX Spark as the other runs of 
 
 - **V1 (`vm.min_free_kbytes` 1 GiB, `vm.watermark_scale_factor` 25) is not worse than the baseline B (1 GiB, 50) on stalls in these runs.** In two complete stall tests of 248 prefill chunks each, V1 has 1 and 0 slow chunks (over 1.3 s). B has 4 and 0. The baseline itself varies from 0 to 4 slow chunks, so this run shows "not worse", not "better".
 - **The 3-run rule of CONTRIBUTING.md is not met.** Each side has 2 complete runs. A third run of each side (B3 and V1c, a later window) started, but the 1.25 GiB head memory rule stopped both early, on the baseline too: B3 after 164 chunks (2 slow, max 1.51 s) and V1c after 21 chunks (1 slow, max 1.47 s). They show no stall rise for V1. They also show that the head margin is small with either value.
-- **V1 raises the head `MemAvailable` reading by about 0.47 GiB** (477 MiB measured, lowest value in the long 4-stream run; mean of two complete runs against the mean of two B runs). The kernel formula gives +934 MiB (0.91 GiB). The measured gain is about half of it, because the free memory of the node differs between two starts by 0.4 GiB or more. The lowest head value of B alone ranges from 1,157 MiB (B3, partial run) to 1,867 MiB, which is wider than the measured gain. Only the formula part is fixed.
-- **This is a lower reserve, not more free memory.** The engine holds the same memory in every run. With V1 the kernel keeps about 0.9 GiB less in reserve, so `MemAvailable` reads higher for the same real state. earlyoom (1 GiB limit) and the engine floor (1.5 GiB) now act at less real free memory. This lowers false stops. It does not prevent a real out-of-memory case.
+- **V1 raises the head `MemAvailable` reading by about 0.47 GiB** (477 MiB measured, lowest value in the long 4-stream run; mean of two complete runs against the mean of two B runs). The kernel formula, with the real page cache of the loaded engine, gives +633 MiB (0.62 GiB): the drop of `totalreserve` (623 MiB) plus a change of 10 MiB in the page cache and slab cuts (see "Settings"). The measured idle gain is +510 MiB. The lowest head value of B alone ranges from 1,157 MiB (B3, partial run) to 1,867 MiB, which is wider than the measured gain, so the measured number is only a check of the formula.
+- **This is a lower reserve, not more free memory.** The engine holds the same memory in every run. With V1 the kernel keeps about 0.6 GiB less in reserve, so `MemAvailable` reads higher for the same real state. earlyoom (1 GiB limit) and the engine floor (1.5 GiB) now act at less real free memory. This lowers false stops. It does not prevent a real out-of-memory case.
 - **V3 (512 MiB, 25) is not safe.** It gives +1.6 GiB, but the head shows memory pressure: 4,195 compaction stalls in the stall test (B: 2 and 0), 25,437 swap-in pages and 24,018 major faults in the long run (B: 72 and 109), and a chunk of 2.54 s.
 - **V2 (512 MiB, 50) is irregular.** Its first run reached 1,192 MiB on the head and the watchdog stopped it (limit 1,280 MiB). Its repeat reached 1,982 MiB. It gives the same measured gain as V1 (+466 MiB) with a less regular low point.
 - The median chunk time is 0.94 s in every run. Prefill tok/s at 8K, 32K, 64K and 128K is within 2 percent of B. No request failed. earlyoom logged no line.
 
 ## Settings
 
-| Name | `vm.min_free_kbytes` | `vm.watermark_scale_factor` | Sum of zone reserve (`totalreserve`) | Sum of low watermarks | Gain by the kernel formula |
-|---|---|---|---|---|---|
-| B (the `host_tuning.sh` value before this change) | 1,048,576 (1 GiB) | 50 | 2,754 MiB | 1,647 MiB | 0 |
-| V1 | 1,048,576 (1 GiB) | 25 | 2,131 MiB | 1,336 MiB | +934 MiB |
-| V2 | 524,288 (512 MiB) | 50 | 2,242 MiB | 1,135 MiB | +1,024 MiB |
-| V3 | 524,288 (512 MiB) | 25 | 1,619 MiB | 824 MiB | +1,958 MiB |
+| Name | `vm.min_free_kbytes` | `vm.watermark_scale_factor` | Sum of zone reserve (`totalreserve`) | Sum of low watermarks | Gain with the real cuts (loaded engine) | Upper bound (both cuts capped) | Measured idle gain |
+|---|---|---|---|---|---|---|---|
+| B (the `host_tuning.sh` value before this change) | 1,048,576 (1 GiB) | 50 | 2,754 MiB | 1,647 MiB | 0 | 0 | 0 |
+| V1 | 1,048,576 (1 GiB) | 25 | 2,131 MiB | 1,336 MiB | +633 MiB | +934 MiB | +510 MiB |
+| V2 | 524,288 (512 MiB) | 50 | 2,242 MiB | 1,135 MiB | +589 MiB | +1,024 MiB | +476 MiB |
+| V3 | 524,288 (512 MiB) | 25 | 1,619 MiB | 824 MiB | +1,269 MiB | +1,958 MiB | +1,305 MiB |
 
-The kernel subtracts the `totalreserve` from `MemFree` and cuts the page cache by the sum of the low watermarks (see the kernel-reserve check in [INDEX.md](../INDEX.md)). Gain = drop of the `totalreserve` + drop of the low watermarks. The values are read from `/proc/zoneinfo` (`zone-head.txt`, `zone-worker.txt` in each run folder).
+The kernel function `si_mem_available()` gives `MemAvailable = MemFree - totalreserve + X`. `X` is the page cache plus the reclaimable slab, each less its cut `min(x / 2, sum of the low watermarks)`. A lower low watermark gives a smaller cut only when the cut is capped by it. That needs a page cache of at least twice the sum of the low watermarks (3.2 GiB for B). The kernel-reserve check in [INDEX.md](../INDEX.md) had such a page cache (no engine). The loaded engine has `Cached` of 3.2 to 3.4 GiB, which includes shared memory, and `X` is about 1.1 GiB. If no cut were capped, page cache plus slab would be about 2.2 GiB, and each half (about 1.1 GiB) is under the low watermarks of B (1.6 GiB) and of V1 (1.3 GiB). So the cuts are not capped, and only the drop of `totalreserve` counts. The upper bound column is the sum of both drops, as if both cuts were capped; it is **not** the expected gain here.
+
+How the "real cuts" column is made (`summarize.py`, last block of `summary-table.txt`): for each 1 s sample of the idle window, `X = MemAvailable - MemFree + totalreserve`. `X` is 1,088 and 1,102 MiB for B and B2 (mean 1,095), 1,113 and 1,097 MiB for V1 and V1r, 1,172 MiB for V2r and 1,229 MiB for V3. A change of `X` of at most 10 MiB for V1 shows that its cuts did not change, so the gain is the drop of `totalreserve` (623 MiB) plus 10 MiB. For V3 `X` rises by 134 MiB, because its low watermarks (824 MiB) cap the page cache cut. `totalreserve` is read from `/proc/zoneinfo` (`zone-head.txt`, `zone-worker.txt` in each run folder). The files do not hold `Active(file)`, `Inactive(file)` or `SReclaimable` of each sample, so the split of `X` into page cache and slab is not measured; the identity needs only the three values that the samples hold.
 
 ## Method
 
@@ -44,7 +46,7 @@ Steps in each run: set the two values on both nodes; start the engine fresh; wai
 - **Long run:** 4 streams at the same time with prompts of 20K, 50K, 100K and 200K tokens, 1,500 new tokens each (`capdrive.py long`, seed 7). The token hashes equal those of the 1.1.0 gate in all runs that finished.
 - **Samples at 1 s on both nodes** (`mem-head.csv`, `mem-worker.csv`): `MemAvailable`, `MemFree`, `Cached`, `/proc/vmstat` counters (`compact_*`, `allocstall*`, `pgscan*`, `pgsteal*`, `pswpin`, `pswpout`, `pgmajfault`) and the CPU time of kswapd0 and kcompactd0.
 - **Watchdog** (`scripts/watch.sh`): it stops the test containers when the head `MemAvailable` is under 1.25 GiB or when earlyoom logs a stop. It never touches other containers.
-- **Order:** B, V1, V2, V3, B2 in the first window (20:23 to 21:15 UTC), then V2r and V1r in the second window (22:16 to 22:43 UTC), then B3 and V1c in the third window (00:17 to 00:26 UTC on the next day). Both locks of the pair were held in each window, so no other job ran. The third window began with less free memory on the head: idle `MemAvailable` 2,843 MiB for B3 (B: 3,467, B2: 3,051), and the 1.25 GiB rule stopped B3 in pass 2 and V1c in pass 1.
+- **Order:** B, V1, V2, V3, B2 in the first window (20:23 to 21:15 UTC), then V2r and V1r in the second window (22:16 to 22:43 UTC), then B3 and V1c in the third window (2026-10-22, 00:17 to 00:26 UTC; its files are in [runs/2026-10-22](../../2026-10-22/INDEX.md)). Both locks of the pair were held in each window, so no other job ran. The third window began with less free memory on the head: idle `MemAvailable` 2,843 MiB for B3 (B: 3,467, B2: 3,051), and the 1.25 GiB rule stopped B3 in pass 2 and V1c in pass 1.
 - The two `vm` values were read back after each window. Both nodes ended at 1,048,576 and 50.
 
 ## Results
@@ -80,11 +82,11 @@ Extra head numbers for V3 (long run): swap-in 25,437 pages, swap-out 26,960 page
 2. The `/proc/vmstat` compaction counters change a lot between two runs of the same setting (head `allocstall` 1 in B and 1,928 in B2; worker `compact_stall` 0 in V1 and 807 in V1r). They do not match the chunk times. Use the chunk times, the swap-in and the major faults as the stall signal.
 3. V3 is the only setting with a clear sign of pressure in the swap and major-fault numbers, and it has the largest chunk (2.54 s).
 4. The head `MemAvailable` moves by about 1 GiB from second to second during a prefill (see `mem-head.csv`), also at B. A single low value (V2: 1,192 MiB; B3: 1,157 MiB) can be an excursion, so the means of complete runs are the fair figure. The lowest head value of B alone ranges from 1,157 to 1,867 MiB.
-5. In the third window the baseline (B3) and V1 (V1c) both fell to the 1.25 GiB rule in a 32K prefill of the stall test. The head margin is thin with either value, as the 1.1.0 gate also found. V1 changes the reading by the kernel formula (0.91 GiB). It does not give the head a larger real margin.
+5. In the third window the baseline (B3) and V1 (V1c) both fell to the 1.25 GiB rule in a 32K prefill of the stall test. The head margin is thin with either value, as the 1.1.0 gate also found. V1 changes the reading by the kernel formula (0.62 GiB at the loaded state). It does not give the head a larger real margin.
 
 ## Limits
 
-- Two complete runs per side (V3: one). The A/B rule of CONTRIBUTING.md asks for at least 3. The third runs (B3, V1c) were stopped early by the head memory rule and have 164 and 21 chunks. This run makes no speed claim. It supports one claim: no stall rise for V1 in the runs made (2 complete, 1 partial). It does not prove V1 is equal to B on stalls. The kernel formula, not the measurement, gives the size of the reading change (+0.91 GiB); the measured gain (+0.47 GiB) is inside the spread between starts.
+- Two complete runs per side (V3: one). The A/B rule of CONTRIBUTING.md asks for at least 3. The third runs (B3, V1c) were stopped early by the head memory rule and have 164 and 21 chunks. This run makes no speed claim. It supports one claim: no stall rise for V1 in the runs made (2 complete, 1 partial). It does not prove V1 is equal to B on stalls. The kernel formula, not the measurement, gives the size of the reading change (+0.62 GiB at the loaded state); the measured gain (+0.47 to +0.51 GiB) is inside the spread between starts. The formula needs the page cache of the loaded state: with a page cache over 3.2 GiB the gain is up to +0.91 GiB.
 - One engine image, one model view, THP off, one pass of the long run for each setting.
 - The test ran for about 1 hour 30 minutes in total. It does not cover a slow drift of the page cache over days.
 - The gain is a change of the reading. The real free memory is the same.
@@ -101,5 +103,6 @@ Extra head numbers for V3 (long run): swap-in 25,437 pages, swap-out 26,960 page
 | `<run>/long4.log` | the long run (`capdrive.py long`): TTFT, decode tok/s and token hash of each stream |
 | `<run>/zone-head.txt`, `<run>/zone-worker.txt` | sums of the zone watermarks and the reserve |
 | `<run>/notes.txt`, `<run>/windows.tsv`, `<run>/trip.txt`, `<run>/earlyoom-*.txt`, `<run>/start.log` | notes, the time windows, the watchdog result, the earlyoom lines (empty in all runs), the engine start |
-| `window1-orchestrate.log`, `window2-orchestrate.log`, `window3-orchestrate.log`, `env.txt` | the console output of the three windows and the node state |
+| `window1-orchestrate.log`, `window2-orchestrate.log`, `env.txt` | the console output of windows 1 and 2 and the node state |
+| `../../2026-10-22/watermark-ab/` | the runs `B3` and `V1c` and `window3-orchestrate.log` (window 3 ran after midnight UTC); same file layout as the other runs |
 | `scripts/` | the scripts as they ran (home path and host names replaced) |
