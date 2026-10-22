@@ -254,6 +254,10 @@ DOCKER_STUB = r"""case "$1 $2" in
     echo 'memory config2={"auth":"@FAKE_WORD_D@"}'
     echo "memory args3: --auth @FAKE_WORD_E@"
     echo "memory author and authority ok"
+    echo 'memory config3={"authentication":"@FAKE_WORD_D@"}'
+    echo "memory args4: --authentication @FAKE_WORD_E@"
+    echo "memory args5: --authn @FAKE_WORD_F@"
+    echo "memory store: userAuthenticator=@FAKE_WORD_D@"
     ;;
   "image inspect") echo "id sha256:0123456789abcdef, created 2026-10-21T00:00:00Z" ;;
   "ps -a") echo "tfv41-r0 | tensorfold-dsv41:test | Up 3 hours" ;;
@@ -386,6 +390,10 @@ API_KEY_FILE={d}/keys
         self.assertIn('memory config2={"[removed]' + chr(10), text)
         self.assertIn("memory args3: --[removed]" + chr(10), text)
         self.assertIn("memory author and authority ok", text)
+        self.assertIn('memory config3={"[removed]' + chr(10), text)
+        self.assertIn("memory args4: --[removed]" + chr(10), text)
+        self.assertIn("memory args5: --[removed]" + chr(10), text)
+        self.assertIn("memory store: user[removed]" + chr(10), text)
         # a flag that only contains "token" in a longer word keeps its value
         self.assertIn("--max-num-batched-tokens 8192 --port 8888 tokenizer ok", text)
         # a quoted value with spaces goes as a whole, and the text after it stays
