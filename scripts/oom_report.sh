@@ -12,7 +12,9 @@ set -uo pipefail
 
 out=${1:-$LOGS/oom-report-$(date -u +%Y%m%dT%H%M%SZ).txt}
 # the script has no set -e: each write that the report needs stops it with an error when it fails
-fail() { echo "error: $*" >&2; exit 1; }
+# fd 3 keeps the terminal's stderr: the report block below sends its own stderr into the report file
+exec 3>&2
+fail() { echo "error: $*" >&3; exit 1; }
 [ -d "$out" ] && fail "$out is a folder; give a file name"
 mkdir -p "$LOGS" "$(dirname "$out")" || fail "cannot make the folder for $out"
 raw=$(mktemp) || fail "cannot make a temporary file"
@@ -80,7 +82,7 @@ log_filter() { grep -a -i -E 'memory|earlyoom|terminate|mem avail|NCCL error' | 
 # saved in logs/.
 engine_lines() {
   local rank=$1 src="docker logs tfv41-r$1" f rc tmp
-  tmp=$(mktemp)
+  tmp=$(mktemp) || fail "cannot make a temporary file for the log of rank $rank"
   if [ "$rank" = 0 ]; then
     docker logs tfv41-r0 2>&1 | log_filter > "$tmp"; rc=${PIPESTATUS[0]}
   else

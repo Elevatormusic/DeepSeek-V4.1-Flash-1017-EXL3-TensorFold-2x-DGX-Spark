@@ -324,6 +324,18 @@ API_KEY_FILE={d}/keys
                 self.assertIn(message, r.stderr)
                 self.assertNotIn("report written", r.stdout)
 
+    def test_failed_rank_temp_file_stops_the_report(self):
+        t = self.prepared()
+        # mktemp works once (the report's own file), then fails (the file for the log of rank 0)
+        real = shutil.which("mktemp")
+        t.stub("mktemp", f'n=$(cat "{t.dir}/mk" 2>/dev/null || echo 0); echo $((n + 1)) > "{t.dir}/mk"\n'
+                         f'[ "$n" = 0 ] && exec {real} "$@"\nexit 1\n')
+        r = t.run(["bash", "scripts/oom_report.sh", str(t.dir / "out" / "r.txt")], {"HOME": "/home/ubuntu"})
+        self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("cannot make a temporary file for the log of rank 0", r.stderr)
+        self.assertNotIn("report written", r.stdout)
+        self.assertFalse((t.dir / "out" / "r.txt").exists())
+
     def test_report_holds_the_facts_of_both_nodes(self):
         text = self.report()
         self.assertEqual(text.count("=== head node"), 1)
