@@ -248,6 +248,9 @@ DOCKER_STUB = r"""case "$1 $2" in
     echo "memory args2: --key @FAKE_WORD_D@ --access-key @FAKE_WORD_E@"
     echo "memory store: secret_key=@FAKE_WORD_F@"
     echo "memory keys loaded 5, monkey test ok"
+    echo 'memory config={"privateKey":"@FAKE_WORD_D@"}'
+    echo "memory aws accessKeyId=@FAKE_WORD_E@ apiToken: @FAKE_WORD_F@"
+    echo "memory KeyError in cacheKeys ok"
     ;;
   "image inspect") echo "id sha256:0123456789abcdef, created 2026-10-21T00:00:00Z" ;;
   "ps -a") echo "tfv41-r0 | tensorfold-dsv41:test | Up 3 hours" ;;
@@ -343,6 +346,9 @@ API_KEY_FILE={d}/keys
         self.assertIn("memory basic mode on", text)
         self.assertIn("memory args2: --[removed]" + chr(10), text)
         self.assertIn("memory keys loaded 5, monkey test ok", text)
+        self.assertIn('memory config={"private[removed]' + chr(10), text)
+        self.assertIn("memory aws access[removed]" + chr(10), text)
+        self.assertIn("memory KeyError in cacheKeys ok", text)
         # a flag that only contains "token" in a longer word keeps its value
         self.assertIn("--max-num-batched-tokens 8192 --port 8888 tokenizer ok", text)
         # a quoted value with spaces goes as a whole, and the text after it stays

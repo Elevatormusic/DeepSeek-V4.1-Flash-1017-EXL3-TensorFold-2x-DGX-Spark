@@ -135,6 +135,9 @@ filter=(-E
   -e 's/(api[_-]?key|secret|passw(or)?d|authori[sz]ation|bearer|cookie|credential|token([^a-z]|$)).*$/[removed]/Ig'
   # "key" alone or as the last part of a name (--key, --access-key, ssh_key), not in keys or monkey
   -e 's/(^|[^a-z])key([^a-z]|$).*$/\1[removed]/Ig'
+  # a camel-case name part (privateKey, accessKeyId, apiToken, clientSecret): case-sensitive, after a lower-case
+  # letter or a digit, so KeyError and Tokenizer stay
+  -e 's/([a-z0-9])(Key|Token|Secret|Passw|Credential|Cookie|Auth)([^a-z]|$).*$/\1[removed]/g'
   -e 's#/home/[A-Za-z0-9._-]+#/home/<user>#g'
   -e 's#/Users/[A-Za-z0-9._-]+#/Users/<user>#g')
 [ -n "${HOME:-}" ] && [ "$HOME" != / ] && filter+=(-e "s/$(esc "$HOME")/~/g")
