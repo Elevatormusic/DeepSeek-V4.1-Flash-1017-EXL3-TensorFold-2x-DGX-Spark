@@ -76,6 +76,31 @@ Files:
 | `gate-1.1.0/data/idle-b.log`, `idle-f.log` | idle `MemAvailable` before the start, after the start and before the long run |
 | `gate-1.1.0/data/mem-b-full-*`, `mem-f-full-*` | `MemAvailable` in kB each second, head and worker, over the whole step |
 
+## Kernel memory reserve of the pair (read-only check)
+
+Same pair as the gate. The check only read `/proc` on both nodes at 18:23 UTC (the node clock). It changed no setting. No engine ran: `tfv41` containers 0, so the page cache held the weight files. The watermarks do not depend on the engine load. `host_tuning.sh` was applied on both nodes (`vm.min_free_kbytes` 1,048,576 and `vm.watermark_scale_factor` 50).
+
+What `MemAvailable` leaves out, by the kernel formula of `si_mem_available()`. `compute_reserve.py` gives the numbers from the raw reads. The formula result is equal to the `MemAvailable` line of the same read, to the kB, on both nodes.
+
+| Part | Head | Worker |
+|---|---|---|
+| Sum of the zone low watermarks | 1.61 GiB | 1.61 GiB |
+| Sum of the zone high watermarks | 2.22 GiB | 2.22 GiB |
+| Lowmem reserve of zone DMA against Normal (kernel default ratio) | 0.47 GiB | 0.47 GiB |
+| `totalreserve`, subtracted from `MemFree` (high watermarks plus lowmem reserve) | 2.69 GiB | 2.69 GiB |
+| Cut from the page cache, `min(page cache / 2, sum of the low watermarks)`, when the page cache is over 3.22 GiB | 1.61 GiB | 1.61 GiB |
+| Cut from the reclaimable slab, `min(SReclaimable / 2, sum of the low watermarks)` | 0.25 GiB | 0.42 GiB |
+| Hidden in all | 4.55 GiB | 4.71 GiB |
+| Same `totalreserve` at the kernel defaults (`vm.min_free_kbytes` 67,584, `vm.watermark_scale_factor` 10), by the formula, not measured | 0.79 GiB | 0.79 GiB |
+
+The tuned values raise `totalreserve` by 1.90 GiB (2.69 against 0.79 GiB) and the page cache cut by about 1.4 GiB (1.61 against 0.19 GiB, by the formula). The watermark boost was 0 on both nodes at this read.
+
+| File | Content |
+|---|---|
+| `kernel-reserve/head-raw.txt`, `kernel-reserve/worker-raw.txt` | the raw reads: the four sysctl values, `/proc/meminfo`, and the watermarks, protection and free pages of each zone from `/proc/zoneinfo` |
+| `kernel-reserve/compute_reserve.py` | the calculation (`python3 -I compute_reserve.py`) |
+| `kernel-reserve/result.txt` | the output of that script |
+
 ## Release gate of engine 1.1.1
 
 Same pair of DGX Spark. Two lock windows on 21 October 2026 (UTC 19:13 to 19:50 and 21:42 to 22:16). Window 2 repeated window 1 with the step order swapped (candidate first), to check the head memory result. Each step started a fresh engine with a new prompt-spill folder, then ran the same checks in the same order. Settings, equal in all steps (production settings): `CONTEXT=1048576`, `PARALLEL=4`, `SPILL_GIB=64`, decode graphs on.

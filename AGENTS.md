@@ -19,7 +19,7 @@ Then give the user the three client settings from [docs/CONNECT.md](docs/CONNECT
 
 - **Never `docker exec` into `tfv41-r0` or `tfv41-r1` while they serve.** The exec process counts against the rank's memory.
 - **Never stop the display manager** (`systemctl stop gdm`) on a Spark. On the tested pair it powered the node off.
-- **Run one model server at a time.** Each one needs port 8888 and ~100 GB of memory on each node.
+- **Run one model server at a time.** Each one needs port 8888 and ~108 GiB of memory on each node ([docs/MEMORY.md](docs/MEMORY.md)).
 - **Keep `BIND_HOST=127.0.0.1`** unless the user asks for network access. Then set `API_KEY_FILE` too ([docs/CONNECT.md](docs/CONNECT.md)).
 - **If the server stops with exit code 75**, the lane broke on a device fault. Run `./stop.sh && ./start.sh`.
 - **If NCCL hangs at start after a cable or reboot event**, the RoCE GID index moved. Set `GID_INDEX=-1` in `.env` and restart ([docs/NETWORK.md](docs/NETWORK.md)).
@@ -53,6 +53,7 @@ Write docs and the pull request text in ASD-STE100 Simplified Technical English.
 | Question | File |
 |---|---|
 | A start fails | `logs/` (saved by `./stop.sh`), `docker logs tfv41-r0`, [docs/OPERATIONS.md](docs/OPERATIONS.md) |
+| earlyoom stops the engine, or `terminate called without an active exception` | [docs/MEMORY.md](docs/MEMORY.md); `scripts/oom_report.sh` collects the facts for an issue |
 | How to call the API | [docs/CONNECT.md](docs/CONNECT.md) |
 | Run the tests | [tests/README.md](tests/README.md) |
 | Open an issue or a pull request | [CONTRIBUTING.md](CONTRIBUTING.md), [.github/ISSUE_TEMPLATE/](.github/ISSUE_TEMPLATE/), [.github/pull_request_template.md](.github/pull_request_template.md) |

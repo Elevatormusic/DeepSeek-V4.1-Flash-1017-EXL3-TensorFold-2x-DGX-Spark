@@ -54,7 +54,7 @@ You need:
 
 - **Two NVIDIA DGX Spark**, joined by one QSFP cable between their ConnectX-7 network ports. NVIDIA's [Connect Two Sparks](https://build.nvidia.com/spark/connect-two-sparks) guide shows how to cable them, set fixed addresses, and set up ssh.
 - **About 650 GB of free disk on each computer.** The model files use 414 GB (385 GiB). The first start needs 110 GiB more for the cache (preflight checks this). With the default `SPILL_GIB=64`, cached prompts can use up to 64 GiB more. With `SPILL_GIB=0`, about 550 GB is enough.
-- **About 100 GB of free memory on each computer.** Close other AI programs first.
+- **About 111 GiB of free memory on the head and 109 GiB on the worker** (`MemAvailable` before the start; `scripts/preflight.sh` checks this). The engine holds about 108 GiB on the head. The head is the first computer to run out of memory, so close other AI programs, browsers and desktop programs on it first. See [Memory](docs/MEMORY.md).
 - **A network setup** with fixed addresses on the cable link and ssh from the first computer to the second. Do NVIDIA's guide first, then read [our network notes](docs/NETWORK.md).
 - **Software on the head:** Docker with GPU support (DGX OS has it), Python 3, `curl`, `rsync`, and the [Hugging Face CLI](https://huggingface.co/docs/huggingface_hub/guides/cli) (`hf`). The worker needs Docker and `rsync`.
 - **Time.** Most of the first setup is the 400 GB download. It takes a few hours on a fast internet link.
@@ -138,7 +138,7 @@ Thinking is off by default. Turn it on per request with `"reasoning_effort": "hi
 | Run all the tests | `tests/run_all.sh` |
 | Install a new engine version safely | `scripts/deploy_gate.sh <new> <old>` |
 
-If something goes wrong, read [Operations](docs/OPERATIONS.md). It covers restarts, logs, and what to avoid on DGX Spark.
+If something goes wrong, read [Operations](docs/OPERATIONS.md). It covers restarts, logs, and what to avoid on DGX Spark. If earlyoom stops the engine, read [Memory](docs/MEMORY.md).
 
 ---
 
@@ -278,7 +278,7 @@ Every checksum, file size and computer detail: [PROVENANCE](runs/2026-10-17/PROV
 | `experiments/tool-output/` | opt-in image that rejects unoffered model tool calls ([guide](docs/TOOL-OUTPUT.md)) |
 | `.github/` | CI (offline tests, ruff, shellcheck, link check), the pull request and issue templates |
 | `runs/2026-10-17/` | every log and result behind this page |
-| `docs/` | how to connect your app, the full story, benchmarks, network, operations, known limits |
+| `docs/` | how to connect your app, the full story, benchmarks, network, operations, memory, known limits |
 
 </details>
 

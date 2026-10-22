@@ -1,0 +1,225 @@
+utc 2026-10-21T18:23:35Z
+kernel 7.0.0-1019-nvidia
+pagesize 4096
+vm.min_free_kbytes 1048576
+vm.watermark_scale_factor 50
+vm.watermark_boost_factor 15000
+vm.lowmem_reserve_ratio 256	256	32	0	0
+--- /proc/meminfo
+MemTotal:       127598832 kB
+MemFree:         4848068 kB
+MemAvailable:   93592356 kB
+Buffers:           10936 kB
+Cached:         94273164 kB
+SwapCached:       186284 kB
+Active:         91945756 kB
+Inactive:        7113748 kB
+Active(anon):    2788196 kB
+Inactive(anon):  3282132 kB
+Active(file):   89157560 kB
+Inactive(file):  3831616 kB
+Unevictable:       25524 kB
+Mlocked:           25524 kB
+SwapTotal:      16777212 kB
+SwapFree:       15452680 kB
+Zswap:                 0 kB
+Zswapped:              0 kB
+Dirty:              3724 kB
+Writeback:             0 kB
+AnonPages:       4799224 kB
+Mapped:          1754184 kB
+Shmem:           1288516 kB
+KReclaimable:     524120 kB
+Slab:            1347752 kB
+SReclaimable:     524120 kB
+SUnreclaim:       823632 kB
+KernelStack:       14816 kB
+ShadowCallStack:    3796 kB
+PageTables:        34136 kB
+SecPageTables:     77652 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    80576628 kB
+Committed_AS:   10124612 kB
+VmallocTotal:   135288315904 kB
+VmallocUsed:      118744 kB
+VmallocChunk:          0 kB
+Percpu:            23920 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:         0 kB
+ShmemHugePages:        0 kB
+ShmemPmdMapped:        0 kB
+FileHugePages:     63488 kB
+FilePmdMapped:         0 kB
+CmaTotal:              0 kB
+CmaFree:               0 kB
+Balloon:               0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+Hugetlb:               0 kB
+--- /proc/zoneinfo (zone lines, watermarks, protection, free pages)
+Node 0, zone      DMA
+  pages free     126136
+        min      1436
+        low      2310
+        high     3184
+        present  426977
+        managed  174814
+        protection: (0, 0, 123925, 123925, 123925)
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     642
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     221
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     1092
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+              high:     124
+              high_min: 124
+              high_max: 1092
+Node 0, zone    DMA32
+  pages free     0
+        min      0
+        low      0
+        high     0
+        present  0
+        managed  0
+        protection: (0, 0, 0, 0, 0)
+Node 0, zone   Normal
+  pages free     1085881
+        min      260707
+        low      419331
+        high     577955
+        present  33030144
+        managed  31724894
+        protection: (0, 0, 0, 0, 0)
+              high:     20966
+              high_min: 20966
+              high_max: 198280
+              high:     21029
+              high_min: 20966
+              high_max: 198280
+              high:     21029
+              high_min: 20966
+              high_max: 198280
+              high:     20966
+              high_min: 20966
+              high_max: 198280
+              high:     20966
+              high_min: 20966
+              high_max: 198280
+              high:     20966
+              high_min: 20966
+              high_max: 198280
+              high:     21344
+              high_min: 20966
+              high_max: 198280
+              high:     21029
+              high_min: 20966
+              high_max: 198280
+              high:     21029
+              high_min: 20966
+              high_max: 198280
+              high:     21428
+              high_min: 20966
+              high_max: 198280
+              high:     20966
+              high_min: 20966
+              high_max: 198280
+              high:     20966
+              high_min: 20966
+              high_max: 198280
+              high:     20966
+              high_min: 20966
+              high_max: 198280
+              high:     21029
+              high_min: 20966
+              high_max: 198280
+              high:     20966
+              high_min: 20966
+              high_max: 198280
+              high:     21214
+              high_min: 20966
+              high_max: 198280
+              high:     20966
+              high_min: 20966
+              high_max: 198280
+              high:     20966
+              high_min: 20966
+              high_max: 198280
+              high:     20966
+              high_min: 20966
+              high_max: 198280
+              high:     20966
+              high_min: 20966
+              high_max: 198280
+Node 0, zone  Movable
+  pages free     0
+        min      32
+        low      32
+        high     32
+        present  0
+        managed  0
+        protection: (0, 0, 0, 0, 0)
+Node 0, zone   Device
+  pages free     0
+        min      0
+        low      0
+        high     0
+        present  0
+        managed  0
+        protection: (0, 0, 0, 0, 0)
+--- tfv41 containers running: 0
