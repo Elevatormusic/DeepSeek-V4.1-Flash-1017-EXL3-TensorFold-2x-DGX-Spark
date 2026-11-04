@@ -117,7 +117,7 @@ A broken lane ends both rank processes with **exit code 75** after 5 s (`TF_DS_E
   If `MemAvailable` on either node goes near 1 GiB (1,048,576 kB):
   1. Set `PARALLEL=2` in `.env`, then run `./stop.sh && ./start.sh`. Each request still gets the full context. This is measured only on the validation image above.
   2. Or set `PREFILL_CHUNK=1024` in `.env` and restart (the 1.1.0 release notes advise this for a head with little free memory). It is not measured for memory in this repo.
-  3. Send fewer images at the same time. Keep the images in each request low (the server accepts at most 8), and do not send many image requests at the same time. For an agent, send screenshots one at a time, not as a batch. `scripts/vision-trim.sh` listens on 8001 and forwards to `PORT`. It keeps the newest `VISION_MAX_IMAGES` images and replaces the older ones in each message with one text note. Point the reverse proxy at 8001. The engine still enforces the same cap on anything that reaches it directly.
+  3. Send fewer images at the same time. Keep the images in each request low (the default cap is 8), and do not send many image requests at the same time. For an agent, send screenshots one at a time, not as a batch. For a client that sends old screenshots again, see [the optional image proxy](#optional-image-proxy).
   4. If you do not need image input, set `VISION=0` in `.env`, then run `./stop.sh && ./start.sh`. The vision tower then does not load on the head. The engine log gives its size as 0.95 GiB on rank 0 ([runs/2026-10-20/oom/run2-engine-vision.txt](../runs/2026-10-20/oom/run2-engine-vision.txt)). A run with `VISION=0` is not measured yet.
   5. Do not raise `MEM_FLOOR_GIB`. With 2.0, an 8K prompt failed with CUDA out of memory, which breaks the lane ([runs/2026-10-18/INDEX.md](../runs/2026-10-18/INDEX.md)).
   6. Do not turn off earlyoom or lower its limit. Without it, a node that runs out of memory can stop answering ssh until a power cycle.
@@ -170,3 +170,40 @@ A broken lane ends both rank processes with **exit code 75** after 5 s (`TF_DS_E
 ```
 
 `scripts/deploy_gate.sh` deploys the new image, runs a live structured-output request, the 32-test suite and the `--parallel` grammar check, and goes back to the old image if any step fails.
+
+## Optional image proxy
+
+A client can send all old screenshots again with each turn. The optional proxy
+keeps the newest images and adds one text note for each content list that loses
+images. It supports Chat Completions, Anthropic Messages, and Responses input,
+including images in tool results. It does not change stored client history.
+
+1. Add `VISION_MAX_IMAGES=8` to `.env`. Use a positive integer. This value sets
+   both the engine cap and the proxy limit. Unset, the engine default stays.
+2. Restart the engine with `./stop.sh && ./start.sh`.
+3. Run `scripts/vision-trim.sh` in a separate terminal. `./start.sh` does not
+   start the proxy. `scripts/vision-trim.service` is an optional unit example.
+4. Use `http://127.0.0.1:8001/v1` as the client base URL. For a reverse proxy on
+   the head, forward to `127.0.0.1:8001`.
+
+The proxy binds to `127.0.0.1` by default and forwards only to the engine on
+`127.0.0.1:PORT`. `VISION_TRIM_PORT` changes its port. It must differ from `PORT`.
+The engine still enforces the cap for a client that connects to it directly.
+Raising the cap can increase memory use. These offline checks do not qualify a
+larger cap on two DGX Spark units.
+
+For LAN access, set `VISION_TRIM_BIND` to the required address. Set
+`API_KEY_FILE` to a regular key file with mode `600`, as described in
+[Connect your app](CONNECT.md#use-it-from-another-computer). The proxy refuses a
+LAN bind without a valid key file. It checks the file on each request. A missing,
+empty, or unsafe file closes access. Send a key with `Authorization: Bearer`
+or `x-api-key`. Restart the proxy after a change to these settings. Keep the
+engine on loopback when a proxy provides network access.
+
+The proxy sends streaming events as data arrives. It closes the client
+connection after each response and closes the upstream request if the client
+disconnects. It does not follow redirects. It accepts uncompressed bodies of at
+most 32 MiB, with one `Content-Length` header, and handles at most four requests
+at a time. Chunked request bodies and compressed request bodies are refused.
+A client must send the request body before it waits for the model response.
+No request paths, queries, keys, or screenshots are written to its access log.

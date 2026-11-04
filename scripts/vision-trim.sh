@@ -13,6 +13,6 @@ set -a
 set +a
 export VISION_TRIM_UPSTREAM="http://127.0.0.1:${PORT:?PORT is unset}"
 export PORT="${VISION_TRIM_PORT:-8001}"
-export BIND_HOST="${VISION_TRIM_BIND:-0.0.0.0}"
+export BIND_HOST="${VISION_TRIM_BIND:-127.0.0.1}"
 export VISION_MAX_IMAGES="${VISION_MAX_IMAGES:?set VISION_MAX_IMAGES in .env}"
 exec python3 "$ROOT/scripts/vision_trim.py"
