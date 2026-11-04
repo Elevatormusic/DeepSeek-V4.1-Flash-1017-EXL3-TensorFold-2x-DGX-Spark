@@ -202,7 +202,9 @@ engine on loopback when a proxy provides network access.
 
 The proxy sends streaming events as data arrives. It closes the client
 connection after each response and closes the upstream request if the client
-disconnects. It does not follow redirects. It accepts uncompressed bodies of at
+disconnects. Responses with a body use chunked transfer coding. An upstream
+error leaves the response incomplete, so the client can detect a failed reply.
+The proxy does not follow redirects. It accepts uncompressed bodies of at
 most 32 MiB, with one `Content-Length` header, and handles at most four requests
 at a time. Chunked request bodies and compressed request bodies are refused.
 A client must send the request body before it waits for the model response.

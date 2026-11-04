@@ -273,13 +273,22 @@ class Handler(BaseHTTPRequestHandler):
                 if dropped:
                     self.send_header("X-Vision-Trimmed", str(dropped))
                 no_body = self.command == "HEAD" or resp.status in (204, 304) or resp.status < 200
+                if not no_body:
+                    self.send_header("Transfer-Encoding", "chunked")
                 self.send_header("Connection", "close")
                 self.end_headers()
                 sent = True
                 if not no_body:
                     while chunk := resp.read1(65536):
+                        self.wfile.write(f"{len(chunk):X}\r\n".encode())
                         self.wfile.write(chunk)
+                        self.wfile.write(b"\r\n")
                         self.wfile.flush()
+                    if resp.length not in (None, 0):
+                        raise http.client.IncompleteRead(b"")
+                    # Only a complete upstream response gets a terminal chunk.
+                    self.wfile.write(b"0\r\n\r\n")
+                    self.wfile.flush()
         except (OSError, http.client.HTTPException, ValueError):
             if not sent:
                 self._error(502, "upstream unavailable")

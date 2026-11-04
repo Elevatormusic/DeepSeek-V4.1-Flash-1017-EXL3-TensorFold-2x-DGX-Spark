@@ -44,19 +44,22 @@ class Proxy(unittest.TestCase):
     def tearDown(self):
         trim.Handler.keep, trim.Handler.key_file, trim.Handler.upstream_port = self.old
 
-    def invoke(self, raw, upstream=b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\n{}", check_stream=False):
+    def invoke(self, raw, upstream=b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\n{}",
+               check_stream=False, read_error=None):
         sock = SocketStub(raw)
         response = http.client.HTTPResponse(SocketStub(upstream))
         response.begin()
         conn = mock.Mock()
         conn.getresponse.return_value = response
-        if check_stream:
+        if check_stream or read_error:
             read1 = response.read1
             calls = []
 
             def next_chunk(size):
                 if calls:
                     self.assertIn(b"data: first\n\n", sock.output.getvalue())
+                    if read_error:
+                        raise read_error
                 calls.append(size)
                 return read1(size)
 
@@ -73,10 +76,32 @@ class Proxy(unittest.TestCase):
                     + f"{len(second):x}\r\n".encode() + second + b"\r\n0\r\n\r\n")
         output, conn, _ = self.invoke(b"POST /v1/chat/completions HTTP/1.1\r\nContent-Length: 2\r\n\r\n{}",
                                       upstream, check_stream=True)
-        self.assertTrue(output.endswith(first + second))
-        self.assertNotIn(b"Transfer-Encoding:", output)
+        downstream = http.client.HTTPResponse(SocketStub(output))
+        downstream.begin()
+        self.assertEqual(downstream.read(), first + second)
+        self.assertIn(b"Transfer-Encoding: chunked", output)
+        self.assertTrue(output.endswith(b"0\r\n\r\n"))
         self.assertIn(b"Connection: close", output)
         conn.close.assert_called_once()
+
+    def test_partial_sse_errors_remain_incomplete_for_http_clients(self):
+        event = b"data: first\n\n"
+        chunked = (b"HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nTransfer-Encoding: chunked\r\n\r\n"
+                   + f"{len(event):x}\r\n".encode() + event + b"\r\n0\r\n\r\n")
+        fixed = (b"HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nContent-Length: 100\r\n\r\n" + event)
+        for upstream, error in ((chunked, TimeoutError()), (chunked, ConnectionResetError()),
+                                (chunked[:-5], None), (fixed, None)):
+            with self.subTest(error=type(error).__name__, chunked=b"chunked" in upstream):
+                output, conn, _ = self.invoke(b"GET /v1/chat/completions HTTP/1.1\r\n\r\n",
+                                              upstream, check_stream=True, read_error=error)
+                downstream = http.client.HTTPResponse(SocketStub(output))
+                downstream.begin()
+                self.assertEqual(downstream.status, 200)
+                with self.assertRaises(http.client.IncompleteRead) as caught:
+                    downstream.read()
+                self.assertEqual(caught.exception.partial, event)
+                self.assertFalse(output.endswith(b"0\r\n\r\n"))
+                conn.close.assert_called_once()
 
     def test_trims_query_route_and_rebuilds_headers(self):
         body = json.dumps({"messages": [{"role": "user", "content": [
