@@ -66,7 +66,7 @@ $( [ "${STRICT_TOOL_OUTPUT:-1}" = 0 ] && echo '-e TF_DS_STRICT_TOOL_OUTPUT=0' )
 --entrypoint tensorfold $IMAGE serve /model --tp 2 --rank $r --master $HEAD_IP
 --host $BIND_HOST --port $PORT --name $SERVED_NAME $( [ -n "${SERVED_ALIAS:-}" ] && echo "--alias $SERVED_ALIAS" )
 $( [ -n "$key" ] && echo "--api-key-file /run/keys" )
---context $CONTEXT $( [ "${VISION:-1}" = 1 ] && echo --vision ) --parallel $PARALLEL --mtp-drafts $MTP_DRAFTS
+--context $CONTEXT $( [ "${VISION:-1}" = 1 ] && echo --vision ) $( [ -n "${VISION_MAX_IMAGES:-}" ] && echo --vision-max-images $VISION_MAX_IMAGES ) --parallel $PARALLEL --mtp-drafts $MTP_DRAFTS
 --temperature $TEMPERATURE --top-p $TOP_P $( [ "${THINKING:-0}" = 1 ] && echo --thinking || echo --no-thinking )
 $( [ -n "${REASONING_EFFORT:-}" ] && echo --reasoning-effort $REASONING_EFFORT ) --no-update-check
 EOF
