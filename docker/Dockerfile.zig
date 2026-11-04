@@ -17,8 +17,9 @@ RUN curl -fsSL -o /tmp/zig.tar.xz "https://ziglang.org/download/${ZIG_VERSION}/z
 # submodules come from the commits that this tree records.
 ARG XGRAMMAR_REF=97787376faee5ed8466cfad57c99855e4ce2f6aa
 RUN git init -q /opt/xgrammar && cd /opt/xgrammar && git remote add origin https://github.com/mlc-ai/xgrammar && \
-    git fetch -q --depth 1 origin "${XGRAMMAR_REF}" && git checkout -q --detach FETCH_HEAD && \
+    git fetch -q --depth 1 origin "${XGRAMMAR_REF}" refs/tags/v0.2.8:refs/tags/v0.2.8 && git checkout -q --detach "${XGRAMMAR_REF}" && \
     test "$(git rev-parse HEAD)" = "${XGRAMMAR_REF}" && \
+    test "$(git rev-parse 'v0.2.8^{commit}')" = "${XGRAMMAR_REF}" && \
     git submodule update -q --init --recursive --depth 1
 ARG TF_REPO=https://github.com/Elevatormusic/TensorFold.git
 ARG TF_REF

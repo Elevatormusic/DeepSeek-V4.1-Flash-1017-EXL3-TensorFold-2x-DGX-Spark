@@ -227,11 +227,12 @@ phase_verify() {
 }
 
 phase_view() {
-  local e name f n
+  local e name f n pattern
   for e in "${ENGRAM_FILES[@]}"; do
     [ -f "$DL_DIR/engram/${e%% *}" ] || fail "view: ${e%% *} is missing in $DL_DIR/engram. Run the engram phase first."
   done
-  compgen -G "$DL_DIR/model/model-*.safetensors" > /dev/null ||
+  if [ "$PACK" = 2.8 ]; then pattern='*.safetensors'; else pattern='model-*-of-*.safetensors'; fi
+  compgen -G "$DL_DIR/model/$pattern" > /dev/null ||
     fail "view: no weights in $DL_DIR/model. Run the download phase first."
   mkdir -p "$MODEL_VIEW/model" "$MODEL_VIEW/engram"
   log "view: link the files into $MODEL_VIEW (hard links, no copy)"

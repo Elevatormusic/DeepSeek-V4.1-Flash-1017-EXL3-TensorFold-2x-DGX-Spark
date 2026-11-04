@@ -49,6 +49,9 @@ if [ "$ENGINE" = zig ]; then HEAD_NEED_GIB=$ZIG_NEED_GIB WORKER_NEED_GIB=$ZIG_NE
 # They expand on the head, in the node script below. $1 = rank of the node.
 zig_node_checks() {
   cat <<EOZ
+python3 - "$MODEL_VIEW/model" <<'PACK_CHECK' || echo "FAIL cannot validate the 2.8 bpw pack"
+$(cat "$ROOT/scripts/check_zig_pack.py" || echo 'raise SystemExit(1)')
+PACK_CHECK
 [ -f "$ZIG_KIT/MANIFEST" ] && [ -d "$ZIG_KIT/aot" ] || echo "FAIL no kernel kit in $ZIG_KIT: run scripts/zig_inputs.sh kit"
 [ -f "$ZIG_DATA/dsv41_token_map.json" ] || echo "FAIL no $ZIG_DATA/dsv41_token_map.json: run scripts/zig_inputs.sh token-map"
 compgen -G "$ZIG_RANK_CACHE/rank${1}of2-*.bin" >/dev/null && echo "OK rank cache of rank $1" \\
@@ -73,7 +76,9 @@ else
 fi
 for d in "$MODEL_VIEW/model" "$MODEL_VIEW/engram"; do [ -d "\$d" ] || echo "FAIL missing \$d"; done
 [ -f "$MODEL_VIEW/model/chat_template.jinja" ] || echo "FAIL missing $MODEL_VIEW/model/chat_template.jinja"
+if [ "$ENGINE" = python ]; then
 n=\$(ls "$MODEL_VIEW"/model/*.safetensors 2>/dev/null | wc -l); [ "\$n" -ge $PF_SHARDS ] || echo "FAIL \$n of $PF_SHARDS_LABEL"
+fi
 docker image inspect "$PF_IMAGE" --format '{{.Id}}' 2>/dev/null | sed 's/^/IMAGE /' || echo "FAIL no image $PF_IMAGE"
 $( [ "$ENGINE" = zig ] && zig_node_checks "$rank" )
 # Opt in with PREFLIGHT_NCCL_BOOTSTRAP=1 in .env (off by default: it starts one container on each node, and no live
@@ -157,5 +162,17 @@ else
   no "the nodes hold different images (or none) for $PF_IMAGE: run $PF_BUILD"
 fi
 rm -f /tmp/tfv41-image-head /tmp/tfv41-image-worker
-ss -ltn | grep -q ":$PORT " && no "port $PORT is in use on the head" || ok "port $PORT is free"
+ports=("$PORT")
+[ "$ENGINE" != zig ] || ports+=("$ZIG_RANK_PORT")
+if listeners=$(ss -H -ltn); then
+  for port in "${ports[@]}"; do
+    if awk -v port="$port" '$4 ~ (":" port "$") { busy=1 } END { exit !busy }' <<< "$listeners"; then
+      no "port $port is in use on the head"
+    else
+      ok "port $port is free"
+    fi
+  done
+else
+  no "cannot read TCP listeners on the head"
+fi
 [ "$bad" = 0 ] && echo "preflight: all checks passed" || { echo "preflight: fix the FAIL lines, then start again"; exit 1; }

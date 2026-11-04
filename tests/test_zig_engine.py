@@ -428,6 +428,12 @@ class SuperviseCase(ZigCase):
 
 @needs_bash
 class ZigSupervise(SuperviseCase):
+    def test_clean_follower_does_not_restart_the_pair(self):
+        r, actions = self.supervise(("true 0", "exited 0"))
+        self.assertEqual(r.returncode, 1)
+        self.assertEqual(actions, [])
+        self.assertIn("no rank has an observed exit code 75", r.stdout)
+
     def test_a_clean_stop_ends_with_0_and_no_restart(self):
         for worker in ("exited 0", "exited 75"):
             with self.subTest(worker=worker):
@@ -776,9 +782,9 @@ class ZigBuildImage(ZigCase):
 
 @needs_bash
 class ZigPreflight(ZigCase):
-    SCRIPTS = ("common.sh", "zig_common.sh", "preflight.sh")
+    SCRIPTS = ("common.sh", "zig_common.sh", "preflight.sh", "check_zig_pack.py")
 
-    def preflight(self, avail_kb=120 * GIB_KB, prepare=False, extra_env="", no_image=True):
+    def preflight(self, avail_kb=120 * GIB_KB, prepare=False, extra_env="", no_image=True, busy_port=None):
         t = self.tree(gid="auto", scripts=self.SCRIPTS, extra_env=extra_env)
         if no_image:
             (t.state / "no-image").touch()
@@ -786,6 +792,8 @@ class ZigPreflight(ZigCase):
         (t.dir / "scripts" / "preflight.sh").write_text(text, encoding="utf-8")
         for name in ("ss", "systemctl", "ibv_devinfo"):
             t.stub(name, "exit 1\n")
+        if busy_port:
+            t.stub("ss", f'echo "LISTEN 0 128 0.0.0.0:{busy_port} 0.0.0.0:*"\n')
         if prepare:
             cache = t.dir / "cache"
             (cache / "zig-kit" / "aot").mkdir(parents=True)
@@ -814,13 +822,16 @@ class ZigPreflight(ZigCase):
         self.assertIn("need 110", lines[0])
 
     def test_missing_inputs_are_named(self):
+        out = "\n".join(self.preflight(extra_env="ZIG_RANK_PORT=29621\n", busy_port=29621))
+        self.assertIn("[FAIL] port 29621 is in use on the head", out)
+        self.assertNotIn("port 29621 is free", out)
         out = "\n".join(self.preflight())
         self.assertIn("no kernel kit in", out)
         self.assertIn("zig_inputs.sh kit", out)
         self.assertIn("dsv41_token_map.json: run scripts/zig_inputs.sh token-map", out)
         self.assertIn("no rank cache file for rank 0", out)
         self.assertIn("no rank cache file for rank 1", out)
-        self.assertIn("of 42 weight files", out)
+        self.assertIn("exact 42 weight files", out)
         self.assertIn("the nodes hold different images (or none) for tensorfold-dsv41-zig:d58d25cc: run scripts/zig_build_image.sh", out)
 
     def test_present_inputs_pass(self):

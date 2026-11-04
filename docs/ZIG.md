@@ -6,6 +6,15 @@ The pair is the same: two NVIDIA DGX Spark, TP=2, joined by one QSFP cable. The 
 
 ## What changes for you
 
+Preflight checks the exact 2.8 bpw weight filenames and the pinned config and
+index hashes on both nodes. It checks `ZIG_RANK_PORT` on the head. The native
+engine must still validate the rank cache. These checks do not replace the
+full weight hash check of `scripts/download.sh verify`.
+
+`tests/run_all.sh` names its output with `ZIG_IMAGE` when `ENGINE=zig`.
+It skips the Python prompt conformance and differential tests in this mode.
+Those tests cannot prove that the native Zig prompt path is correct.
+
 | | Zig engine (default) | Python engine (rollback) |
 |---|---|---|
 | Engine | [TensorFold fork](https://github.com/Elevatormusic/TensorFold), branch `dsv41-zig-dev`, commit `d58d25ccd6dbd624814cc2ccc848f8e5ba84580c` | the same fork, release `dsv41-1.1.1` (`cb4ceaff2b8c`) |

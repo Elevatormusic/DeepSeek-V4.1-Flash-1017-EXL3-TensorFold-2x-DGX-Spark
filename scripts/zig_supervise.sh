@@ -73,6 +73,10 @@ while true; do
     log "a rank exited with an error code that is not 75: no restart. Read the logs; do not restart in a loop."
     exit 1
   fi
+  if [ "$c0" != 75 ] && [ "$c1" != 75 ]; then
+    log "no rank has an observed exit code 75: no restart. Read the logs."
+    exit 1
+  fi
   if [ "$restarts" -ge "$MAX_RESTARTS" ]; then
     log "$restarts restarts in a row: give up. Read the logs."
     exit 1
