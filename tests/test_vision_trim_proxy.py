@@ -7,6 +7,7 @@ import importlib.util
 import io
 import json
 import os
+import socket
 import subprocess
 import tempfile
 import unittest
@@ -296,6 +297,52 @@ class Configuration(unittest.TestCase):
         with mock.patch.object(trim.select, "select", return_value=([client], [], [])):
             watcher._watch()
         upstream.shutdown.assert_called_once_with(trim.socket.SHUT_RDWR)
+
+    def test_socket_errors_stop_a_stalled_upstream(self):
+        for failure in (ConnectionResetError(), OSError()):
+            with self.subTest(failure=type(failure).__name__):
+                client, upstream = mock.Mock(), mock.Mock()
+                client.recv.side_effect = failure
+                watcher = trim.DisconnectWatch(client, upstream)
+                with mock.patch.object(trim.select, "select", return_value=([client], [], [])):
+                    watcher._watch()
+                upstream.shutdown.assert_called_once_with(socket.SHUT_RDWR)
+
+    def test_reset_closes_the_real_upstream_socket(self):
+        # A closed peer with unread data causes a reset on this local socket.
+        with contextlib.ExitStack() as stack:
+            client, peer = socket.socketpair()
+            upstream, backend = socket.socketpair()
+            for connection in (client, peer, upstream, backend):
+                stack.enter_context(connection)
+            backend.settimeout(2)
+            client.sendall(b"unread")
+            peer.close()
+            with trim.DisconnectWatch(client, upstream):
+                self.assertEqual(backend.recv(1), b"")
+
+    def test_normal_watcher_exit_keeps_the_upstream_open(self):
+        client, upstream = mock.Mock(), mock.Mock()
+        watcher = trim.DisconnectWatch(client, upstream)
+        watcher.done.set()
+        watcher._watch()
+        upstream.shutdown.assert_not_called()
+
+    def test_select_error_stops_a_stalled_upstream(self):
+        client, upstream = mock.Mock(), mock.Mock()
+        watcher = trim.DisconnectWatch(client, upstream)
+        with mock.patch.object(trim.select, "select", side_effect=OSError()):
+            watcher._watch()
+        upstream.shutdown.assert_called_once_with(socket.SHUT_RDWR)
+
+    def test_cancel_tolerates_an_upstream_that_is_already_closed(self):
+        client, upstream = mock.Mock(), mock.Mock()
+        client.recv.side_effect = ConnectionResetError()
+        upstream.shutdown.side_effect = OSError()
+        watcher = trim.DisconnectWatch(client, upstream)
+        with mock.patch.object(trim.select, "select", return_value=([client], [], [])):
+            watcher._watch()
+        upstream.shutdown.assert_called_once_with(socket.SHUT_RDWR)
 
 
 class BodyFormats(unittest.TestCase):

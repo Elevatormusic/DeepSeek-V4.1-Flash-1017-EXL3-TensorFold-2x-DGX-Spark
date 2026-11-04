@@ -141,11 +141,16 @@ class DisconnectWatch:
                 readable, _, _ = select.select([self.client], [], [], 0.25)
                 if readable:
                     if not self.client.recv(1, socket.MSG_PEEK):
-                        self.upstream.shutdown(socket.SHUT_RDWR)
-                        return
+                        break
                     self.done.wait(0.25)
+            else:
+                return
         except OSError:
-            return
+            pass
+        try:
+            self.upstream.shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass
 
     def __enter__(self):
         self.thread.start()
