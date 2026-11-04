@@ -76,8 +76,8 @@ if name == "docker":
         print(setting("HEAD_NAMES"))
     elif args[:2] == ["image", "inspect"]:
         image = args[2]
-        if image == setting("IMAGE", "base:latest"):
-            if setting("BASE_IMAGE_MISSING") == "1":
+        if image == "tensorfold-dsv41:07aa02585f64":
+            if setting("BASE_IMAGE_MISSING") == "1" and not state.with_suffix(".base").exists():
                 sys.exit(1)
             print("base-id")
         elif any("org.tensorfold.display-kv.source" in arg for arg in args):
@@ -85,6 +85,8 @@ if name == "docker":
         else:
             print(setting("VARIANT_ID", "sha256:" + "a" * 64))
     elif args[:1] == ["build"]:
+        if "TF_COMMIT=07aa02585f64cfb04c60a96de6554c0d4708ed46" in args:
+            state.with_suffix(".base").touch()
         sys.exit(int(setting("DOCKER_BUILD_FAIL", "0")))
     elif args[:1] == ["save"]:
         sys.stdout.write("fixture image stream")
@@ -148,7 +150,8 @@ class StartDisplayKvTest(unittest.TestCase):
         (self.root / "experiments" / "display-kv" / "overlay").mkdir(parents=True)
         self.bin.mkdir()
         shutil.copy2(LAUNCHER, self.root / "start-display-kv.sh")
-        (self.root / ".env").write_text("IMAGE=base:latest\nWORKER_SSH=fixture-worker\n")
+        shutil.copy2(RECIPE / "scripts/display_base.sh", self.root / "scripts/display_base.sh")
+        (self.root / ".env").write_text("IMAGE=base:latest\nWORKER_SSH=fixture-worker\nTF_REPO=https://example.invalid/TensorFold.git\n")
         (self.root / "scripts" / "common.sh").write_text(textwrap.dedent("""\
             ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
             set -a
@@ -238,6 +241,15 @@ class StartDisplayKvTest(unittest.TestCase):
         self.assertNotIn("drm:", commands)
         self.assertNotIn("docker run", commands)
         self.assertNotIn("bundle-start", commands)
+
+    def test_build_uses_the_exact_display_base_with_a_different_ordinary_image(self):
+        result = self.invoke("--build-only", BASE_IMAGE_MISSING=1)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        commands = "\n".join(self.commands())
+        self.assertIn("TF_COMMIT=07aa02585f64cfb04c60a96de6554c0d4708ed46", commands)
+        self.assertIn("BASE_IMAGE=tensorfold-dsv41:07aa02585f64", commands)
+        self.assertNotIn("BASE_IMAGE=base:latest", commands)
+        self.assertNotIn("drm:", commands)
 
     def test_explicit_build_copies_then_launches(self):
         self.state.unlink()
