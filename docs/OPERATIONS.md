@@ -79,6 +79,18 @@ The engine release [dsv41-1.1.1](https://github.com/Elevatormusic/TensorFold/rel
 
 ## When the lane breaks
 
+For a node hang with PCIe or SMMU errors, run `scripts/host_fault_report.sh`
+after the node is reachable. It reads both nodes. Save its output in a private
+file. Review the complete file for private data before you share it.
+The command reads the previous and current boot kernel journal. Each read is
+limited to 2000 lines and keeps at most 200 matching lines. It also reads the
+kernel, NVIDIA driver, GPU temperature and power, mlx5 firmware and thermal
+zones where these facts are available. Permission failures, missing tools and
+missing files are marked as unavailable. No matching events in this bounded
+window does not prove that the node has no fault. A lost journal can contain
+no record of a hang. The report does not change drivers, services or hardware.
+It does not establish a cause or a fix for issue #24.
+
 The engine keeps serving when one request fails:
 - A fault in one request's own work (its grammar, its sampling, its client going away) ends only that request.
 - A device fault (CUDA error, out of memory) or a lost rank breaks the lane. NCCL is aborted, and the lane cannot serve again in that process.
