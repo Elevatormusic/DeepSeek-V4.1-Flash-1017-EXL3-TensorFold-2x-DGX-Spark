@@ -251,7 +251,7 @@ class Handler(BaseHTTPRequestHandler):
         if body is None:
             return
         dropped = 0
-        if self.command == "POST" and self.path.split("?", 1)[0] in TRIM_PATHS and body:
+        if self.command == "POST" and self.path.split("?", 1)[0].rstrip("/") in TRIM_PATHS and body:
             body, dropped = trim_body(body, self.keep)
         hop = _hop(self.headers)
         headers = {key: value for key, value in self.headers.items() if key.lower() not in hop}

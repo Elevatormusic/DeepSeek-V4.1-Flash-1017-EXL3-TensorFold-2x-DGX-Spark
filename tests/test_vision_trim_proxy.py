@@ -112,6 +112,27 @@ class Proxy(unittest.TestCase):
                 self.assertIn(f"HTTP/1.1 {status}".encode(), output)
                 factory.assert_not_called()
 
+    def test_trailing_slash_routes_trim_without_changing_the_forwarded_path(self):
+        for route in ("/v1/chat/completions", "/v1/messages", "/v1/responses"):
+            for suffix in ("/", "///?test=1"):
+                with self.subTest(route=route, suffix=suffix):
+                    responses = route == "/v1/responses"
+                    part = {"type": "input_image", "image_url": "image"} if responses else {
+                        "type": "image_url", "image_url": {"url": "image"},
+                    }
+                    body = json.dumps({"input" if responses else "messages": [
+                        {"role": "user", "content": [part, part]},
+                    ]}).encode()
+                    path = route + suffix
+                    raw = (f"POST {path} HTTP/1.1\r\nContent-Length: {len(body)}\r\n\r\n").encode() + body
+                    output, conn, _ = self.invoke(raw)
+                    self.assertIn(b"X-Vision-Trimmed: 1", output)
+                    self.assertEqual(conn.request.call_args.args, ("POST", path))
+                    sent = json.loads(conn.request.call_args.kwargs["body"])
+                    content = sent["input" if responses else "messages"][0]["content"]
+                    self.assertEqual(content[0], part)
+                    self.assertEqual(content[1]["text"], "[1 earlier image omitted]")
+
     def test_head_and_no_content_have_no_body_or_transfer_coding(self):
         cases = [(b"HEAD", b"200 OK"), (b"GET", b"204 No Content"), (b"GET", b"304 Not Modified")]
         for method, status in cases:
