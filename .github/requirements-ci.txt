@@ -1,5 +1,5 @@
 # The lint tools of .github/workflows/ci.yml. Dependabot keeps these versions current.
-ruff==0.17.1
+ruff==0.17.3
 shellcheck-py==0.11.0.1
 actionlint-py==1.7.12.25
 zizmor==1.31.1
