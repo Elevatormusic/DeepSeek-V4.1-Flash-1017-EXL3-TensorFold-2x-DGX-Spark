@@ -37,7 +37,7 @@ class SpillDirectTests(unittest.TestCase):
                 if str(path).endswith(".partial") and flags & os.O_CREAT:
                     creates.append(path)
                     if flags & os.O_DIRECT:              # reproduce a filesystem that creates before EINVAL
-                        fd = real_open(path, flags & ~os.O_DIRECT, mode, **kwargs)
+                        fd = real_open(path, flags ^ os.O_DIRECT, mode, **kwargs)
                         os.write(fd, b"left by failed direct open")
                         os.close(fd)
                         unsafe.append(path)
@@ -73,7 +73,8 @@ class SpillDirectTests(unittest.TestCase):
                 real_open, real_remove, real_fcntl = os.open, os.remove, fcntl.fcntl
 
                 def open_file(path, flags, mode=0o777, **kwargs):
-                    return real_open(path, flags & ~os.O_DIRECT, mode, **kwargs)
+                    flags = flags ^ os.O_DIRECT if flags & os.O_DIRECT else flags
+                    return real_open(path, flags, mode, **kwargs)
 
                 def set_flags(fd, operation, argument=0):
                     if operation == fcntl.F_SETFL:
