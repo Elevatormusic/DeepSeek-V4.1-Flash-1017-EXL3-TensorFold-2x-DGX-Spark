@@ -548,6 +548,36 @@ class ToolOutputTests(unittest.TestCase):
                     content, calls = self.guard().parse("<tool_call>" + body + "</tool_call>")
                     self.assertEqual([call["function"]["name"] for call in calls], ["task"])
 
+    def test_qwen_values_can_hold_many_literal_glm_tags(self):
+        from tensorfold.cuda import reply_text
+
+        for value in ("<arg_key>" * 65, "<arg_value>" * 65,
+                      "<arg_key>x</arg_key>" * 65 + "<arg_value>unfinished"):
+            text = ("<tool_call><function=task><parameter=note>" + value
+                    + "</parameter></function></tool_call>")
+            for max_calls in (None, 1):
+                with self.subTest(value=value[:30], max_calls=max_calls):
+                    expected = reply_text.parse_tool_calls(text, self.tools, max_calls=max_calls)
+                    content, calls = self.guard().parse(text, max_calls=max_calls)
+                    self.assertEqual(content, expected[0])
+                    self.assertEqual([call["function"] for call in calls],
+                                     [call["function"] for call in expected[1]])
+                    self.assertEqual(json.loads(calls[0]["function"]["arguments"]), {"note": value})
+
+    def test_glm_values_can_hold_many_literal_qwen_tags(self):
+        from tensorfold.cuda import reply_text
+
+        for value in ("<function=literal>" * 65, "<parameter=literal>" * 65):
+            text = "<tool_call>task<arg_key>note</arg_key><arg_value>" + value + "</arg_value></tool_call>"
+            for max_calls in (None, 1):
+                with self.subTest(value=value[:30], max_calls=max_calls):
+                    expected = reply_text.parse_tool_calls(text, self.tools, max_calls=max_calls)
+                    content, calls = self.guard().parse(text, max_calls=max_calls)
+                    self.assertEqual(content, expected[0])
+                    self.assertEqual([call["function"] for call in calls],
+                                     [call["function"] for call in expected[1]])
+                    self.assertEqual(json.loads(calls[0]["function"]["arguments"]), {"note": value})
+
     def test_upper_case_glm_tags_are_not_glm_markup(self):
         # The GLM tags of the parser are literal and case sensitive: other spellings are text, not a looping call.
         text = "<tool_call>task" + "<ARG_KEY>k</ARG_KEY><ARG_VALUE>v" * 100 + "</tool_call>"
