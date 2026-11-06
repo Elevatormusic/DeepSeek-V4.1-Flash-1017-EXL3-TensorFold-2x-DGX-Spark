@@ -408,6 +408,7 @@ class SpillTierTests(unittest.TestCase):
             snap = Snap(ids=third, ring=torch.arange(len(third) * 4, dtype=torch.uint8).reshape(len(third), 4))
             self.assertIsNotNone(store.save(third, snap, skip=("ids",)))
             self.assertNotIn("drain", order)
+            self.assertTrue(self.sp.SpillStore.drain(store, 10))
 
     def test_a_failed_write_waits_for_the_writer_stream_before_the_rows_are_released(self):
         with tempfile.TemporaryDirectory() as root:
@@ -662,6 +663,7 @@ class SpillTierTests(unittest.TestCase):
                 if removable:
                     self.assertIsNotNone(job)
                     self.assertEqual(store.stats.unlink_failed, 0)
+                    self.assertTrue(store.drain(10))
                 else:
                     self.assertIsNone(job)                                    # the bytes did not come back
                     self.assertEqual(store.stats.unlink_failed, 1)
