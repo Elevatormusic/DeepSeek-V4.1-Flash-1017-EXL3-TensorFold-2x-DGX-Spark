@@ -54,7 +54,7 @@ run
 check "first apply saves the live values" "grep -q 'vm.swappiness = 33' '$b' && grep -q 'vm.min_free_kbytes = 67584' '$b'"
 check "first apply sets the tuned values" "grep -q '^vm.swappiness=10$' '$T/state' && grep -q '^vm.min_free_kbytes=1048576$' '$T/state' && grep -q '^vm.watermark_scale_factor=25$' '$T/state'"
 args_line=$(grep '^EARLYOOM_ARGS=' "$T/etc/default/earlyoom")
-case "$args_line" in *"'"*) noq=no ;; *"--prefer ^tensorfold --avoid ^("*) noq=yes ;; *) noq=no ;; esac
+case "$args_line" in *"'"*) noq=no ;; *"--prefer ^(tensorfold|tf-dsv41) --avoid ^("*) noq=yes ;; *) noq=no ;; esac
 check "first apply writes the earlyoom args without quotes" "[ $noq = yes ]"
 tb="$T/var/lib/tensorfold-host-tuning/thp.before"
 tu="$T/etc/systemd/system/tensorfold-thp.service"

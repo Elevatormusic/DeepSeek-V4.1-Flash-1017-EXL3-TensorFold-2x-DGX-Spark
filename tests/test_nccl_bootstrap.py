@@ -31,7 +31,7 @@ class NcclBootstrapTests(unittest.TestCase):
             env = os.environ | {
                 "PATH": str(root) + os.pathsep + os.environ["PATH"],
                 "CALL_LOG": str(log), "PROBE_STATUS": str(status),
-                "TIMED_OUT": "1" if timed_out else "0", "IMAGE": "fixture:image",
+                "TIMED_OUT": "1" if timed_out else "0", "IMAGE": "fixture:image", "PF_IMAGE": "fixture:image",
                 "NCCL_SOCKET_IFNAME": "fixture-net",
             }
             env.pop("PREFLIGHT_NCCL_BOOTSTRAP", None)

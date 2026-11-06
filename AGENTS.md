@@ -6,12 +6,16 @@ You can set up and run this recipe for a user. Follow these steps in this order.
 
 1. Check that the two nodes are cabled and reach each other (NVIDIA's [Connect Two Sparks](https://build.nvidia.com/spark/connect-two-sparks) guide; [docs/NETWORK.md](docs/NETWORK.md)). `ibdev2netdev` must show the CX7 ports as Up on both nodes. Set MTU 9000 on the CX7 netdevs on both nodes ([docs/NETWORK.md](docs/NETWORK.md#mtu)): at the default MTU 1500, the start fails.
 2. `cp .env.example .env`, then fill in the values from `ibdev2netdev`, `ip -br addr` and `show_gids`. Ask the user for paths you cannot find.
-3. `scripts/download.sh` (~400 GB; resumable: run it again after a break). If a download needs a Hugging Face login, ask the user to run `hf auth login`. Never type a token yourself.
+   The default engine is the Zig engine (`ENGINE=zig` in `.env.example`). Read [docs/ZIG.md](docs/ZIG.md), above all the test status and the gaps, before you start. The Python engine is the rollback ([docs/ROLLBACK.md](docs/ROLLBACK.md)). Use it only when the user asks for it or when the Zig engine has a fault.
+3. `scripts/download.sh` (~380 GB: the 2.8 bpw pack and the Engram tables; resumable: run it again after a break). If a download needs a Hugging Face login, ask the user to run `hf auth login`. Never type a token yourself.
 4. `scripts/patch_template.py --worker`
-5. `docker/build.sh`
+5. `scripts/zig_build_image.sh` (builds the Zig image and copies it to the worker; it needs 40 GiB of free memory and no running server). It builds the Python base image first when that image is missing.
 6. `scripts/host_tuning.sh` (once; it needs sudo on both nodes, so the user types the password). It turns swap off for the engine, sets the kernel memory values, turns transparent huge pages off (a systemd unit keeps this after a reboot) and makes earlyoom stop the engine (not the node) when memory runs out; preflight fails without it. Restart the server after it, because the engine sizes its memory at start.
-7. `./start.sh` (it runs `scripts/preflight.sh` first; fix each `[FAIL]` line it prints). The first start takes ~15 min.
-8. `./verify.sh` must print PASS for all five checks. Only a real reply proves that both nodes work; `/health` alone does not.
+7. `scripts/zig_inputs.sh` (the kernel kit, the token map and the weight file of each rank; 96 GiB on each node; no server may run).
+8. `./start.sh` (it runs `scripts/preflight.sh` first; fix each `[FAIL]` line it prints). A start takes 26 to 34 s when the weight files exist.
+9. `./verify.sh` must print PASS for all five checks. Only a real reply proves that both nodes work; `/health` alone does not.
+
+For the rollback, set `ENGINE=python` and the 2.9 bpw `MODEL_VIEW` in `.env`, and replace steps 5 and 7 with `docker/build.sh`. The first start of the Python engine takes ~15 min.
 
 Then give the user the three client settings from [docs/CONNECT.md](docs/CONNECT.md).
 
@@ -19,10 +23,11 @@ Then give the user the three client settings from [docs/CONNECT.md](docs/CONNECT
 
 - **Never `docker exec` into `tfv41-r0` or `tfv41-r1` while they serve.** The exec process counts against the rank's memory.
 - **Never stop the display manager** (`systemctl stop gdm`) on a Spark. On the tested pair it powered the node off.
-- **Run one model server at a time.** Each one needs port 8888 and ~108 GiB of memory on each node ([docs/MEMORY.md](docs/MEMORY.md)).
+- **Run one model server at a time.** Each one needs port 8888 and ~108 GiB of memory on each node ([docs/MEMORY.md](docs/MEMORY.md)). The Zig engine and the Python engine use the same container names, so they also cannot run together.
 - **Keep `BIND_HOST=127.0.0.1`** unless the user asks for network access. Then set `API_KEY_FILE` too ([docs/CONNECT.md](docs/CONNECT.md)).
-- **If the server stops with exit code 75**, the lane broke on a device fault. Run `./stop.sh && ./start.sh`.
-- **If NCCL hangs at start after a cable or reboot event**, the RoCE GID index moved. Set `GID_INDEX=-1` in `.env` and restart ([docs/NETWORK.md](docs/NETWORK.md)).
+- **If a rank stops with exit code 75**, its peer failed or the lane broke. Run `./stop.sh && ./start.sh`. Do not start `scripts/zig_supervise.sh` unless the user asks for it: it is optional and not tested on hardware. Exit code 137 (killed) and every other code are not restarted: read the logs first ([docs/ZIG.md](docs/ZIG.md#exit-codes)).
+- **If NCCL hangs at start after a cable or reboot event** (`ENGINE=python`), the RoCE GID index moved. Set `GID_INDEX=-1` in `.env` and restart ([docs/NETWORK.md](docs/NETWORK.md)). The Zig engine reads the index at each start (`ZIG_RDMA_GID_INDEX=auto`).
+- **Never run a file from the kernel kit.** `scripts/zig_inputs.sh` checks the kit with `scripts/verify_kit.sh` of this repo. Do not run `tools/verify_kit.sh` of the kit, on any node.
 
 ## Issues and pull requests
 
@@ -52,7 +57,8 @@ Write docs and the pull request text in ASD-STE100 Simplified Technical English.
 
 | Question | File |
 |---|---|
-| A start fails | `logs/` (saved by `./stop.sh`), `docker logs tfv41-r0`, [docs/OPERATIONS.md](docs/OPERATIONS.md) |
+| A start fails | `logs/` (saved by `./stop.sh`), `docker logs tfv41-r0`, [docs/ZIG.md](docs/ZIG.md#exit-codes), [docs/OPERATIONS.md](docs/OPERATIONS.md) |
+| Go back to the Python engine | [docs/ROLLBACK.md](docs/ROLLBACK.md) |
 | earlyoom stops the engine, or `terminate called without an active exception` | [docs/MEMORY.md](docs/MEMORY.md); `scripts/oom_report.sh` collects the facts for an issue |
 | How to call the API | [docs/CONNECT.md](docs/CONNECT.md) |
 | Run the tests | [tests/README.md](tests/README.md) |

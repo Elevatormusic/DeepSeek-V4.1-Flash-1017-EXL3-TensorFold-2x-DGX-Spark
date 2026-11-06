@@ -137,3 +137,9 @@ The engine is now [release dsv41-1.1.1](https://github.com/Elevatormusic/TensorF
 - **`json_schema` prompt** (fork PR #27, by hyungraekim-bagelcode). The prompt shows the schema, not the OpenAI wrapper.
 - **Coupled drafts** (fork PR #25) and **L2 prefetch at once** (fork PR #26). Output tokens do not change. In the gate runs, decode and cold prefill are equal to 1.1.0 within the noise ([runs/2026-10-21](../runs/2026-10-21/INDEX.md#release-gate-of-engine-111)).
 - Known issue: the new image holds about 0.14 GiB more on the head, and the lowest head `MemAvailable` in the long run was 1.58 to 1.62 GiB (1.1.0: 1.68 to 1.85 GiB). See [OPERATIONS.md](OPERATIONS.md#engine-switches-of-release-111).
+
+## 9. The Zig engine as the default (22 October 2026)
+
+The Zig engine is bertholomus's second engine for this model. The fork branch `dsv41-zig-dev` ports to it the changes that this page lists for the Python engine, in these pull requests of [the fork](https://github.com/Elevatormusic/TensorFold): `top_k` 0 (#29), the RDMA GID setting (#30), structured output (#31), forced DSML tool calls (#32), fault isolation with exit code 75 (#33), the loader for the 2.8 bpw pack (#38), special-token text as plain text (#39), and a peer watch that ends a rank whose peer died (#40). The release fault campaign found two faults that blocked a release (F1 and F3); both are fixed ([runs/2026-10-22](../runs/2026-10-22/INDEX.md#zig-engine-and-the-28-bpw-pack)).
+
+This recipe changed as follows: `ENGINE` in `.env` picks the engine (`zig` is the default); the Zig scripts and `docker/Dockerfile.zig` are new; the Python engine and the 2.9 bpw pack stay as the rollback ([ROLLBACK.md](ROLLBACK.md)). See [ZIG.md](ZIG.md).

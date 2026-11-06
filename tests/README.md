@@ -20,6 +20,10 @@ The opt-in display-spill image has CPU torch and composition tests in
 `TF_SPILL_SOURCE` names an explicit pinned checkout. See
 [Display spill](../docs/SPILL.md#validation-limits).
 
+## Zig engine checks
+
+`tests/test_zig_engine.py` runs the Zig scripts in a temporary folder, with stub commands first on PATH (`docker`, `ssh`, `hf`, `rsync`) and a small HTTP server that plays the engine API. It checks the `docker run` arguments of each rank and their order, the first real completion, the exit codes (75, 137, other), the supervisor rules, the guards of `scripts/zig_inputs.sh` and `scripts/zig_build_image.sh`, the `ENGINE` switch of `start.sh`, the preflight checks, and the hash list of the 2.8 bpw pack. It also checks `scripts/verify_kit.sh` and the kernel kit rules: a tampered file, an extra file, a tampered `tools/verify_kit.sh` and a wrong `MANIFEST` pin each stop the script before anything from the kit runs, and the worker runs only the checker that goes in on stdin. These tests never touch a GPU node. They need bash on Linux or macOS, `curl` and `rsync`.
+
 ## Memory checks
 
 `test_memory_checks.py` runs `scripts/preflight.sh`, `status.sh`, `margin_check` of `scripts/common.sh` and `scripts/oom_report.sh` in a temporary folder, with stub commands first on `PATH` (ssh, docker, journalctl, nvidia-smi). It checks the `MemAvailable` limits of preflight (head 111 GiB, 110 with `VISION=0`, worker 109), the warning of the post-start check under 2.5 GiB, the sections of the report, its limit of 50 log lines, and that the report holds no key, token, home path or host name, in any value form (separate argument, quoted, escaped JSON, any Authorization scheme). It needs bash on Linux or macOS.

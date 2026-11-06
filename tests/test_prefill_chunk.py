@@ -35,6 +35,7 @@ sleep() { echo 'unexpected sleep' >&2; exit 99; }
             env = "\n".join(line for line in env.splitlines()
                             if not line.startswith("PREFILL_CHUNK="))
             env += f"\nCACHE_DIR={shlex.quote(str(root / 'cache'))}\n"
+            env += "ENGINE=python\n"      # these tests check the Python start script
             if value is not None:
                 env += f"PREFILL_CHUNK={shlex.quote(value)}\n"
             (root / ".env").write_text(env)

@@ -9,6 +9,15 @@
 set -uo pipefail
 # shellcheck source=scripts/common.sh
 . "$(dirname "${BASH_SOURCE[0]}")/../scripts/common.sh"
+case "${ENGINE:-zig}" in
+  zig)
+    # shellcheck source=scripts/zig_common.sh
+    . "$ROOT/scripts/zig_common.sh"
+    IMAGE=$ZIG_IMAGE
+    ;;
+  python) ;;
+  *) echo "ENGINE must be zig or python" >&2; exit 1 ;;
+esac
 
 DAY=$(date -u +%F)
 STAMP=$(date -u +%H%M%SZ)
@@ -115,7 +124,9 @@ counts_match "$log" '^([0-9]+)/([0-9]+) passed$'
 report "grammar-check" "$rc" "$log" "$t" "$?"
 
 # 4. The conformance check: DeepSeek's golden fixtures. It needs the tensorfold package (host Python or engine image).
-if [ ! -d "$FIXTURE_DIR" ]; then
+if [ "${ENGINE:-zig}" = zig ]; then
+  skip "conformance" "this test checks the Python prompt path; Zig prompt conformance needs a native test"
+elif [ ! -d "$FIXTURE_DIR" ]; then
   skip "conformance" "no fixture folder $FIXTURE_DIR (set FIXTURE_DIR)"
 elif have_tensorfold || have_image; then
   t=$SECONDS
@@ -133,7 +144,9 @@ else
 fi
 
 # 5. The differential check: our prompts against DeepSeek's encoding.py. It needs encoding.py (ENCODING_DIR).
-if [ -z "${ENCODING_DIR:-}" ] || [ ! -f "${ENCODING_DIR}/encoding.py" ]; then
+if [ "${ENGINE:-zig}" = zig ]; then
+  skip "differential" "this test checks the Python prompt path; Zig prompt conformance needs a native test"
+elif [ -z "${ENCODING_DIR:-}" ] || [ ! -f "${ENCODING_DIR}/encoding.py" ]; then
   skip "differential" "ENCODING_DIR is not set or has no encoding.py (see tests/README.md for the download)"
 elif have_tensorfold || have_image; then
   t=$SECONDS
