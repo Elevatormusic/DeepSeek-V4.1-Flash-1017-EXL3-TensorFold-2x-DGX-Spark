@@ -26,6 +26,8 @@ The writer creates each partial file once in buffered mode. It then enables
 direct I/O on that descriptor. If the file system rejects direct mode, the
 writer keeps the same buffered descriptor. It does not reopen or remove the
 partial path to make that fallback.
+Ownership changes do not follow links. Publication does not make an atomic
+file-identity check; a replaced entry still fails the no-follow read check.
 
 The top-level `start-display-spill.sh` builds and launches the dependent image.
 It refuses active ranks, prepares DRM on both nodes, probes the display

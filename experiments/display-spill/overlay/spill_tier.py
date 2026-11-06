@@ -724,7 +724,7 @@ class SpillStore:
     def _own(self, path: str) -> None:
         if self.uid >= 0:
             try:
-                os.chown(path, self.uid, self.gid)
+                os.chown(path, self.uid, self.gid, follow_symlinks=False)
             except OSError:
                 pass
 

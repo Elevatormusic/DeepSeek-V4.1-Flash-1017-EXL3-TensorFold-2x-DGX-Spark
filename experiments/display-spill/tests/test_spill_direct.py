@@ -197,6 +197,46 @@ class SpillDirectTests(unittest.TestCase):
             self.assertEqual(store.stuck, {job.partial: os.lstat(job.partial).st_size})
             self.assertGreater(store.stuck[job.partial], 0)
 
+    def test_a_published_link_never_changes_external_target_ownership(self):
+        with tempfile.TemporaryDirectory() as root:
+            store = self.store(root)
+            target = os.path.join(root, "outside-cache")
+            with open(target, "wb") as output:
+                output.write(b"keep outside bytes")
+            os.chmod(target, 0o6755)
+            before = os.stat(target)
+            real_replace, real_chown = os.replace, os.chown
+            followed, owned = [], []
+
+            def replace(source, destination):
+                if str(source).endswith(".partial"):
+                    os.unlink(source)
+                    os.symlink(target, source)             # substitute a link after the write closed its descriptor
+                return real_replace(source, destination)
+
+            def chown(path, uid, gid, **kwargs):
+                actual = os.stat(path, follow_symlinks=kwargs.get("follow_symlinks", True))
+                if (actual.st_dev, actual.st_ino) == (before.st_dev, before.st_ino):
+                    followed.append(path)
+                owned.append(path)
+                return real_chown(path, uid, gid, **kwargs)
+
+            with mock.patch.object(self.sp.os, "replace", side_effect=replace), \
+                    mock.patch.object(self.sp.os, "chown", side_effect=chown):
+                job = store.save([1, 2])
+                self.assertTrue(store.drain(3))
+            self.assertTrue(job.ok)
+            self.assertTrue(os.path.islink(job.path))        # publication itself is not an atomic identity check
+            self.assertEqual(owned, [job.path])
+            self.assertEqual(followed, [])
+            after = os.stat(target)
+            self.assertEqual((after.st_uid, after.st_gid, after.st_mode),
+                             (before.st_uid, before.st_gid, before.st_mode))
+            with open(target, "rb") as source:
+                self.assertEqual(source.read(), b"keep outside bytes")
+            with self.assertRaises(OSError):
+                store.load_async(self.sp.ids_key([1, 2]), lambda *args: None)
+
 
 if __name__ == "__main__":
     unittest.main()
