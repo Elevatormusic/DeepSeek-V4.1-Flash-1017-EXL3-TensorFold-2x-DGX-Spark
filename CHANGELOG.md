@@ -46,6 +46,7 @@ Each release is a git tag. To use a release, run `git checkout vX.Y.Z` before `.
 - `docs/CONNECT.md`: the examples show how to send your key when you set `API_KEY_FILE`.
 - `./start.sh` stopped with "Permission denied" on a new clone: `scripts/build_extensions.sh` had no executable bit (#15).
 - Preflight now checks that RoCE has MTU 4096 on both nodes. At the default MTU 1500, the RDMA gather failed with "transport retry counter exceeded" (#15). `docs/NETWORK.md` tells you to set MTU 9000.
+- `scripts/preflight.sh`: the cache free-space check now reads to one decimal GiB instead of `df -BG`, which rounds up to the next whole GiB. Near a 5 GiB or 110 GiB need, that rounding could read "OK" for a node that was actually short.
 
 ### Repo
 
