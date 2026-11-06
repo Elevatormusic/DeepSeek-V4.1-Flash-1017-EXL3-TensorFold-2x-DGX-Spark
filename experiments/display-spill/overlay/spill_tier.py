@@ -485,6 +485,8 @@ class Job:
         self.src_event = src_event
         self.copied = threading.Event()
         self.done = threading.Event()
+        self.decided = threading.Event()          # the writer waits for the final save agreement
+        self.cancelled = False
         self.ok = False
 
 
@@ -524,7 +526,7 @@ def _open_file(path: str, flags: int = os.O_RDONLY) -> int:
     """Open a stored file for reading, never blocking and never following a link, and check that it is a regular file.
     (A writable host cache could swap the file for a FIFO or a link after the start-up scan.)"""
 
-    fd = os.open(path, flags | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0))
+    fd = os.open(path, flags | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0), 0o600)
     try:
         if not stat.S_ISREG(os.fstat(fd).st_mode):
             raise OSError(errno.ESPIPE, "not a regular file", path)
@@ -663,6 +665,7 @@ class SpillStore:
             self.stuck: dict[str, int] = {}          # evicted files that could not be removed: path -> size (tried again)
             self._evictions = [0, 0]                 # evicted entries, and those whose file stayed, since a save began
             self.generation = 0                     # bumped whenever the index changes
+            self._disabled = False                 # a failed index agreement stops this tier until restart
             self.stats = Stats()
             self.direct = bool(cfg.direct) and hasattr(os, "O_DIRECT")
             self.jobs: queue.Queue = queue.Queue()
@@ -995,7 +998,7 @@ class SpillStore:
         for _, name in sorted(found):                          # oldest first: recency follows the files' age
             path = os.path.join(self.dir, name)
             try:
-                with open(path, "rb") as f:
+                with _open_read(path) as f:
                     header, data_at = _read_header_file(f)
                     meta = header.get("__metadata__") or {}
                     if meta.get("format") != FORMAT or meta.get("compat") != self.compat:
@@ -1049,6 +1052,21 @@ class SpillStore:
 
         if self.share is None or self.gather is None:
             return 0
+        try:
+            return self._reconcile_index()
+        except Exception:
+            self._disable()
+            raise
+
+    def _disable(self) -> None:
+        """Stop reuse and saves after a failed agreement. Leave files for the next startup scan."""
+
+        with self.lock:
+            self._disabled = True
+            self.index.clear()
+            self.generation += 1
+
+    def _reconcile_index(self) -> int:
 
         def prepare() -> list[int] | None:
             mine = sorted(self.index.values(), key=lambda e: e.last)
@@ -1062,19 +1080,23 @@ class SpillStore:
                                                       for hi, lo, n in keys]))
             keep = self._agreed(lambda: [k for i, k in enumerate(keys) if all(r[i] for r in every)])
         sizes = self.gather(self._agreed(lambda: [self.index[(hi, lo)].size >> 20 for hi, lo, _ in keep])) if keep else []
-        want = {(hi, lo) for hi, lo, _ in keep}
-        dropped = 0
-        for e in list(self.index.values()):
-            if e.key not in want:
-                self._delete(e)
-                dropped += 1
-        self.clock = 0
-        for i, (hi, lo, _) in enumerate(keep):
-            self.clock += 1
-            e = self.index[(hi, lo)]
-            e.last = self.clock
-            e.size = max(e.size, (max(r[i] for r in sizes) + 1) << 20)
-        return dropped
+
+        def apply() -> int:
+            want = {(hi, lo) for hi, lo, _ in keep}
+            dropped = 0
+            for e in list(self.index.values()):
+                if e.key not in want:
+                    self._delete(e)
+                    dropped += 1
+            self.clock = 0
+            for i, (hi, lo, _) in enumerate(keep):
+                self.clock += 1
+                e = self.index[(hi, lo)]
+                e.last = self.clock
+                e.size = max(e.size, (max(r[i] for r in sizes) + 1) << 20)
+            return dropped
+
+        return self._agreed(apply)
 
     def _delete(self, e: Entry) -> None:
         with self.lock:
@@ -1135,6 +1157,18 @@ class SpillStore:
         ``bad`` mark does not hide an entry: every rank must pick the same candidate, and then the failed read
         makes every rank forget it together."""
 
+        if self._disabled:
+            return None
+        step = lambda: self._find(prompt, grid=grid, whole_needs_head=whole_needs_head, usable=usable)
+        if self.world < 2 or self.gather is None:
+            return step()
+        try:
+            return self._agreed(step)
+        except Exception:                              # every rank skips the restore after a lookup failure
+            return None
+
+    def _find(self, prompt: Sequence[int], *, grid: int, whole_needs_head: bool,
+              usable: Callable[[Entry], bool] | None) -> Entry | None:
         arr = np.asarray(prompt, dtype=np.int64)
         best = None
         with self.lock:
@@ -1283,15 +1317,15 @@ class SpillStore:
                 self._last_dir_sync = now
 
     def _open_write(self, path: str) -> tuple[int, bool]:
-        flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
         if self.direct:
             try:
-                return os.open(path, flags | os.O_DIRECT, 0o600), True
+                return _open_file(path, flags | os.O_DIRECT), True
             except OSError as exc:
                 if exc.errno != errno.EINVAL:
                     raise
                 self.direct = False
-        return os.open(path, flags, 0o600), False
+        return _open_file(path, flags), False
 
     @staticmethod
     def _write_all(fd: int, mv: memoryview) -> None:
@@ -1426,6 +1460,11 @@ class SpillStore:
                 pass
             except OSError as exc:
                 self._unlink_failed(path, exc)
+                with self.lock:
+                    try:
+                        self.stuck[path] = os.lstat(path).st_size
+                    except OSError:
+                        self.stuck[path] = job.nbytes
             return False
 
     @staticmethod
@@ -1457,6 +1496,10 @@ class SpillStore:
             job = self.jobs.get()
             if job is None:
                 return
+            job.decided.wait()
+            if job.cancelled:
+                job = None
+                continue
             t0 = time.perf_counter()
             try:
                 ok = self._write(job, bufs, stream, hasher, staging)
@@ -1489,6 +1532,8 @@ class SpillStore:
         floor. Returns the job, or None when skipped (stored or on its way, too short, no room, no disk)."""
 
         t0 = time.perf_counter()
+        if self._disabled:
+            return None
         n = len(ids)
         if n < self.cfg.min_tokens:
             return None
@@ -1621,18 +1666,54 @@ class SpillStore:
             if not room:
                 self.stats.no_space += 1
                 return None
-        self._throttle(size)
-        with self.lock:                                    # the index changes here, on every rank alike
-            old = self.index.get(key)
-            if old is not None:
-                self.index.pop(key, None)
-            self.pending[key] = job
-            self.active.add(job)
-            self.clock += 1
-            entry.last = self.clock                        # recency is the queue order (every rank alike)
-            self.index[key] = entry
-            self.generation += 1
-        self.jobs.put(job)
+        old = None
+        failure = None
+        try:
+            self._throttle(size)
+            with self.lock:
+                old = self.index.get(key)
+                self.pending[key] = job
+                self.active.add(job)
+                self.clock += 1
+                entry.last = self.clock
+                self.index[key] = entry
+                self.generation += 1
+            self.jobs.put(job)                             # the writer waits for job.decided
+        except Exception as exc:                           # every rank must report a failed commit
+            failure = exc
+        reports = self.gather([int(failure is not None)]) if self.world > 1 and self.gather is not None else \
+            [[int(failure is not None)]]
+        if any(row[0] for row in reports):
+            def rollback() -> None:
+                with self.lock:
+                    if self.pending.get(key) is job:
+                        self.pending.pop(key, None)
+                    self.active.discard(job)
+                    if self.index.get(key) is entry:
+                        if old is None:
+                            self.index.pop(key, None)
+                        else:
+                            self.index[key] = old
+                    self.generation += 1
+
+            try:
+                if self.world > 1 and self.gather is not None:
+                    self._agreed(rollback)
+                else:
+                    rollback()
+            except Exception:
+                self._disable()
+            finally:
+                job.cancelled = True
+                job.items = None
+                job.copied.set()
+                job.done.set()
+                job.decided.set()
+            if self.world < 2 or self.gather is None:
+                raise failure
+            self._log(failure if failure is not None else RuntimeError("another rank could not commit the save"))
+            return None
+        job.decided.set()
         self.stats.save_s += time.perf_counter() - t0
         return job
 

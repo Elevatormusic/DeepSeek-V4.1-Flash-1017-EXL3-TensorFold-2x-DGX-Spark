@@ -10,6 +10,7 @@ Each release is a git tag. To use a release, run `git checkout vX.Y.Z` before `.
 
 ## [Unreleased]
 
+- Fix hostile files and rank-local failures in the optional display spill tier. A failed index agreement disables that tier until restart.
 - Add an independent opt-in [cache metrics experiment](experiments/cache-metrics/README.md) for health and Prometheus accounting. The ordinary engine stays unchanged.
 
 ### Added
