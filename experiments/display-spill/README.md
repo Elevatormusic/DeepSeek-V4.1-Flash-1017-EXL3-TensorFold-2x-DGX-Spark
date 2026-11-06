@@ -22,6 +22,11 @@ only after every rank commits the queue entry. A failed commit rolls back the
 entry on every rank. If the final exchange fails, this rank cancels its local
 job and raises the error. The peer state is then unknown.
 
+The writer creates each partial file once in buffered mode. It then enables
+direct I/O on that descriptor. If the file system rejects direct mode, the
+writer keeps the same buffered descriptor. It does not reopen or remove the
+partial path to make that fallback.
+
 The top-level `start-display-spill.sh` builds and launches the dependent image.
 It refuses active ranks, prepares DRM on both nodes, probes the display
 reservation, and keeps `SPILL_GIB` from `.env`. Never stop GDM. Never use

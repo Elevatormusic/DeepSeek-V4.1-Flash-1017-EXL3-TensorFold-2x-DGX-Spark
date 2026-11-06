@@ -102,6 +102,44 @@ class SpillDirectTests(unittest.TestCase):
                         self.assertIsNone(store.save([3, 4], keep=frozenset(store.index)))
 
     @unittest.skipUnless(hasattr(os, "mkfifo"), "needs POSIX FIFOs")
+    def test_buffered_fallback_does_not_touch_a_fifo_or_link_replacement(self):
+        for kind in ("fifo", "link"):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as root:
+                store = self.store(root)
+                store.direct = True
+                path = os.path.join(store.dir, "owned.partial")
+                target = os.path.join(root, "keep")
+                with open(target, "wb") as output:
+                    output.write(b"keep")
+                fd = store._open_write(path)
+                self.addCleanup(os.close, fd)
+                real_fcntl = fcntl.fcntl
+
+                def set_flags(opened, operation, argument=0):
+                    if operation == fcntl.F_SETFL:
+                        self.assertEqual(opened, fd)
+                        os.unlink(path)
+                        if kind == "fifo":
+                            os.mkfifo(path)
+                        else:
+                            os.symlink(target, path)
+                        raise OSError(errno.EINVAL, "direct mode unsupported")
+                    return real_fcntl(opened, operation, argument)
+
+                with mock.patch.object(fcntl, "fcntl", side_effect=set_flags), \
+                        mock.patch.object(self.sp.os, "open", side_effect=AssertionError("path reopened")), \
+                        mock.patch.object(self.sp.os, "remove", side_effect=AssertionError("path removed")):
+                    self.assertFalse(store._direct_write(fd))
+                    self.assertEqual(os.write(fd, b"owned bytes"), len(b"owned bytes"))
+                self.assertTrue(os.path.lexists(path))
+                if kind == "link":
+                    self.assertTrue(os.path.islink(path))
+                else:
+                    self.assertTrue(self.sp.stat.S_ISFIFO(os.lstat(path).st_mode))
+                with open(target, "rb") as source:
+                    self.assertEqual(source.read(), b"keep")
+
+    @unittest.skipUnless(hasattr(os, "mkfifo"), "needs POSIX FIFOs")
     def test_failed_exclusive_creation_does_not_unlink_an_existing_fifo_link_or_file(self):
         for kind in ("fifo", "link", "file"):
             with self.subTest(kind=kind), tempfile.TemporaryDirectory() as root:
