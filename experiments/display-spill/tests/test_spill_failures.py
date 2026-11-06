@@ -251,6 +251,7 @@ class SpillFailureTests(unittest.TestCase):
                         self.assertTrue(store.drain(3))
                     connect()
                     failing = stores[failing_rank]
+                    clocks = [store.clock for store in stores]
                     real_put = failing.jobs.put
                     queued = []
 
@@ -274,6 +275,7 @@ class SpillFailureTests(unittest.TestCase):
                         self.assertEqual(store.pending, {})
                         self.assertEqual(store.active, set())
                         self.assertFalse(store._disabled)
+                    self.assertEqual([store.clock for store in stores], clocks)
                     self.assertTrue(queued[0].done.is_set())
                     self.assertTrue(queued[0].copied.is_set())
                     self.assertIsNone(queued[0].items)

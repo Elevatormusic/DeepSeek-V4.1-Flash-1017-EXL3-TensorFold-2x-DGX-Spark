@@ -1667,12 +1667,14 @@ class SpillStore:
             if not room:
                 self.stats.no_space += 1
                 return None
-        old = None
+        old = old_pending = old_clock = None
         failure = None
         try:
             self._throttle(size)
             with self.lock:
                 old = self.index.get(key)
+                old_pending = self.pending.get(key)
+                old_clock = self.clock
                 self.pending[key] = job
                 self.active.add(job)
                 self.clock += 1
@@ -1688,13 +1690,18 @@ class SpillStore:
             def rollback() -> None:
                 with self.lock:
                     if self.pending.get(key) is job:
-                        self.pending.pop(key, None)
+                        if old_pending is None:
+                            self.pending.pop(key, None)
+                        else:
+                            self.pending[key] = old_pending
                     self.active.discard(job)
                     if self.index.get(key) is entry:
                         if old is None:
                             self.index.pop(key, None)
                         else:
                             self.index[key] = old
+                    if old_clock is not None:
+                        self.clock = old_clock
                     self.generation += 1
 
             try:
