@@ -1727,8 +1727,9 @@ class SpillStore:
                     self._agreed(rollback)
                 else:
                     rollback()
-            except Exception:
+            except BaseException:
                 self._disable()
+                raise
             finally:
                 cancel()
             if self.world < 2 or self.gather is None:

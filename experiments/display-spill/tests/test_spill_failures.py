@@ -285,41 +285,45 @@ class SpillFailureTests(unittest.TestCase):
                     self.assertTrue(all(result.ok for result in results))
 
     def test_a_failed_final_gather_cancels_the_local_job_and_propagates(self):
-        with tempfile.TemporaryDirectory() as root:
-            store = self.store(root)
-            queued = []
-            real_put = store.jobs.put
+        for stage in ("final", "rollback"):
+            with self.subTest(stage=stage), tempfile.TemporaryDirectory() as root:
+                store = self.store(root)
+                queued, exchanges = [], []
+                real_put = store.jobs.put
 
-            def put(job):
-                queued.append(job)
-                real_put(job)
+                def put(job):
+                    queued.append(job)
+                    real_put(job)
 
-            def gather(values):
-                if len(values) == 5:
-                    return [list(values), list(values)]
-                raise RuntimeError("final gather failed")
+                def gather(values):
+                    if len(values) == 5:
+                        return [list(values), list(values)]
+                    if stage == "rollback" and not exchanges:
+                        exchanges.append("commit")
+                        return [list(values), [1]]          # the peer could not commit
+                    raise RuntimeError(stage + " gather failed")
 
-            store.world, store.gather = 2, gather
-            threads = list(store._threads)
-            with mock.patch.object(store.jobs, "put", side_effect=put), \
-                    mock.patch.object(store, "_write", wraps=store._write) as write:
-                with self.assertRaisesRegex(RuntimeError, "final gather failed"):
-                    store.save([1, 2])
-                write.assert_not_called()
-            self.assertEqual(len(queued), 1)
-            job = queued[0]
-            self.assertTrue(job.decided.is_set())
-            self.assertTrue(job.copied.is_set())
-            self.assertTrue(job.done.is_set())
-            self.assertTrue(job.cancelled)
-            self.assertIsNone(job.items)
-            self.assertEqual(store.index, {})
-            self.assertEqual(store.pending, {})
-            self.assertEqual(store.active, set())
-            self.assertTrue(store._disabled)
-            self.assertFalse(os.path.exists(job.path))
-            store.close()
-            self.assertFalse(any(thread.is_alive() for thread in threads))
+                store.world, store.gather = 2, gather
+                threads = list(store._threads)
+                with mock.patch.object(store.jobs, "put", side_effect=put), \
+                        mock.patch.object(store, "_write", wraps=store._write) as write:
+                    with self.assertRaisesRegex(RuntimeError, stage + " gather failed"):
+                        store.save([1, 2])
+                    write.assert_not_called()
+                self.assertEqual(len(queued), 1)
+                job = queued[0]
+                self.assertTrue(job.decided.is_set())
+                self.assertTrue(job.copied.is_set())
+                self.assertTrue(job.done.is_set())
+                self.assertTrue(job.cancelled)
+                self.assertIsNone(job.items)
+                self.assertEqual(store.index, {})
+                self.assertEqual(store.pending, {})
+                self.assertEqual(store.active, set())
+                self.assertTrue(store._disabled)
+                self.assertFalse(os.path.exists(job.path))
+                store.close()
+                self.assertFalse(any(thread.is_alive() for thread in threads))
 
 
 if __name__ == "__main__":
