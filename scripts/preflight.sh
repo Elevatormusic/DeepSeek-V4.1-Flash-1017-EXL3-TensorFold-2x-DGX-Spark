@@ -75,9 +75,19 @@ done
 avail=\$(awk '/MemAvailable/ {print int(\$2/1048576)}' /proc/meminfo); [ "\$avail" -ge $mem_need ] \
   && echo "OK \$avail GiB memory available (need $mem_need)" \
   || echo "FAIL only \$avail GiB memory available, need $mem_need: close browsers, desktop programs and other containers on this node$hint, and run scripts/host_tuning.sh if you did not (docs/MEMORY.md)"
-mkdir -p "$CACHE_DIR"; free=\$(df -BG --output=avail "$CACHE_DIR" | tail -1 | tr -dc 0-9)
 [ -d "$CACHE_DIR/tf-ds-rank" ] && need=5 || need=110
-[ "\$free" -ge "\$need" ] && echo "OK \$free GiB free for the cache" || echo "FAIL \$free GiB free in $CACHE_DIR (need \$need)"
+if ! mkdir -p "$CACHE_DIR" || ! disk=\$(df -B1 --output=avail "$CACHE_DIR" 2>/dev/null); then
+  echo "FAIL cannot read free space in $CACHE_DIR"
+else
+  free=\$(printf '%s\n' "\$disk" | awk 'NR == 2 && NF == 1 && \$1 ~ /^[0-9]+\$/ {value=\$1} END {if (NR == 2 && value != "") print value}')
+  if [ -z "\$free" ]; then
+    echo "FAIL cannot read free space in $CACHE_DIR"
+  else
+    freegib=\$(awk -v b="\$free" 'BEGIN { printf "%.1f", b / 1073741824 }')
+    [ "\$free" -ge \$((need * 1073741824)) ] && echo "OK \$freegib GiB free for the cache" \
+      || echo "FAIL \$freegib GiB free in $CACHE_DIR (need \$need)"
+  fi
+fi
 [ -z "${CGROUP_PARENT-tensorfold.slice}" ] || [ "\$(systemctl show -p MemorySwapMax --value ${CGROUP_PARENT-tensorfold.slice} 2>/dev/null)" = 0 ] \
   && echo "OK no swap for the engine" || echo "FAIL ${CGROUP_PARENT-tensorfold.slice} has swap or is missing: run scripts/host_tuning.sh"
 diff=""
