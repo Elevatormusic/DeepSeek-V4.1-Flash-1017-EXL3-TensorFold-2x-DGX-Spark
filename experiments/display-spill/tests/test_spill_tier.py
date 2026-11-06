@@ -974,7 +974,12 @@ class SpillTierTests(unittest.TestCase):
             root = os.path.join(base, "a", "b")
             owned = []
             cfg = self.sp.SpillConfig(root=root, gib=1, min_free_gib=0, min_tokens=1)
-            with mock.patch.object(self.sp.os, "chown", lambda path, uid, gid: owned.append(path)):
+
+            def chown(path, uid, gid, *, follow_symlinks=True):
+                self.assertFalse(follow_symlinks)
+                owned.append(path)
+
+            with mock.patch.object(self.sp.os, "chown", side_effect=chown):
                 self.sp.SpillStore(cfg, rank=0, world=1, device="cpu", classes=[], quiet=True)
             for path in (os.path.join(base, "a"), root):
                 self.assertIn(path, owned)                                # the folders this start made
