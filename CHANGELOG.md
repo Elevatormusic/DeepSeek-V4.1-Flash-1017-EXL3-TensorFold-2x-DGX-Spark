@@ -10,6 +10,8 @@ Each release is a git tag. To use a release, run `git checkout vX.Y.Z` before `.
 
 ## [Unreleased]
 
+- Add a read-only host fault report for PCIe, SMMU, mlx5 and NVIDIA kernel events. It records diagnostic gaps and does not establish a fault cause or fix issue #24.
+
 - Add an independent opt-in [cache metrics experiment](experiments/cache-metrics/README.md) for health and Prometheus accounting. The ordinary engine stays unchanged.
 
 ### Added
