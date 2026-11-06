@@ -15,10 +15,12 @@ Full two-node hardware validation is pending.
 - `tests/` uses CPU torch and temporary directories. Real source composition
   tests run only when `TF_SPILL_SOURCE` names an explicit pinned checkout.
 
-A lookup failure on one rank makes every rank skip that restore. A failed
-index agreement disables reuse and saves on every rank until restart. Files
-remain for the next startup scan. A save starts its writer only after every
-rank commits the queue entry. A failed commit rolls back the entry on every rank.
+A lookup failure on one rank makes every rank skip that restore. If a local
+index step fails, the ranks agree the failure. They then disable reuse and saves
+until restart. Files remain for the next startup scan. A save starts its writer
+only after every rank commits the queue entry. A failed commit rolls back the
+entry on every rank. If the final exchange fails, this rank cancels its local
+job and raises the error. The peer state is then unknown.
 
 The top-level `start-display-spill.sh` builds and launches the dependent image.
 It refuses active ranks, prepares DRM on both nodes, probes the display
