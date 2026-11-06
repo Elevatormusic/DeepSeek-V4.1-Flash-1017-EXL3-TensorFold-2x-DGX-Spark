@@ -1684,26 +1684,44 @@ class SpillStore:
             self.jobs.put(job)                             # the writer waits for job.decided
         except Exception as exc:                           # every rank must report a failed commit
             failure = exc
-        reports = self.gather([int(failure is not None)]) if self.world > 1 and self.gather is not None else \
-            [[int(failure is not None)]]
-        if any(row[0] for row in reports):
-            def rollback() -> None:
-                with self.lock:
-                    if self.pending.get(key) is job:
-                        if old_pending is None:
-                            self.pending.pop(key, None)
-                        else:
-                            self.pending[key] = old_pending
-                    self.active.discard(job)
-                    if self.index.get(key) is entry:
-                        if old is None:
-                            self.index.pop(key, None)
-                        else:
-                            self.index[key] = old
-                    if old_clock is not None:
-                        self.clock = old_clock
-                    self.generation += 1
+        def rollback() -> None:
+            with self.lock:
+                if self.pending.get(key) is job:
+                    if old_pending is None:
+                        self.pending.pop(key, None)
+                    else:
+                        self.pending[key] = old_pending
+                self.active.discard(job)
+                if self.index.get(key) is entry:
+                    if old is None:
+                        self.index.pop(key, None)
+                    else:
+                        self.index[key] = old
+                if old_clock is not None:
+                    self.clock = old_clock
+                self.generation += 1
 
+        def cancel() -> None:
+            job.cancelled = True
+            job.items = None
+            job.copied.set()
+            job.done.set()
+            job.decided.set()
+
+        try:
+            reports = self.gather([int(failure is not None)]) if self.world > 1 and self.gather is not None else \
+                [[int(failure is not None)]]
+        except BaseException:
+            # Communication failed. Stop this tier and release its local job. Peer agreement is unknown.
+            try:
+                rollback()
+            except Exception:
+                pass
+            finally:
+                self._disable()
+                cancel()
+            raise
+        if any(row[0] for row in reports):
             try:
                 if self.world > 1 and self.gather is not None:
                     self._agreed(rollback)
@@ -1712,11 +1730,7 @@ class SpillStore:
             except Exception:
                 self._disable()
             finally:
-                job.cancelled = True
-                job.items = None
-                job.copied.set()
-                job.done.set()
-                job.decided.set()
+                cancel()
             if self.world < 2 or self.gather is None:
                 raise failure
             self._log(failure if failure is not None else RuntimeError("another rank could not commit the save"))
