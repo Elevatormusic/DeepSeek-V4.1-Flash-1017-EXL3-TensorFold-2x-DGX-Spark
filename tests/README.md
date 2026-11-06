@@ -15,6 +15,13 @@ It runs `host_tuning_test.sh` (see below) and the Python `unittest` files (`test
 `test_repo_rules.py` checks the repo rules of [CONTRIBUTING.md](../CONTRIBUTING.md): git tracks `runs/`, each entry in `runs/` is a `YYYY-MM-DD` folder with an `INDEX.md`, and `.env.example` sources cleanly and holds no token.
 A test that needs a GPU, a server or the `tensorfold` package skips itself.
 
+`test_vision_trim.py` and `test_vision_trim_proxy.py` check the optional image
+proxy. They use in-memory HTTP streams, stub connections, and temporary key
+files. They open no network sockets. They check image order, tool-result and
+Responses images, authentication, request framing, streaming, cancellation,
+and upstream cleanup. They do not prove two-node serving or safe memory use
+with a larger image cap.
+
 The opt-in display-spill image has CPU torch and composition tests in
 `experiments/display-spill/tests/`. Real source tests run only when
 `TF_SPILL_SOURCE` names an explicit pinned checkout. See

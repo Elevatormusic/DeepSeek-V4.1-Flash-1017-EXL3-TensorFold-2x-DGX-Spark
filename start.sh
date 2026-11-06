@@ -37,6 +37,11 @@ case "${DROP_UNOFFERED_TOOL_CALLS:-1}" in
   *) echo "DROP_UNOFFERED_TOOL_CALLS must be 0 or 1" >&2; exit 1 ;;
 esac
 
+if [ -n "${VISION_MAX_IMAGES:-}" ] && ! [[ "$VISION_MAX_IMAGES" =~ ^[0-9]+$ && "$VISION_MAX_IMAGES" =~ [1-9] ]]; then
+  echo "VISION_MAX_IMAGES must be a positive integer" >&2
+  exit 1
+fi
+
 if [ "${PREFLIGHT:-1}" = 1 ]; then
   "$ROOT/scripts/preflight.sh" || exit 1
 fi
@@ -66,7 +71,7 @@ $( [ "${STRICT_TOOL_OUTPUT:-1}" = 0 ] && echo '-e TF_DS_STRICT_TOOL_OUTPUT=0' )
 --entrypoint tensorfold $IMAGE serve /model --tp 2 --rank $r --master $HEAD_IP
 --host $BIND_HOST --port $PORT --name $SERVED_NAME $( [ -n "${SERVED_ALIAS:-}" ] && echo "--alias $SERVED_ALIAS" )
 $( [ -n "$key" ] && echo "--api-key-file /run/keys" )
---context $CONTEXT $( [ "${VISION:-1}" = 1 ] && echo --vision ) --parallel $PARALLEL --mtp-drafts $MTP_DRAFTS
+--context $CONTEXT $( [ "${VISION:-1}" = 1 ] && echo --vision ) $( [ -n "${VISION_MAX_IMAGES:-}" ] && echo "--vision-max-images $VISION_MAX_IMAGES" ) --parallel $PARALLEL --mtp-drafts $MTP_DRAFTS
 --temperature $TEMPERATURE --top-p $TOP_P $( [ "${THINKING:-0}" = 1 ] && echo --thinking || echo --no-thinking )
 $( [ -n "${REASONING_EFFORT:-}" ] && echo --reasoning-effort $REASONING_EFFORT ) --no-update-check
 EOF

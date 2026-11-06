@@ -14,6 +14,7 @@ Each release is a git tag. To use a release, run `git checkout vX.Y.Z` before `.
 
 ### Added
 
+- Opt-in image cap: set `VISION_MAX_IMAGES` in `.env` to pass `--vision-max-images`. Unset, the engine default stays. `scripts/vision-trim.sh` keeps the newest images, streams replies, and binds to loopback by default. A LAN bind requires a valid API key file. A client close or socket reset cancels the upstream request. `./start.sh` does not start it. See [docs/OPERATIONS.md](docs/OPERATIONS.md#optional-image-proxy).
 - `docs/MEMORY.md`: why the head runs out of memory first, how to read the earlyoom journal, how to tell if `terminate called without an active exception` on rank 0 is a SIGTERM from earlyoom (a journal line at the same time) or a crash, the low-memory settings (`VISION=0`, `PREFILL_CHUNK=1024`, `PARALLEL=2`), and the kernel memory reserve that `MemAvailable` leaves out ([runs/2026-10-21](runs/2026-10-21/INDEX.md#kernel-memory-reserve-of-the-pair-read-only-check)).
 - `scripts/oom_report.sh`: writes one text file with the memory facts of both nodes (meminfo, earlyoom journal, kernel memory settings, engine image, `.env` settings from a fixed list, engine log lines, driver). It removes keys in known formats and the rest of each line from a word that names a credential (key, token, secret, password, Authorization, Basic with a value). Read the file before you post it. The bug and performance forms ask for it.
 - After the API answers, `./start.sh` and `./status.sh` print the `MemAvailable` of the head and warn under 2.5 GiB.

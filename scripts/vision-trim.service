@@ -1,0 +1,15 @@
+# Example unit. Copy it and set ExecStart to the absolute path of scripts/vision-trim.sh.
+# Set User to the account that owns the checkout. ./start.sh does not install this unit.
+[Unit]
+Description=Keep the newest images before TensorFold
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/path/to/checkout/scripts/vision-trim.sh
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
