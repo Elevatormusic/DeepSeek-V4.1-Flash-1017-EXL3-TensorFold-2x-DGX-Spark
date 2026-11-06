@@ -79,7 +79,10 @@ fi
 
 image_state="$ROOT/.display-kv-image"
 if [ "$action" = --build ] || [ "$action" = --build-only ]; then
-  base_id=$(docker image inspect "$IMAGE" --format '{{.Id}}')
+  # shellcheck source=scripts/display_base.sh
+  . "$ROOT/scripts/display_base.sh"
+  display_base
+  base_id=$(docker image inspect "$DISPLAY_BASE_IMAGE" --format '{{.Id}}')
   fingerprint=$({
     printf '%s\n' "$base_id"
     sha256sum "$stage/Dockerfile" "$stage/.dockerignore" "$stage/apply.py" "$stage/probe.py" "$stage/overlay/"*.py
@@ -88,8 +91,8 @@ if [ "$action" = --build ] || [ "$action" = --build-only ]; then
   variant="tensorfold-dsv41:display-kv-${fingerprint:0:12}"
   existing=$(docker image inspect "$variant" --format '{{index .Config.Labels "org.tensorfold.display-kv.source"}}' 2>/dev/null || true)
   if [ "$existing" != "$fingerprint" ]; then
-    log "building $variant from $IMAGE (pinned source is checked inside the build)"
-    docker build --build-arg "BASE_IMAGE=$IMAGE" \
+    log "building $variant from $DISPLAY_BASE_IMAGE (pinned source is checked inside the build)"
+    docker build --build-arg "BASE_IMAGE=$DISPLAY_BASE_IMAGE" \
       --label "org.tensorfold.display-kv.source=$fingerprint" -t "$variant" "$stage"
   fi
   variant_id=$(docker image inspect "$variant" --format '{{.Id}}')

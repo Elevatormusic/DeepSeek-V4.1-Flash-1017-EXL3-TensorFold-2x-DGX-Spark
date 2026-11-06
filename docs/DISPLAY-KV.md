@@ -6,6 +6,12 @@ Do not use the offline test results as proof of safe serving or better performan
 
 ## Scope and risks
 
+The display launchers use `tensorfold-dsv41:07aa02585f64` as their base.
+`--build` and `--build-only` build this image at the full pinned source commit
+when it is missing. They do not use `IMAGE` from `.env` as the display base.
+The installer still checks the exact source revision, hashes and shapes.
+The launcher copies the final image to the worker and checks both image IDs.
+
 The installer changes only the pinned TensorFold `model.py`, `engine.py` and
 `multi.py`, and adds `display_kv.py`. It checks the source revision, file hashes,
 replacement anchors and generated Python before it writes files. It does not

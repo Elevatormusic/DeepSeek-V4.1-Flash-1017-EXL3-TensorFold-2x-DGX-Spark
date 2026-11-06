@@ -10,6 +10,8 @@ Each release is a git tag. To use a release, run `git checkout vX.Y.Z` before `.
 
 ## [Unreleased]
 
+- Build the exact display experiment base when it is missing. The display launchers keep their source checks when the ordinary image uses a newer engine.
+
 - Add an independent opt-in [cache metrics experiment](experiments/cache-metrics/README.md) for health and Prometheus accounting. The ordinary engine stays unchanged.
 
 ### Added

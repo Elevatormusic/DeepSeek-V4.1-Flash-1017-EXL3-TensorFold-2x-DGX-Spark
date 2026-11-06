@@ -6,6 +6,9 @@ unchanged. Full two-node hardware validation is still pending.
 
 ## Dependency
 
+The launcher uses the same exact base as display KV. It builds that base when
+it is missing. See [the display base rules](DISPLAY-KV.md#scope-and-risks).
+
 This image needs the display-KV feature. The composition installer validates the
 union of pristine source hashes once, applies the display transform first, then
 the spill transform, checks every generated Python file, and only then writes. The spill transform also removes
