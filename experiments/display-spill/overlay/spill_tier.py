@@ -1320,7 +1320,8 @@ class SpillStore:
     def _open_write(self, path: str) -> int:
         """Create one buffered file. Direct mode is set after the caller holds its descriptor."""
 
-        return _open_file(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL)
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+        return os.open(path, flags, 0o600)
 
     def _direct_write(self, fd: int) -> bool:
         """Enable direct I/O on the open file. An unsupported mode keeps the same buffered descriptor."""
@@ -1363,6 +1364,8 @@ class SpillStore:
         try:
             fd = self._open_write(path)
             created = True
+            if not stat.S_ISREG(os.fstat(fd).st_mode):
+                raise OSError(errno.ESPIPE, "not a regular file", path)
             direct = self._direct_write(fd)
             if stream is not None and job.src_event is not None:
                 stream.wait_event(job.src_event)        # the rows are final where the engine recorded

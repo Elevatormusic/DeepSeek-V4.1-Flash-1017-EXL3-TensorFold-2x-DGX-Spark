@@ -155,8 +155,9 @@ class SpillFailureTests(unittest.TestCase):
             os.mkfifo(path)
             fd = os.open(path, os.O_RDONLY | os.O_NONBLOCK)
             with mock.patch.object(self.sp.os, "open", return_value=fd):
-                with self.assertRaises(OSError):
-                    store._open_write(os.path.join(store.dir, "entry.partial"))
+                job = store.save([1, 2])
+                self.assertTrue(store.drain(3))
+                self.assertFalse(job.ok)
             with self.assertRaises(OSError) as caught:
                 os.fstat(fd)
             self.assertEqual(caught.exception.errno, errno.EBADF)

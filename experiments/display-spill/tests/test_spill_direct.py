@@ -138,17 +138,19 @@ class SpillDirectTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             store = self.store(root)
             real_remove = os.remove
+            original = store._open_write
 
-            def evict(fd):
+            def evict(path):
+                opened = original(path)
                 store.index.clear()
-                return False
+                return opened
 
             def remove(path):
                 if str(path).endswith(".partial"):
                     raise PermissionError("cannot remove evicted partial")
                 return real_remove(path)
 
-            with mock.patch.object(store, "_direct_write", side_effect=evict), \
+            with mock.patch.object(store, "_open_write", side_effect=evict), \
                     mock.patch.object(self.sp.os, "remove", side_effect=remove):
                 job = store.save([1, 2])
                 self.assertTrue(store.drain(3))
