@@ -59,7 +59,7 @@ class SpillTierTests(unittest.TestCase):
                 imports.add(node.module.split(".")[0])
         allowed = {"__future__", "base64", "contextlib", "ctypes", "dataclasses", "errno", "hashlib", "importlib", "json",
                    "os", "queue", "re", "shutil", "stat", "struct", "threading", "time", "zlib", "collections",
-                   "concurrent", "typing", "pathlib", "numpy", "torch", "tensorfold"}
+                   "concurrent", "typing", "pathlib", "numpy", "torch", "tensorfold", "fcntl"}
         self.assertEqual(imports - allowed, set())
 
     def test_config_validation(self):
@@ -408,6 +408,7 @@ class SpillTierTests(unittest.TestCase):
             snap = Snap(ids=third, ring=torch.arange(len(third) * 4, dtype=torch.uint8).reshape(len(third), 4))
             self.assertIsNotNone(store.save(third, snap, skip=("ids",)))
             self.assertNotIn("drain", order)
+            self.assertTrue(self.sp.SpillStore.drain(store, 10))
 
     def test_a_failed_write_waits_for_the_writer_stream_before_the_rows_are_released(self):
         with tempfile.TemporaryDirectory() as root:
@@ -485,6 +486,7 @@ class SpillTierTests(unittest.TestCase):
             self.assertIsNotNone(store.save(new, snap, skip=("ids",)))
             self.assertNotIn(True, [cap is not None for cap in rooms])    # no eviction for the floor
             self.assertEqual(len(store.index), 2)
+            self.assertTrue(self.sp.SpillStore.drain(store, 10))
 
     def test_the_writer_threads_start_with_the_store_and_a_start_failure_is_an_error_of_the_constructor(self):
         from unittest import mock
@@ -662,6 +664,7 @@ class SpillTierTests(unittest.TestCase):
                 if removable:
                     self.assertIsNotNone(job)
                     self.assertEqual(store.stats.unlink_failed, 0)
+                    self.assertTrue(store.drain(10))
                 else:
                     self.assertIsNone(job)                                    # the bytes did not come back
                     self.assertEqual(store.stats.unlink_failed, 1)
@@ -971,7 +974,12 @@ class SpillTierTests(unittest.TestCase):
             root = os.path.join(base, "a", "b")
             owned = []
             cfg = self.sp.SpillConfig(root=root, gib=1, min_free_gib=0, min_tokens=1)
-            with mock.patch.object(self.sp.os, "chown", lambda path, uid, gid: owned.append(path)):
+
+            def chown(path, uid, gid, *, follow_symlinks=True):
+                self.assertFalse(follow_symlinks)
+                owned.append(path)
+
+            with mock.patch.object(self.sp.os, "chown", side_effect=chown):
                 self.sp.SpillStore(cfg, rank=0, world=1, device="cpu", classes=[], quiet=True)
             for path in (os.path.join(base, "a"), root):
                 self.assertIn(path, owned)                                # the folders this start made
@@ -1387,6 +1395,7 @@ class SpillTierTests(unittest.TestCase):
             self.assertEqual(len(store.index), 0)
             self.assertIsNotNone(store.save(third_ids, third, skip=("ids",)))        # the file goes at the next try
             self.assertFalse(os.path.exists(first_path))
+            self.assertTrue(store.drain(10))                              # finish the write before the folder goes
 
     def test_a_peer_whose_eviction_file_stays_skips_the_save_on_this_rank(self):
         with tempfile.TemporaryDirectory() as root:

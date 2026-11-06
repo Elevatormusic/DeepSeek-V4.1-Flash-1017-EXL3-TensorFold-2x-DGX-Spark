@@ -15,6 +15,20 @@ Full two-node hardware validation is pending.
 - `tests/` uses CPU torch and temporary directories. Real source composition
   tests run only when `TF_SPILL_SOURCE` names an explicit pinned checkout.
 
+A lookup failure on one rank makes every rank skip that restore. If a local
+index step fails, the ranks agree the failure. They then disable reuse and saves
+until restart. Files remain for the next startup scan. A save starts its writer
+only after every rank commits the queue entry. A failed commit rolls back the
+entry on every rank. If the final exchange fails, this rank cancels its local
+job and raises the error. The peer state is then unknown.
+
+The writer creates each partial file once in buffered mode. It then enables
+direct I/O on that descriptor. If the file system rejects direct mode, the
+writer keeps the same buffered descriptor. It does not reopen or remove the
+partial path to make that fallback.
+Ownership changes do not follow links. Publication does not make an atomic
+file-identity check; a replaced entry still fails the no-follow read check.
+
 The top-level `start-display-spill.sh` builds and launches the dependent image.
 It refuses active ranks, prepares DRM on both nodes, probes the display
 reservation, and keeps `SPILL_GIB` from `.env`. Never stop GDM. Never use
