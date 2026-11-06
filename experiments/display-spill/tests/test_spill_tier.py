@@ -486,6 +486,7 @@ class SpillTierTests(unittest.TestCase):
             self.assertIsNotNone(store.save(new, snap, skip=("ids",)))
             self.assertNotIn(True, [cap is not None for cap in rooms])    # no eviction for the floor
             self.assertEqual(len(store.index), 2)
+            self.assertTrue(self.sp.SpillStore.drain(store, 10))
 
     def test_the_writer_threads_start_with_the_store_and_a_start_failure_is_an_error_of_the_constructor(self):
         from unittest import mock
