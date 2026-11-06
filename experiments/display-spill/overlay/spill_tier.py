@@ -1317,16 +1317,27 @@ class SpillStore:
                 self._dirty = False
                 self._last_dir_sync = now
 
-    def _open_write(self, path: str) -> tuple[int, bool]:
-        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
-        if self.direct:
-            try:
-                return _open_file(path, flags | os.O_DIRECT), True
-            except OSError as exc:
-                if exc.errno != errno.EINVAL:
-                    raise
-                self.direct = False
-        return _open_file(path, flags), False
+    def _open_write(self, path: str) -> int:
+        """Create one buffered file. Direct mode is set after the caller holds its descriptor."""
+
+        return _open_file(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL)
+
+    def _direct_write(self, fd: int) -> bool:
+        """Enable direct I/O on the open file. An unsupported mode keeps the same buffered descriptor."""
+
+        if not self.direct:
+            return False
+        import fcntl
+
+        try:
+            flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+            fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_DIRECT)
+        except OSError as exc:
+            if exc.errno != errno.EINVAL:
+                raise
+            self.direct = False
+            return False
+        return True
 
     @staticmethod
     def _write_all(fd: int, mv: memoryview) -> None:
@@ -1346,9 +1357,13 @@ class SpillStore:
         off the device overlaps the other's write), full aligned buffers written, the tail padded then truncated."""
 
         path = job.partial
-        fd, direct = self._open_write(path)
+        fd = -1
+        created = False
         total = 0
         try:
+            fd = self._open_write(path)
+            created = True
+            direct = self._direct_write(fd)
             if stream is not None and job.src_event is not None:
                 stream.wait_event(job.src_event)        # the rows are final where the engine recorded
             cur, fill, ev = 0, 0, [None, None]
@@ -1435,9 +1450,11 @@ class SpillStore:
                 current = self.index.get(job.key) is job.entry       # by the cap or a failed read, leaves none)
                 if current:
                     os.replace(path, job.path)
+                    created = False
                     self.stuck.pop(job.path, None)          # (the file that stayed is replaced: no longer stuck)
             if not current:
                 os.remove(path)
+                created = False
                 return False
             self._own(job.path)
             with self._dir_lock:
@@ -1455,17 +1472,18 @@ class SpillStore:
                     os.close(fd)
             except OSError:
                 pass
-            try:
-                os.remove(path)
-            except FileNotFoundError:
-                pass
-            except OSError as exc:
-                self._unlink_failed(path, exc)
-                with self.lock:
-                    try:
-                        self.stuck[path] = os.lstat(path).st_size
-                    except OSError:
-                        self.stuck[path] = job.nbytes
+            if created:                                  # exclusive creation succeeded; this job made the path
+                try:
+                    os.remove(path)
+                except FileNotFoundError:
+                    pass
+                except OSError as exc:
+                    self._unlink_failed(path, exc)
+                    with self.lock:
+                        try:
+                            self.stuck[path] = os.lstat(path).st_size
+                        except OSError:
+                            self.stuck[path] = job.nbytes
             return False
 
     @staticmethod

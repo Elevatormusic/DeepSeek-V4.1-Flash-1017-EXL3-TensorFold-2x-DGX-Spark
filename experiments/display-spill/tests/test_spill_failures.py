@@ -125,7 +125,7 @@ class SpillFailureTests(unittest.TestCase):
 
                 def create():
                     try:
-                        fd, _ = store._open_write(path)
+                        fd = store._open_write(path)
                         os.close(fd)
                         results.append(None)
                     except OSError as exc:

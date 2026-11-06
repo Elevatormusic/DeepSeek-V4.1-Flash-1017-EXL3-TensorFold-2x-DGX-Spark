@@ -59,7 +59,7 @@ class SpillTierTests(unittest.TestCase):
                 imports.add(node.module.split(".")[0])
         allowed = {"__future__", "base64", "contextlib", "ctypes", "dataclasses", "errno", "hashlib", "importlib", "json",
                    "os", "queue", "re", "shutil", "stat", "struct", "threading", "time", "zlib", "collections",
-                   "concurrent", "typing", "pathlib", "numpy", "torch", "tensorfold"}
+                   "concurrent", "typing", "pathlib", "numpy", "torch", "tensorfold", "fcntl"}
         self.assertEqual(imports - allowed, set())
 
     def test_config_validation(self):
