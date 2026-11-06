@@ -10,6 +10,7 @@ Each release is a git tag. To use a release, run `git checkout vX.Y.Z` before `.
 
 ## [Unreleased]
 
+- Keep literal GLM tags in Qwen call values and literal Qwen tags in GLM call values in the opt-in tool-output guard.
 - Add an independent opt-in [cache metrics experiment](experiments/cache-metrics/README.md) for health and Prometheus accounting. The ordinary engine stays unchanged.
 
 ### Added

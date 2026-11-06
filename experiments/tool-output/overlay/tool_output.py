@@ -262,31 +262,38 @@ class ToolOutputGuard:
                 return []
         return [(str(name), "json")]
 
-    def _fallback_stalls(self, block: str) -> bool:
+    def _fallback_stalls(self, block: str, form: str | None = None) -> bool:
         """Whether the Qwen or GLM expressions of the parser would scan this call block for long. The parser reads these
         forms only when the block is not a JSON call, so this is checked only then (a JSON argument may hold any text)."""
 
         qwen = self._fold(block)                       # (the Qwen expressions ignore case; the GLM tags are literal)
-        return (any(self._stalls(qwen, opener, closer)
-                    for opener, closer in (("<function=", "</function>"), ("<parameter=", "</parameter>")))
-                or any(self._stalls(block, opener, closer)
+        return ((form != "glm" and any(self._stalls(qwen, opener, closer)
+                    for opener, closer in (("<function=", "</function>"), ("<parameter=", "</parameter>"))))
+                or (form != "qwen_xml" and (any(self._stalls(block, opener, closer)
                        for opener, closer in (("<arg_key>", "</arg_key>"), ("<arg_value>", "</arg_value>"),
                                               ("<arg_key>", "<arg_value>")))   # (a key needs a value to make a pair)
                 # A value without its closer sends the pairing expression back over every key before it.
                 or (self._open_tail(block, "<arg_value>", "</arg_value>") > 0
-                    and block.count("<arg_key>") > self._RUNAWAY))
+                    and block.count("<arg_key>") > self._RUNAWAY))))
 
     def _text_names(self, reply_text: Any, block: str, complete: bool) -> list[tuple[str, str]]:
         """The (tool name, wrapper) of a Qwen XML or GLM call block."""
 
-        if self._fallback_stalls(block):
+        from tensorfold.server import tools as engine_tools
+
+        # Select the parser's form before checking its tags. Other-form tags can be literal argument text.
+        head = self._qwen_head.match(block)
+        qwen = head is not None and self._qwen_close.search(block, head.end()) is not None
+        name_re = getattr(engine_tools, "_GLM_NAME_RE", None)
+        name = block.partition("<arg_key>")[0].strip()
+        form = "qwen_xml" if qwen else "glm" if name_re is not None and name_re.fullmatch(name) else None
+        if self._fallback_stalls(block, form):
             raise _RunawayMarkup
         if not complete:
             # The Qwen name and the closing tag, read linearly. (The parser expression has white space on both sides of
             # a lazy part: on a body without its closing tag it backtracks for long. The closer is matched with the
             # same case rules as the parser.)
-            head = self._qwen_head.match(block)
-            if head and self._qwen_close.search(block, head.end()):
+            if qwen:
                 return [(head.group(1).strip(), "qwen_xml")]
         else:
             xml = reply_text._TOOL_FUNCTION_BLOCK_RE.match(block)
@@ -297,11 +304,7 @@ class ToolOutputGuard:
         if not complete:
             # The name of a GLM call is the text before its first key. The parser's pairing expression for the keys
             # and values is not needed for the name, and it can be quadratic on malformed output.
-            from tensorfold.server import tools as engine_tools
-
-            name_re = getattr(engine_tools, "_GLM_NAME_RE", None)
             if name_re is not None:
-                name = block.partition("<arg_key>")[0].strip()
                 return [(name, "glm")] if name_re.fullmatch(name) else []
         glm = reply_text.parse_glm_tool_call_block(block, self.tools, complete=complete)
         return [(str(glm[0]).strip(), "glm")] if glm is not None and str(glm[0]).strip() else []
