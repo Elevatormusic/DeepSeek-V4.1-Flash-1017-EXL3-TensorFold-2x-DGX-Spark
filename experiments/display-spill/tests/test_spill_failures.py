@@ -66,6 +66,7 @@ class SpillFailureTests(unittest.TestCase):
                 job = store.save([1, 2])
                 self.assertTrue(store.drain(3))
                 path = job.path
+                store.index.clear()
                 fifo = os.path.join(root, "pipe") if linked else path
                 real_lstat = os.lstat
                 swapped = []
@@ -99,6 +100,7 @@ class SpillFailureTests(unittest.TestCase):
                         thread.join(2)
                 self.assertFalse(blocked, "the startup scan blocked on a substituted FIFO")
                 self.assertEqual(errors, [])
+                self.assertEqual(store.index, {})
                 self.assertFalse(os.path.lexists(path))
                 if linked:
                     self.assertTrue(os.path.exists(fifo))

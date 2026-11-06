@@ -1387,6 +1387,7 @@ class SpillTierTests(unittest.TestCase):
             self.assertEqual(len(store.index), 0)
             self.assertIsNotNone(store.save(third_ids, third, skip=("ids",)))        # the file goes at the next try
             self.assertFalse(os.path.exists(first_path))
+            self.assertTrue(store.drain(10))                              # finish the write before the folder goes
 
     def test_a_peer_whose_eviction_file_stays_skips_the_save_on_this_rank(self):
         with tempfile.TemporaryDirectory() as root:

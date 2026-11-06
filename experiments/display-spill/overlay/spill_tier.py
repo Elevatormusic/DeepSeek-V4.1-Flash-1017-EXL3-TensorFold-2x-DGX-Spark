@@ -523,7 +523,7 @@ def _check_header_crc(raw: bytes) -> None:
 
 
 def _open_file(path: str, flags: int = os.O_RDONLY) -> int:
-    """Open a stored file for reading, never blocking and never following a link, and check that it is a regular file.
+    """Open a regular file without blocking or following a link. Create new files with mode 0600.
     (A writable host cache could swap the file for a FIFO or a link after the start-up scan.)"""
 
     fd = os.open(path, flags | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0), 0o600)
@@ -1159,7 +1159,8 @@ class SpillStore:
 
         if self._disabled:
             return None
-        step = lambda: self._find(prompt, grid=grid, whole_needs_head=whole_needs_head, usable=usable)
+        def step():
+            return self._find(prompt, grid=grid, whole_needs_head=whole_needs_head, usable=usable)
         if self.world < 2 or self.gather is None:
             return step()
         try:
